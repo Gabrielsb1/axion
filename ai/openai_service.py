@@ -301,7 +301,7 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
-                max_tokens=1024
+                max_tokens=2048
             )
         except Exception as client_error:
             print(f"❌ Erro ao inicializar cliente OpenAI: {str(client_error)}")
@@ -316,15 +316,21 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
         
         try:
             match = re.search(r'\{[\s\S]+\}', content)
-            if match:
+            if not match:
+                print("❌ JSON não encontrado na resposta da OpenAI")
+                print(f"📄 Conteúdo recebido: {content[:500]}...")
+                return {"error": "A resposta da OpenAI não contém um JSON válido.", "raw": content}
+            
+            try:
                 result = json.loads(match.group(0))
                 print("✅ JSON extraído com sucesso")
                 print(f"📊 Campos extraídos: {list(result.keys())}")
                 return clean_and_validate_fields(result, service_type)
-            result = json.loads(content)
-            print("✅ JSON direto processado com sucesso")
-            print(f"📊 Campos extraídos: {list(result.keys())}")
-            return clean_and_validate_fields(result, service_type)
+            except json.JSONDecodeError as e:
+                print("❌ Erro ao decodificar JSON extraído:", str(e))
+                print(f"📄 JSON extraído: {match.group(0)[:200]}...")
+                return {"error": f"Erro ao decodificar JSON extraído: {str(e)}", "raw": content}
+                
         except Exception as e:
             print(f"❌ Erro ao processar JSON: {str(e)}")
             print(f"📄 Conteúdo recebido: {content[:200]}...")

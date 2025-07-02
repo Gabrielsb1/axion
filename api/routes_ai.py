@@ -86,6 +86,10 @@ def process_file_chatgpt():
                 'message': 'Configure a variável de ambiente OPENAI_API_KEY no Render'
             }), 400
         
+        # Log para verificar se a API key está sendo carregada
+        api_key_preview = Config.OPENAI_API_KEY[:10] if Config.OPENAI_API_KEY else "NONE"
+        print(f"🔑 API key carregada: {api_key_preview}...")
+        
         # Obter tipo de serviço
         service_type = request.form.get('service', 'matricula')
         print(f"🎯 Serviço recebido: {service_type}")
@@ -146,6 +150,8 @@ def process_file_chatgpt():
         
         if 'error' in campos:
             print(f"❌ Erro na extração: {campos['error']}")
+            if 'raw' in campos:
+                print(f"📄 Resposta bruta da OpenAI:\n{campos['raw'][:500]}")
             return jsonify(campos), 500
         
         return jsonify({
