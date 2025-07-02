@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axion - Solução Registral</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-building me-2"></i>
+                Axion - Solução Registral
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-globe me-1"></i>
+                    Versão Web 2.0 - Segura
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row mt-3">
+            <!-- Configurações -->
+            <div class="col-md-3">
+                <!-- Configurações de Processamento -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cog me-2"></i>Configurações de Processamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Método de Processamento</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="processingMethod" id="methodOCR" value="ocr">
+                                <label class="form-check-label" for="methodOCR">
+                                    <i class="fas fa-eye me-1"></i>OCR Tradicional
+                                    <small class="text-muted d-block">Processamento local, sem custo</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="processingMethod" id="methodChatGPT" value="chatgpt" checked>
+                                <label class="form-check-label" for="methodChatGPT">
+                                    <i class="fas fa-robot me-1"></i>ChatGPT (Recomendado)
+                                    <small class="text-muted d-block">Processamento inteligente com IA</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="chatgptOptions" style="display: none;">
+                            <label class="form-label fw-bold">Modelo ChatGPT</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="chatgptModel" id="modelGPT35" value="gpt-3.5-turbo" checked>
+                                <label class="form-check-label" for="modelGPT35">
+                                    <i class="fas fa-dollar-sign me-1"></i>GPT-3.5 Turbo (Econômico)
+                                    <small class="text-muted d-block">Mais barato, adequado para a maioria dos casos</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="chatgptModel" id="modelGPT4o" value="gpt-4o">
+                                <label class="form-check-label" for="modelGPT4o">
+                                    <i class="fas fa-star me-1"></i>GPT-4o (Avançado)
+                                    <small class="text-muted d-block">Mais preciso, para documentos complexos</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Dica:</strong> As configurações são aplicadas automaticamente ao processar arquivos.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área Principal -->
+            <div class="col-md-9">
+                <!-- Abas de Serviços -->
+                <ul class="nav nav-tabs" id="servicesTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="matricula-tab" data-bs-toggle="tab" data-bs-target="#matriculaTab" type="button" role="tab">
+                            <i class="fas fa-file-contract me-2"></i>Matrícula 3º RI
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="minuta-tab" data-bs-toggle="tab" data-bs-target="#minuta" type="button" role="tab">
+                            <i class="fas fa-file-text me-2"></i>Minuta
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contratos-tab" data-bs-toggle="tab" data-bs-target="#contratos" type="button" role="tab">
+                            <i class="fas fa-file-signature me-2"></i>Contratos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="escrituras-tab" data-bs-toggle="tab" data-bs-target="#escrituras" type="button" role="tab">
+                            <i class="fas fa-scroll me-2"></i>Escrituras
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="qualificacao-tab" data-bs-toggle="tab" data-bs-target="#qualificacao" type="button" role="tab">
+                            <i class="fas fa-user-check me-2"></i>Qualificação
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="memorial-tab" data-bs-toggle="tab" data-bs-target="#memorial" type="button" role="tab">
+                            <i class="fas fa-file-alt me-2"></i>Memorial
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ocr-tesseract-tab" data-bs-toggle="tab" data-bs-target="#ocr-tesseract" type="button" role="tab">
+                            <i class="fas fa-magic me-2"></i>OCR Tesseract
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Conteúdo das Abas -->
+                <div class="tab-content" id="servicesTabsContent">
+                    <!-- Aba Matrícula 3º RI -->
+                    <div class="tab-pane fade show active" id="matriculaTab" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-file-contract me-2"></i>Matrículas</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMatricula" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileMatricula" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWord" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDF" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSON" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="matriculaStatus"></div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Básicas</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="matricula" class="form-label fw-bold">Número da Matrícula</label>
+                                                    <input type="text" class="form-control" id="matricula" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="dataMatricula" class="form-label fw-bold">Data da Matrícula</label>
+                                                    <input type="text" class="form-control" id="dataMatricula" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="descricaoImovel" class="form-label fw-bold">Descrição do Imóvel</label>
+                                                    <textarea class="form-control" id="descricaoImovel" rows="3" readonly></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="endereco" class="form-label fw-bold">Endereço</label>
+                                                    <textarea class="form-control" id="endereco" rows="2" readonly></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0"><i class="fas fa-ruler-combined me-2"></i>Áreas e Garagem</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="areaPrivativa" class="form-label fw-bold">Área Privativa (m²)</label>
+                                                    <input type="text" class="form-control" id="areaPrivativa" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="areaTotal" class="form-label fw-bold">Área Total (m²)</label>
+                                                    <input type="text" class="form-control" id="areaTotal" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="garagem" class="form-label fw-bold">Garagem/Vagas</label>
+                                                    <input type="text" class="form-control" id="garagem" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0"><i class="fas fa-users me-2"></i>Proprietários</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="proprietarios" class="form-label fw-bold">Nome dos Proprietários</label>
+                                                    <textarea class="form-control" id="proprietarios" rows="3" readonly></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="livroAnterior" class="form-label fw-bold">Livro Anterior</label>
+                                                    <input type="text" class="form-control" id="livroAnterior" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="folhaAnterior" class="form-label fw-bold">Folha Anterior</label>
+                                                    <input type="text" class="form-control" id="folhaAnterior" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="matriculaAnterior" class="form-label fw-bold">Matrícula Anterior</label>
+                                                    <input type="text" class="form-control" id="matriculaAnterior" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Transação</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="tipoTitulo" class="form-label fw-bold">Tipo do Título</label>
+                                                    <input type="text" class="form-control" id="tipoTitulo" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="valorTitulo" class="form-label fw-bold">Valor do Título</label>
+                                                    <input type="text" class="form-control" id="valorTitulo" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="comprador" class="form-label fw-bold">Comprador</label>
+                                                    <input type="text" class="form-control" id="comprador" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="cpfCnpj" class="form-label fw-bold">CPF/CNPJ</label>
+                                                    <input type="text" class="form-control" id="cpfCnpj" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-danger">
+                                            <div class="card-header bg-danger text-white">
+                                                <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>ITBI</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="valorITBI" class="form-label fw-bold">Valor do ITBI</label>
+                                                    <input type="text" class="form-control" id="valorITBI" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="numeroDAM" class="form-label fw-bold">Número da DAM</label>
+                                                    <input type="text" class="form-control" id="numeroDAM" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="dataPagamentoITBI" class="form-label fw-bold">Data de Pagamento ITBI</label>
+                                                    <input type="text" class="form-control" id="dataPagamentoITBI" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Minuta -->
+                    <div class="tab-pane fade" id="minuta" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-file-text me-2"></i>Dados da Minuta</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMinuta" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileMinuta" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordMinuta" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFMinuta" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONMinuta" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="minutaStatus"></div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-building me-2"></i>Descrição do Imóvel</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="descricaoImovelCompleta" class="form-label fw-bold">Descrição Completa do Imóvel</label>
+                                                    <textarea class="form-control" id="descricaoImovelCompleta" rows="6" readonly placeholder="Texto completo extraído referente à descrição do imóvel..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Proprietário Atual</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="proprietarioAtual" class="form-label fw-bold">Proprietário Atual do Imóvel</label>
+                                                    <textarea class="form-control" id="proprietarioAtual" rows="4" readonly placeholder="Nome completo do proprietário atual..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>Ônus Ativo</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="tipoOnusAtivo" class="form-label fw-bold">Tipo de Ônus Ativo</label>
+                                                    <input type="text" class="form-control" id="tipoOnusAtivo" readonly placeholder="Ex: Hipoteca, Penhora, Usufruto...">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="descricaoOnusCompleta" class="form-label fw-bold">Descrição Completa do Ônus</label>
+                                                    <textarea class="form-control" id="descricaoOnusCompleta" rows="6" readonly placeholder="Texto completo extraído referente ao ônus ativo..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Adicionais</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="numeroMatricula" class="form-label fw-bold">Número da Matrícula</label>
+                                                    <input type="text" class="form-control" id="numeroMatricula" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="possiveisErros" class="form-label fw-bold">Possíveis Erros</label>
+                                                    <textarea class="form-control" id="possiveisErros" rows="4" readonly placeholder="Erros encontrados durante a extração..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Contratos -->
+                    <div class="tab-pane fade" id="contratos" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-file-signature me-2"></i>Dados dos Contratos</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputContratos" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileContratos" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordContratos" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFContratos" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONContratos" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="contratosStatus"></div>
+                                
+                                <!-- 1. Qualificação das Partes -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-users me-2"></i>1. Qualificação das Partes</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary">Parte 1 (Vendedor/Outorgante)</h6>
+                                                        <div class="mb-3">
+                                                            <label for="nomeParte1" class="form-label fw-bold">Nome Completo</label>
+                                                            <input type="text" class="form-control" id="nomeParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="nacionalidadeParte1" class="form-label fw-bold">Nacionalidade</label>
+                                                            <input type="text" class="form-control" id="nacionalidadeParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="estadoCivilParte1" class="form-label fw-bold">Estado Civil</label>
+                                                            <input type="text" class="form-control" id="estadoCivilParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="profissaoParte1" class="form-label fw-bold">Profissão</label>
+                                                            <input type="text" class="form-control" id="profissaoParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cpfParte1" class="form-label fw-bold">CPF</label>
+                                                            <input type="text" class="form-control" id="cpfParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="rgParte1" class="form-label fw-bold">RG (com órgão emissor e data)</label>
+                                                            <input type="text" class="form-control" id="rgParte1" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="enderecoParte1" class="form-label fw-bold">Endereço Completo</label>
+                                                            <textarea class="form-control" id="enderecoParte1" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="conjugeParte1" class="form-label fw-bold">Cônjuge (se aplicável)</label>
+                                                            <textarea class="form-control" id="conjugeParte1" rows="3" readonly placeholder="Nome completo, CPF, regime de bens, necessidade de anuência"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-success">Parte 2 (Comprador/Outorgado)</h6>
+                                                        <div class="mb-3">
+                                                            <label for="nomeParte2" class="form-label fw-bold">Nome Completo</label>
+                                                            <input type="text" class="form-control" id="nomeParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="nacionalidadeParte2" class="form-label fw-bold">Nacionalidade</label>
+                                                            <input type="text" class="form-control" id="nacionalidadeParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="estadoCivilParte2" class="form-label fw-bold">Estado Civil</label>
+                                                            <input type="text" class="form-control" id="estadoCivilParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="profissaoParte2" class="form-label fw-bold">Profissão</label>
+                                                            <input type="text" class="form-control" id="profissaoParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cpfParte2" class="form-label fw-bold">CPF</label>
+                                                            <input type="text" class="form-control" id="cpfParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="rgParte2" class="form-label fw-bold">RG (com órgão emissor e data)</label>
+                                                            <input type="text" class="form-control" id="rgParte2" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="enderecoParte2" class="form-label fw-bold">Endereço Completo</label>
+                                                            <textarea class="form-control" id="enderecoParte2" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="conjugeParte2" class="form-label fw-bold">Cônjuge (se aplicável)</label>
+                                                            <textarea class="form-control" id="conjugeParte2" rows="3" readonly placeholder="Nome completo, CPF, regime de bens, necessidade de anuência"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Pessoas Jurídicas -->
+                                                <div class="row mt-4">
+                                                    <div class="col-12">
+                                                        <h6 class="text-info">Pessoas Jurídicas (se aplicável)</h6>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="razaoSocial" class="form-label fw-bold">Razão Social</label>
+                                                                    <input type="text" class="form-control" id="razaoSocial" readonly>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="cnpj" class="form-label fw-bold">CNPJ</label>
+                                                                    <input type="text" class="form-control" id="cnpj" readonly>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="enderecoPJ" class="form-label fw-bold">Endereço</label>
+                                                                    <textarea class="form-control" id="enderecoPJ" rows="2" readonly></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="representanteLegal" class="form-label fw-bold">Representante Legal</label>
+                                                                    <textarea class="form-control" id="representanteLegal" rows="3" readonly placeholder="Nome, CPF, RG, cargo"></textarea>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="instrumentoRepresentacao" class="form-label fw-bold">Instrumento de Representação</label>
+                                                                    <textarea class="form-control" id="instrumentoRepresentacao" rows="3" readonly placeholder="Contrato social, ata, procuração"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Identificação do Imóvel -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0"><i class="fas fa-home me-2"></i>2. Identificação do Imóvel</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="enderecoImovel" class="form-label fw-bold">Endereço Completo do Imóvel</label>
+                                                            <textarea class="form-control" id="enderecoImovel" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="numeroMatriculaImovel" class="form-label fw-bold">Número da Matrícula</label>
+                                                            <input type="text" class="form-control" id="numeroMatriculaImovel" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cartorioRegistro" class="form-label fw-bold">Cartório de Registro de Imóveis</label>
+                                                            <input type="text" class="form-control" id="cartorioRegistro" readonly placeholder="1º, 2º, etc.">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="tipoImovel" class="form-label fw-bold">Tipo do Imóvel</label>
+                                                            <input type="text" class="form-control" id="tipoImovel" readonly placeholder="Urbano ou Rural">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="descricaoCompletaImovel" class="form-label fw-bold">Descrição Completa do Imóvel</label>
+                                                            <textarea class="form-control" id="descricaoCompletaImovel" rows="6" readonly placeholder="Área, confrontações, benfeitorias, inscrição municipal, área construída"></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="origemPropriedade" class="form-label fw-bold">Origem da Propriedade</label>
+                                                            <textarea class="form-control" id="origemPropriedade" rows="3" readonly placeholder="Transcrição anterior, matrícula, escritura anterior"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Natureza do Negócio Jurídico -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>3. Natureza do Negócio Jurídico</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="tipoContrato" class="form-label fw-bold">Tipo de Contrato</label>
+                                                            <input type="text" class="form-control" id="tipoContrato" readonly placeholder="Compra e venda, doação, permuta, etc.">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="finalidadeTransacao" class="form-label fw-bold">Finalidade da Transação</label>
+                                                            <input type="text" class="form-control" id="finalidadeTransacao" readonly placeholder="Regularização, transmissão, garantia">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="valorNegocio" class="form-label fw-bold">Valor do Negócio</label>
+                                                            <input type="text" class="form-control" id="valorNegocio" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="formaPagamento" class="form-label fw-bold">Forma de Pagamento</label>
+                                                            <input type="text" class="form-control" id="formaPagamento" readonly placeholder="À vista, financiado, parcelado, FGTS, etc.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="condicoesClausulas" class="form-label fw-bold">Condições e Cláusulas</label>
+                                                            <textarea class="form-control" id="condicoesClausulas" rows="6" readonly placeholder="Condições, cláusulas resolutivas, prazos, obrigações acessórias"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Informações Tributárias e Encargos -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-danger">
+                                            <div class="card-header bg-danger text-white">
+                                                <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>4. Informações Tributárias e Encargos</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="valorITBI" class="form-label fw-bold">Valor do ITBI</label>
+                                                            <input type="text" class="form-control" id="valorITBI" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="itbiPago" class="form-label fw-bold">ITBI Pago</label>
+                                                            <input type="text" class="form-control" id="itbiPago" readonly placeholder="Sim/Não">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="baseCalculo" class="form-label fw-bold">Base de Cálculo</label>
+                                                            <input type="text" class="form-control" id="baseCalculo" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="declaracaoIsencao" class="form-label fw-bold">Declaração de Isenção</label>
+                                                            <input type="text" class="form-control" id="declaracaoIsencao" readonly placeholder="Se aplicável">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="itrCcir" class="form-label fw-bold">ITR ou CCIR (Rural)</label>
+                                                            <input type="text" class="form-control" id="itrCcir" readonly placeholder="Para imóveis rurais">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="debitosFiscais" class="form-label fw-bold">Débitos Fiscais ou Ônus</label>
+                                                            <textarea class="form-control" id="debitosFiscais" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="certidoesNegativas" class="form-label fw-bold">Certidões Negativas</label>
+                                                            <textarea class="form-control" id="certidoesNegativas" rows="3" readonly placeholder="Certidões negativas ou positivas com efeitos de negativa"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. Ônus e Gravames -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-dark">
+                                            <div class="card-header bg-dark text-white">
+                                                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>5. Ônus e Gravames</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="hipoteca" class="form-label fw-bold">Hipoteca</label>
+                                                            <textarea class="form-control" id="hipoteca" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="alienacaoFiduciaria" class="form-label fw-bold">Alienação Fiduciária</label>
+                                                            <textarea class="form-control" id="alienacaoFiduciaria" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="usufruto" class="form-label fw-bold">Usufruto</label>
+                                                            <textarea class="form-control" id="usufruto" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="penhora" class="form-label fw-bold">Penhora</label>
+                                                            <textarea class="form-control" id="penhora" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="clausulasInalienabilidade" class="form-label fw-bold">Cláusulas de Inalienabilidade</label>
+                                                            <textarea class="form-control" id="clausulasInalienabilidade" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="acoesJudiciais" class="form-label fw-bold">Ações Judiciais (Averbações)</label>
+                                                            <textarea class="form-control" id="acoesJudiciais" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. Documentos Complementares -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fas fa-folder-open me-2"></i>6. Documentos Complementares</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="procuracoes" class="form-label fw-bold">Procurações</label>
+                                                            <textarea class="form-control" id="procuracoes" rows="4" readonly placeholder="Poderes específicos, validade, dados do outorgante/outorgado"></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="escriturasAnteriores" class="form-label fw-bold">Escrituras Anteriores</label>
+                                                            <textarea class="form-control" id="escriturasAnteriores" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="contratosPreliminares" class="form-label fw-bold">Contratos Preliminares</label>
+                                                            <textarea class="form-control" id="contratosPreliminares" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="certidoes" class="form-label fw-bold">Certidões</label>
+                                                            <textarea class="form-control" id="certidoes" rows="4" readonly placeholder="Estado civil, negativa de débitos, etc."></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 7. Informações para a Minuta -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-secondary">
+                                            <div class="card-header bg-secondary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-file-text me-2"></i>7. Informações para a Minuta</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="tituloMinuta" class="form-label fw-bold">Título da Minuta</label>
+                                                            <input type="text" class="form-control" id="tituloMinuta" readonly placeholder="Ex: Escritura Pública de Compra e Venda">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="identificacaoOutorgantes" class="form-label fw-bold">Identificação dos Outorgantes</label>
+                                                            <textarea class="form-control" id="identificacaoOutorgantes" rows="4" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="clausulasContratuais" class="form-label fw-bold">Cláusulas Contratuais Relevantes</label>
+                                                            <textarea class="form-control" id="clausulasContratuais" rows="4" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="declaracoesLegais" class="form-label fw-bold">Declarações Legais Obrigatórias</label>
+                                                            <textarea class="form-control" id="declaracoesLegais" rows="4" readonly placeholder="Ex: que o imóvel está livre de ônus, que os impostos foram pagos"></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="responsabilidadeTributos" class="form-label fw-bold">Responsabilidade por Tributos e Taxas</label>
+                                                            <textarea class="form-control" id="responsabilidadeTributos" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="reconhecimentoFirma" class="form-label fw-bold">Reconhecimento de Firma e Data</label>
+                                                            <textarea class="form-control" id="reconhecimentoFirma" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Escrituras -->
+                    <div class="tab-pane fade" id="escrituras" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-scroll me-2"></i>Dados das Escrituras</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputEscrituras" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileEscrituras" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordEscrituras" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFEscrituras" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONEscrituras" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="escriturasStatus"></div>
+                                
+                                <!-- 1. Identificação do Ato -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-file-signature me-2"></i>1. Identificação do Ato</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="tipoEscritura" class="form-label fw-bold">Tipo de Escritura</label>
+                                                            <input type="text" class="form-control" id="tipoEscritura" readonly placeholder="Compra e venda, doação, permuta, etc.">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="numeroLivro" class="form-label fw-bold">Número do Livro</label>
+                                                            <input type="text" class="form-control" id="numeroLivro" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="numeroFolha" class="form-label fw-bold">Número da Folha</label>
+                                                            <input type="text" class="form-control" id="numeroFolha" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="dataLavratura" class="form-label fw-bold">Data da Lavratura</label>
+                                                            <input type="text" class="form-control" id="dataLavratura" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="nomeTabeliao" class="form-label fw-bold">Nome do Tabelião</label>
+                                                            <input type="text" class="form-control" id="nomeTabeliao" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="termoEletronico" class="form-label fw-bold">Termo Eletrônico</label>
+                                                            <input type="text" class="form-control" id="termoEletronico" readonly placeholder="Se aplicável">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Qualificação das Partes -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0"><i class="fas fa-users me-2"></i>2. Qualificação das Partes</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary">Parte 1 (Outorgante)</h6>
+                                                        <div class="mb-3">
+                                                            <label for="nomeParte1Escritura" class="form-label fw-bold">Nome Completo</label>
+                                                            <input type="text" class="form-control" id="nomeParte1Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="nacionalidadeParte1Escritura" class="form-label fw-bold">Nacionalidade</label>
+                                                            <input type="text" class="form-control" id="nacionalidadeParte1Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="estadoCivilParte1Escritura" class="form-label fw-bold">Estado Civil</label>
+                                                            <input type="text" class="form-control" id="estadoCivilParte1Escritura" readonly placeholder="Com regime de bens e nome do cônjuge">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="profissaoParte1Escritura" class="form-label fw-bold">Profissão</label>
+                                                            <input type="text" class="form-control" id="profissaoParte1Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cpfParte1Escritura" class="form-label fw-bold">CPF</label>
+                                                            <input type="text" class="form-control" id="cpfParte1Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="rgParte1Escritura" class="form-label fw-bold">RG (com órgão emissor e UF)</label>
+                                                            <input type="text" class="form-control" id="rgParte1Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="enderecoParte1Escritura" class="form-label fw-bold">Endereço</label>
+                                                            <textarea class="form-control" id="enderecoParte1Escritura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="regimeBensParte1" class="form-label fw-bold">Regime de Bens (se casado)</label>
+                                                            <input type="text" class="form-control" id="regimeBensParte1" readonly placeholder="Comunhão, separação, etc.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-success">Parte 2 (Outorgado)</h6>
+                                                        <div class="mb-3">
+                                                            <label for="nomeParte2Escritura" class="form-label fw-bold">Nome Completo</label>
+                                                            <input type="text" class="form-control" id="nomeParte2Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="nacionalidadeParte2Escritura" class="form-label fw-bold">Nacionalidade</label>
+                                                            <input type="text" class="form-control" id="nacionalidadeParte2Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="estadoCivilParte2Escritura" class="form-label fw-bold">Estado Civil</label>
+                                                            <input type="text" class="form-control" id="estadoCivilParte2Escritura" readonly placeholder="Com regime de bens e nome do cônjuge">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="profissaoParte2Escritura" class="form-label fw-bold">Profissão</label>
+                                                            <input type="text" class="form-control" id="profissaoParte2Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cpfParte2Escritura" class="form-label fw-bold">CPF</label>
+                                                            <input type="text" class="form-control" id="cpfParte2Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="rgParte2Escritura" class="form-label fw-bold">RG (com órgão emissor e UF)</label>
+                                                            <input type="text" class="form-control" id="rgParte2Escritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="enderecoParte2Escritura" class="form-label fw-bold">Endereço</label>
+                                                            <textarea class="form-control" id="enderecoParte2Escritura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="regimeBensParte2" class="form-label fw-bold">Regime de Bens (se casado)</label>
+                                                            <input type="text" class="form-control" id="regimeBensParte2" readonly placeholder="Comunhão, separação, etc.">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Pessoas Jurídicas -->
+                                                <div class="row mt-4">
+                                                    <div class="col-12">
+                                                        <h6 class="text-info">Pessoas Jurídicas (se aplicável)</h6>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="razaoSocialEscritura" class="form-label fw-bold">Razão Social</label>
+                                                                    <input type="text" class="form-control" id="razaoSocialEscritura" readonly>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="cnpjEscritura" class="form-label fw-bold">CNPJ</label>
+                                                                    <input type="text" class="form-control" id="cnpjEscritura" readonly>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="enderecoPJEscritura" class="form-label fw-bold">Endereço</label>
+                                                                    <textarea class="form-control" id="enderecoPJEscritura" rows="2" readonly></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label for="representanteLegalEscritura" class="form-label fw-bold">Representante Legal</label>
+                                                                    <textarea class="form-control" id="representanteLegalEscritura" rows="3" readonly placeholder="Qualificação completa"></textarea>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="instrumentoRepresentacaoEscritura" class="form-label fw-bold">Instrumento de Representação</label>
+                                                                    <textarea class="form-control" id="instrumentoRepresentacaoEscritura" rows="3" readonly placeholder="Contrato social, estatuto, procuração"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Identificação do Imóvel -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0"><i class="fas fa-home me-2"></i>3. Identificação do Imóvel</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="enderecoImovelEscritura" class="form-label fw-bold">Endereço Completo</label>
+                                                            <textarea class="form-control" id="enderecoImovelEscritura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="matriculaEscritura" class="form-label fw-bold">Matrícula</label>
+                                                            <input type="text" class="form-control" id="matriculaEscritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="cartorioRegistroEscritura" class="form-label fw-bold">Cartório de Registro de Imóveis</label>
+                                                            <input type="text" class="form-control" id="cartorioRegistroEscritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="areaTotalEscritura" class="form-label fw-bold">Área Total</label>
+                                                            <input type="text" class="form-control" id="areaTotalEscritura" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="confrontacoesEscritura" class="form-label fw-bold">Confrontações</label>
+                                                            <textarea class="form-control" id="confrontacoesEscritura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="benfeitoriasEscritura" class="form-label fw-bold">Benfeitorias</label>
+                                                            <textarea class="form-control" id="benfeitoriasEscritura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="inscricaoCadastral" class="form-label fw-bold">Inscrição Cadastral</label>
+                                                            <input type="text" class="form-control" id="inscricaoCadastral" readonly placeholder="IPTU, CCIR, ITR">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="origemPropriedadeEscritura" class="form-label fw-bold">Origem da Propriedade</label>
+                                                            <textarea class="form-control" id="origemPropriedadeEscritura" rows="3" readonly placeholder="Averbação anterior ou escritura anterior"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Informações do Negócio Jurídico -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fas fa-handshake me-2"></i>4. Informações do Negócio Jurídico</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="valorImovelEscritura" class="form-label fw-bold">Valor do Imóvel</label>
+                                                            <input type="text" class="form-control" id="valorImovelEscritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="formaPagamentoEscritura" class="form-label fw-bold">Forma de Pagamento</label>
+                                                            <input type="text" class="form-control" id="formaPagamentoEscritura" readonly placeholder="À vista, parcelado, FGTS, financiamento, permuta">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="condicoesSuspensivas" class="form-label fw-bold">Condições Suspensivas ou Resolutivas</label>
+                                                            <textarea class="form-control" id="condicoesSuspensivas" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="participacaoTerceiros" class="form-label fw-bold">Participação de Terceiros</label>
+                                                            <textarea class="form-control" id="participacaoTerceiros" rows="3" readonly placeholder="Financiadoras, cessionários"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="clausulasEspeciais" class="form-label fw-bold">Cláusulas Especiais</label>
+                                                            <textarea class="form-control" id="clausulasEspeciais" rows="6" readonly placeholder="Inalienabilidade, impenhorabilidade, usufruto, reversão, direito de preferência"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. Tributos e Documentos -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-danger">
+                                            <div class="card-header bg-danger text-white">
+                                                <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>5. Tributos e Documentos</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="valorITBIEscritura" class="form-label fw-bold">Valor do ITBI</label>
+                                                            <input type="text" class="form-control" id="valorITBIEscritura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="declaracaoIsencaoEscritura" class="form-label fw-bold">Declaração de Isenção</label>
+                                                            <input type="text" class="form-control" id="declaracaoIsencaoEscritura" readonly placeholder="Se aplicável">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="numeroGuia" class="form-label fw-bold">Número da Guia</label>
+                                                            <input type="text" class="form-control" id="numeroGuia" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="dataGuia" class="form-label fw-bold">Data da Guia</label>
+                                                            <input type="text" class="form-control" id="dataGuia" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="certidoesNegativas" class="form-label fw-bold">Certidões Negativas de Débitos</label>
+                                                            <textarea class="form-control" id="certidoesNegativas" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="certidaoEstadoCivil" class="form-label fw-bold">Certidão de Estado Civil</label>
+                                                            <textarea class="form-control" id="certidaoEstadoCivil" rows="3" readonly placeholder="Casamento, divórcio, óbito"></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="certidaoMatricula" class="form-label fw-bold">Certidão da Matrícula Atualizada</label>
+                                                            <textarea class="form-control" id="certidaoMatricula" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="comprovantesResidencia" class="form-label fw-bold">Comprovantes de Residência</label>
+                                                            <textarea class="form-control" id="comprovantesResidencia" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. Procurações -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-dark">
+                                            <div class="card-header bg-dark text-white">
+                                                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>6. Procurações (se houver)</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="outorganteProcura" class="form-label fw-bold">Dados do Outorgante</label>
+                                                            <textarea class="form-control" id="outorganteProcura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="outorgadoProcura" class="form-label fw-bold">Dados do Outorgado</label>
+                                                            <textarea class="form-control" id="outorgadoProcura" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="livroProcura" class="form-label fw-bold">Livro da Procuração</label>
+                                                            <input type="text" class="form-control" id="livroProcura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="folhaProcura" class="form-label fw-bold">Folha da Procuração</label>
+                                                            <input type="text" class="form-control" id="folhaProcura" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="dataLavraturaProcura" class="form-label fw-bold">Data de Lavratura da Procuração</label>
+                                                            <input type="text" class="form-control" id="dataLavraturaProcura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="poderesConcedidos" class="form-label fw-bold">Poderes Concedidos</label>
+                                                            <textarea class="form-control" id="poderesConcedidos" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="validadeProcura" class="form-label fw-bold">Validade da Procuração</label>
+                                                            <input type="text" class="form-control" id="validadeProcura" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="procuraEspecifica" class="form-label fw-bold">Procuração Específica para o Ato</label>
+                                                            <input type="text" class="form-control" id="procuraEspecifica" readonly placeholder="Sim/Não">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 7. Ônus e Gravames -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-secondary">
+                                            <div class="card-header bg-secondary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>7. Ônus e Gravames</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="existeOnus" class="form-label fw-bold">Existe Ônus sobre o Imóvel</label>
+                                                            <input type="text" class="form-control" id="existeOnus" readonly placeholder="Sim/Não">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="tipoOnusEscritura" class="form-label fw-bold">Tipo de Ônus</label>
+                                                            <textarea class="form-control" id="tipoOnusEscritura" rows="4" readonly placeholder="Hipoteca, penhora, alienação fiduciária, usufruto, etc."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="clausulasImpeditivas" class="form-label fw-bold">Cláusulas Impeditivas de Alienação</label>
+                                                            <textarea class="form-control" id="clausulasImpeditivas" rows="4" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 8. Cláusulas e Declarações Importantes -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-file-text me-2"></i>8. Cláusulas e Declarações Importantes</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="declaracaoTributos" class="form-label fw-bold">Declaração de Ciência dos Tributos</label>
+                                                            <textarea class="form-control" id="declaracaoTributos" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="responsabilidadeRegistro" class="form-label fw-bold">Assunção de Responsabilidade pelo Registro</label>
+                                                            <textarea class="form-control" id="responsabilidadeRegistro" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="declaracaoQuitacao" class="form-label fw-bold">Declaração de Quitação</label>
+                                                            <textarea class="form-control" id="declaracaoQuitacao" rows="3" readonly></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="imovelLivreDesembaracado" class="form-label fw-bold">Imóvel Livre e Desembaraçado</label>
+                                                            <textarea class="form-control" id="imovelLivreDesembaracado" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="fePublicaTabeliao" class="form-label fw-bold">Fé Pública do Tabelião</label>
+                                                            <textarea class="form-control" id="fePublicaTabeliao" rows="3" readonly></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="assinaturas" class="form-label fw-bold">Assinaturas</label>
+                                                            <textarea class="form-control" id="assinaturas" rows="3" readonly placeholder="Ou menção à fé pública do tabelião"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Qualificação -->
+                    <div class="tab-pane fade" id="qualificacao" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-user-check me-2"></i>Dados de Qualificação</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputQualificacao" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileQualificacao" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordQualificacao" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFQualificacao" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONQualificacao" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-user-check me-2"></i>Qualificação</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Serviço em Desenvolvimento</strong>
+                                    <br>
+                                    Esta funcionalidade será implementada em breve.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Memorial -->
+                    <div class="tab-pane fade" id="memorial" role="tabpanel">
+                        <!-- Cabeçalho da Área Principal -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-3"><i class="fas fa-book me-2"></i>Dados do Memorial</h5>
+                                    <div class="d-flex align-items-center">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMemorial" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <button class="btn btn-success btn-sm" id="processFileMemorial" disabled>
+                                            <i class="fas fa-play me-1"></i>Processar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordMemorial" title="Baixar dados como documento Word">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFMemorial" title="Baixar dados como documento PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONMemorial" title="Baixar dados como arquivo JSON">
+                                        <i class="fas fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-file-alt me-2"></i>Memorial</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Serviço em Desenvolvimento</strong>
+                                    <br>
+                                    Esta funcionalidade será implementada em breve.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo da nova aba OCR Tesseract -->
+                    <div class="tab-pane fade" id="ocr-tesseract" role="tabpanel">
+                        <div class="card mt-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-magic me-2"></i>Transformar PDF em Pesquisável (Python + Tesseract)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Envie um arquivo PDF não pesquisável para ser convertido em PDF pesquisável usando OCR Tesseract (integração Python).
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fileInputOCRTesseract" class="form-label fw-bold">Selecione o PDF</label>
+                                    <input type="file" class="form-control" id="fileInputOCRTesseract" accept=".pdf">
+                                </div>
+                                <button class="btn btn-primary" id="processFileOCRTesseract" disabled>
+                                    <i class="fas fa-play me-1"></i>Processar com Python OCR
+                                </button>
+                                <div class="mt-3" id="ocrTesseractStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app-simple.js"></script>
+</body>
+</html> 
