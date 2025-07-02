@@ -187,4 +187,39 @@ Para suporte ou dúvidas:
 
 ---
 
-**Desenvolvido com ❤️ usando Flask + Tesseract OCR** 
+**Desenvolvido com ❤️ usando Flask + Tesseract OCR**
+
+# Como rodar o Axion localmente (sem OCR, apenas ChatGPT)
+
+1. **Pré-requisitos:**
+   - Python 3.8 ou superior
+   - Pip
+   - (Opcional) Ambiente virtual
+
+2. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure a chave da OpenAI:**
+   - Crie um arquivo `.env` na raiz do projeto com:
+     ```
+     OPENAI_API_KEY=sua-chave-aqui
+     ```
+   - Ou edite diretamente o `config.py` para definir sua chave.
+
+4. **Execute o backend Flask:**
+   ```bash
+   python app.py
+   ```
+
+5. **Acesse o sistema:**
+   - Abra o navegador em: http://localhost:5000/static/index.html
+
+---
+
+## Observações
+- O sistema NÃO possui mais OCR. Apenas PDFs pesquisáveis (com texto) são processados.
+- O botão "Processar" só habilita ao selecionar um arquivo válido.
+- Se tiver problemas com o botão, verifique o console do navegador para erros de JS.
+- Para deploy, utilize apenas as dependências listadas em `requirements.txt`. 

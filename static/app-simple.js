@@ -124,7 +124,9 @@ function setupEventListeners() {
         if (input) {
             const serviceId = inputId.replace('fileInput', '').toLowerCase();
             input.addEventListener('change', (event) => handleFileSelect(event, serviceId));
-            console.log(`✅ File input listener configurado para ${serviceId}`);
+            console.log(`✅ File input listener configurado para ${serviceId} (${inputId})`);
+        } else {
+            console.log(`❌ File input não encontrado: ${inputId}`);
         }
     });
     
@@ -391,30 +393,48 @@ function handleModelChange(event) {
 // Handle file select
 function handleFileSelect(event, serviceId) {
     const files = event.target.files;
-    const processButton = document.getElementById(`processFile${serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}`);
+    const buttonId = `processFile${serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}`;
+    const processButton = document.getElementById(buttonId);
+    
+    console.log(`🔍 handleFileSelect chamado para ${serviceId}`);
+    console.log(`🔍 Procurando botão: ${buttonId}`);
+    console.log(`🔍 Botão encontrado:`, processButton);
+    console.log(`🔍 Arquivos selecionados:`, files);
     
     if (serviceId === 'certidao') {
         // Para alta produção - múltiplos arquivos
         if (files && files.length > 0) {
             currentFiles = Array.from(files);
-            if (processButton) processButton.disabled = false;
+            if (processButton) {
+                processButton.disabled = false;
+                console.log(`✅ Botão habilitado para ${serviceId}`);
+            }
             console.log(`${files.length} arquivo(s) selecionado(s) para ${getServiceName(serviceId)}`);
             showAlert(`${files.length} arquivo(s) selecionado(s) com sucesso!`, 'success');
         } else {
             currentFiles = [];
-            if (processButton) processButton.disabled = true;
+            if (processButton) {
+                processButton.disabled = true;
+                console.log(`❌ Botão desabilitado para ${serviceId}`);
+            }
             console.log('Nenhum arquivo selecionado');
         }
     } else {
         // Para outros serviços - arquivo único
         const file = files[0];
-    if (file) {
-        currentFile = file;
-            if (processButton) processButton.disabled = false;
+        if (file) {
+            currentFile = file;
+            if (processButton) {
+                processButton.disabled = false;
+                console.log(`✅ Botão habilitado para ${serviceId}`);
+            }
             console.log(`Arquivo selecionado para ${getServiceName(serviceId)}:`, file.name);
-    } else {
-        currentFile = null;
-            if (processButton) processButton.disabled = true;
+        } else {
+            currentFile = null;
+            if (processButton) {
+                processButton.disabled = true;
+                console.log(`❌ Botão desabilitado para ${serviceId}`);
+            }
             console.log('Nenhum arquivo selecionado');
         }
     }
@@ -693,42 +713,55 @@ async function processSingleFile(serviceId) {
                 }
             }
             
-            showAlert(`Processamento do ${getServiceName(serviceId)} concluído com sucesso!`, 'success');
-            
-            // Mostrar informações do modelo usado
-            const modelInfo = result.model ? ` (Modelo: ${result.model})` : '';
-            console.log(`Processamento concluído${modelInfo}`);
-        } else {
-            throw new Error(result.error || 'Erro desconhecido no processamento');
-        }
-        
-        // Limpar status ao finalizar
-        if (serviceId === 'matricula') {
-            document.getElementById('matriculaStatus').innerHTML = '';
-        } else if (serviceId === 'minuta') {
-            document.getElementById('minutaStatus').innerHTML = '';
-        } else if (serviceId === 'contratos') {
-            document.getElementById('contratosStatus').innerHTML = '';
-        } else if (serviceId === 'escrituras') {
-            document.getElementById('escriturasStatus').innerHTML = '';
-        }
-    } catch (error) {
-        console.error('Erro no processamento:', error);
-        showAlert(`Erro: ${error.message}`, 'danger');
-        // Exibir erro no status
-        if (serviceId === 'matricula') {
-            document.getElementById('matriculaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
-        } else if (serviceId === 'minuta') {
-            document.getElementById('minutaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
-        } else if (serviceId === 'contratos') {
-            document.getElementById('contratosStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
-        } else if (serviceId === 'escrituras') {
-            document.getElementById('escriturasStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+            try {
+                if (result.success) {
+                    showAlert(`Processamento do ${getServiceName(serviceId)} concluído com sucesso!`, 'success');
+                    // Mostrar informações do modelo usado
+                    const modelInfo = result.model ? ` (Modelo: ${result.model})` : '';
+                    console.log(`Processamento concluído${modelInfo}`);
+                } else {
+                    throw new Error(result.error || 'Erro desconhecido no processamento');
+                }
+                // Limpar status ao finalizar
+                if (serviceId === 'matricula') {
+                    document.getElementById('matriculaStatus').innerHTML = '';
+                } else if (serviceId === 'minuta') {
+                    document.getElementById('minutaStatus').innerHTML = '';
+                } else if (serviceId === 'contratos') {
+                    document.getElementById('contratosStatus').innerHTML = '';
+                } else if (serviceId === 'escrituras') {
+                    document.getElementById('escriturasStatus').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Erro no processamento:', error);
+                showAlert(`Erro: ${error.message}`, 'danger');
+                // Exibir erro no status
+                if (serviceId === 'matricula') {
+                    document.getElementById('matriculaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+                } else if (serviceId === 'minuta') {
+                    document.getElementById('minutaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+                } else if (serviceId === 'contratos') {
+                    document.getElementById('contratosStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+                } else if (serviceId === 'escrituras') {
+                    document.getElementById('escriturasStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+                }
+            }
+        } catch (error) {
+            console.error('Erro no processamento:', error);
+            showAlert(`Erro: ${error.message}`, 'danger');
+            // Exibir erro no status
+            if (serviceId === 'matricula') {
+                document.getElementById('matriculaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+            } else if (serviceId === 'minuta') {
+                document.getElementById('minutaStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+            } else if (serviceId === 'contratos') {
+                document.getElementById('contratosStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+            } else if (serviceId === 'escrituras') {
+                document.getElementById('escriturasStatus').innerHTML = `<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i>Erro: ${error.message}</div>`;
+            }
         }
     }
-}
 
-// Função removida: extractMatriculaFields não é mais necessária (OCR foi removido)
 
 // Função de delay
 function delay(ms) {

@@ -39,7 +39,7 @@ class Config:
     PORT = 5000
     
     # Chave da OpenAI API
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or 'CHAVE-AQUI'  # Temporário para teste local
     
     @staticmethod
     def init_app(app):
