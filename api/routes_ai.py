@@ -31,11 +31,11 @@ def test_openai():
         # Teste simples com a API
         import openai
         try:
-            # Tentar inicializar o cliente com configurações básicas
-            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+            # Configurar a API key (sintaxe da versão 0.28.1)
+            openai.api_key = Config.OPENAI_API_KEY
             
             # Teste simples
-            response = client.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": "Responda apenas 'OK' se você está funcionando."}],
                 temperature=0.0,

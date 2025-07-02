@@ -293,8 +293,9 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
 
         print("📡 Enviando requisição para OpenAI...")
         try:
-            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
-            response = client.chat.completions.create(
+            # Configurar a API key (sintaxe da versão 0.28.1)
+            openai.api_key = Config.OPENAI_API_KEY
+            response = openai.ChatCompletion.create(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
