@@ -292,13 +292,17 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
         print(f"🔑 Usando chave API: {api_key_preview}...")
 
         print("📡 Enviando requisição para OpenAI...")
-        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-            max_tokens=1024
-        )
+        try:
+            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+                max_tokens=1024
+            )
+        except Exception as client_error:
+            print(f"❌ Erro ao inicializar cliente OpenAI: {str(client_error)}")
+            return {"error": f"Erro na comunicação com OpenAI: {str(client_error)}", "raw": None}
         
         content = response.choices[0].message.content
         print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")

@@ -30,19 +30,30 @@ def test_openai():
         
         # Teste simples com a API
         import openai
-        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": "Responda apenas 'OK' se você está funcionando."}],
-            temperature=0.0,
-            max_tokens=10
-        )
-        
-        return jsonify({
-            'success': True,
-            'message': 'API da OpenAI está funcionando',
-            'response': response.choices[0].message.content
-        })
+        try:
+            # Tentar inicializar o cliente com configurações básicas
+            client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+            
+            # Teste simples
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "Responda apenas 'OK' se você está funcionando."}],
+                temperature=0.0,
+                max_tokens=10
+            )
+            
+            return jsonify({
+                'success': True,
+                'message': 'API da OpenAI está funcionando',
+                'response': response.choices[0].message.content
+            })
+            
+        except Exception as openai_error:
+            return jsonify({
+                'error': f'Erro na comunicação com OpenAI: {str(openai_error)}',
+                'api_key_configured': True,
+                'suggestion': 'Verifique se a API key é válida e tem créditos disponíveis'
+            }), 500
         
     except Exception as e:
         return jsonify({
