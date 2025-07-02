@@ -132,8 +132,17 @@ def process_file_chatgpt():
         
         # Extrair campos com OpenAI
         print("🤖 Iniciando extração com OpenAI...")
-        campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
-        print(f"✅ Campos extraídos: {len(campos) if isinstance(campos, dict) else 'erro'}")
+        print("📍 Antes de extract_fields_with_openai")
+        try:
+            campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
+            print("📍 Depois de extract_fields_with_openai")
+            print(f"✅ Campos extraídos: {len(campos) if isinstance(campos, dict) else 'erro'}")
+        except Exception as e:
+            print("❌ Erro na função extract_fields_with_openai:", str(e))
+            import traceback
+            print("📋 Traceback completo:")
+            print(traceback.format_exc())
+            return jsonify({'error': f'Erro ao extrair campos com OpenAI: {str(e)}'}), 500
         
         if 'error' in campos:
             print(f"❌ Erro na extração: {campos['error']}")
