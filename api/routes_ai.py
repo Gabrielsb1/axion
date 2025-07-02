@@ -1,7 +1,5 @@
 # Endpoints relacionados ao ChatGPT/OpenAI
 
-# (O conteúdo será movido do app_ocr_melhor.py) 
-
 from flask import Blueprint, request, jsonify
 import os
 import uuid
@@ -9,11 +7,16 @@ import shutil
 import re
 import tempfile
 from werkzeug.utils import secure_filename
-from ocr.ocr_service import allowed_file, best_ocr_with_tesseract, UPLOAD_FOLDER, PROCESSED_FOLDER
 from ai.openai_service import extract_fields_with_openai
 import PyPDF2
+from config import Config
 
 ai_bp = Blueprint('ai', __name__)
+
+def allowed_file(filename):
+    """Verifica se o arquivo tem extensão permitida"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 @ai_bp.route('/api/process-file', methods=['POST'])
 def process_file_chatgpt():
@@ -34,7 +37,7 @@ def process_file_chatgpt():
         original_filename = secure_filename(file.filename or 'unknown.pdf')
         file_id = str(uuid.uuid4())
         upload_filename = f"{file_id}_{original_filename}"
-        upload_path = os.path.join(UPLOAD_FOLDER, upload_filename)
+        upload_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
         file.save(upload_path)
         
         # Extrair texto diretamente do PDF (sem OCR)

@@ -488,12 +488,9 @@ async function processSingleFile(serviceId) {
             console.log('Modelo:', model);
         }
         
-        // Escolher endpoint baseado no método de processamento
+        // Usar apenas endpoint do ChatGPT (OCR foi removido)
         let endpoint = '/api/process-file';
-        if (processingMethod === 'ocr') {
-            endpoint = '/api/ocr-tesseract';
-            console.log('Usando endpoint OCR Tesseract');
-        }
+        console.log('Usando endpoint ChatGPT');
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -510,13 +507,8 @@ async function processSingleFile(serviceId) {
         const result = await response.json();
         
         if (result.success) {
-            // Se for OCR, extrair campos da matrícula automaticamente
-            if (processingMethod === 'ocr' && serviceId === 'matricula') {
-                console.log('Extraindo campos da matrícula 3º RI...');
-                await extractMatriculaFields(result.processed_filename);
-            } else {
-                // Para ChatGPT, usar result.campos diretamente
-                if (result.campos) {
+            // Usar result.campos do ChatGPT
+            if (result.campos) {
                     console.log('🎯 Campos recebidos da API:', result.campos);
                     
                     let mappedData = {};
@@ -745,54 +737,7 @@ async function processSingleFile(serviceId) {
     }
 }
 
-// Função para extrair campos da matrícula após OCR
-async function extractMatriculaFields(processedFilename) {
-    try {
-        console.log('Extraindo campos da matrícula:', processedFilename);
-        
-        const response = await fetch(`/api/extract-matricula/${processedFilename}`);
-        
-        if (!response.ok) {
-            throw new Error(`Erro ao extrair campos: HTTP ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Mapeamento correto dos campos extraídos para os campos do frontend
-            const extractedData = {
-                matricula: result.campos.numero_matricula,
-                dataMatricula: result.campos.data_matricula,
-                descricaoImovel: result.campos.descricao_imovel,
-                endereco: result.campos.endereco,
-                areaPrivativa: result.campos.area_privativa,
-                areaTotal: result.campos.area_total,
-                garagem: result.campos.garagem_vagas,
-                proprietarios: result.campos.proprietarios,
-                livroAnterior: result.campos.livro_anterior,
-                folhaAnterior: result.campos.folha_anterior,
-                matriculaAnterior: result.campos.matricula_anterior,
-                tipoTitulo: result.campos.tipo_titulo,
-                valorTitulo: result.campos.valor_titulo,
-                comprador: result.campos.comprador,
-                cpfCnpj: result.campos.cpf_cnpj,
-                valorITBI: result.campos.valor_itbi,
-                numeroDAM: result.campos.numero_dam,
-                dataPagamentoITBI: result.campos.data_pagamento_itbi
-            };
-            currentData = extractedData;
-            displayExtractedData(extractedData);
-            console.log(`Campos extraídos: ${result.campos_encontrados}/${result.total_campos}`);
-            showAlert(`Campos extraídos com sucesso! (${result.campos_encontrados}/${result.total_campos} campos encontrados)`, 'success');
-        } else {
-            throw new Error(result.error || 'Erro ao extrair campos');
-        }
-        
-    } catch (error) {
-        console.error('Erro ao extrair campos da matrícula:', error);
-        showAlert(`Erro ao extrair campos: ${error.message}`, 'warning');
-    }
-}
+// Função removida: extractMatriculaFields não é mais necessária (OCR foi removido)
 
 // Função de delay
 function delay(ms) {
@@ -835,17 +780,14 @@ async function processMultipleFiles(serviceId) {
             
             formData.append('useAdvancedModel', useAdvancedModel);
             
-                    // Escolher endpoint baseado no método de processamento
-        let endpoint = '/api/process-file';
-        if (processingMethod === 'ocr') {
-            endpoint = '/api/ocr-tesseract';
-            console.log('Usando endpoint OCR Tesseract');
-        }
-        
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            body: formData
-        });
+            // Usar apenas endpoint do ChatGPT (OCR foi removido)
+            let endpoint = '/api/process-file';
+            console.log('Usando endpoint ChatGPT');
+            
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                body: formData
+            });
             
             if (!response.ok) {
                 if (response.status === 429) {

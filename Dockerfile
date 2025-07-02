@@ -1,4 +1,4 @@
-# Dockerfile para Axion OCR Flask
+# Dockerfile para Axion ChatGPT Flask
 FROM python:3.11-slim
 
 # Diretório de trabalho
@@ -7,9 +7,9 @@ WORKDIR /app
 # Copia os arquivos do projeto
 COPY . /app
 
-# Instala dependências do sistema necessárias para o Tesseract e ocrmypdf
+# Instala dependências do sistema e Python
 RUN apt-get update && \
-    apt-get install -y tesseract-ocr tesseract-ocr-por tesseract-ocr-eng ghostscript unpaper poppler-utils && \
+    apt-get install -y poppler-utils && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
