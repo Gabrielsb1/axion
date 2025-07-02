@@ -14,34 +14,8 @@ ocr_bp = Blueprint('ocr', __name__)
 
 @ocr_bp.route('/api/ocr-tesseract', methods=['POST'])
 def ocr_tesseract():
-    """Endpoint para OCR com Tesseract (aba OCR Tesseract)"""
-    try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo enviado'}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
-        if not allowed_file(file.filename):
-            return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
-        original_filename = secure_filename(file.filename or 'unknown.pdf')
-        file_id = str(uuid.uuid4())
-        upload_filename = f"{file_id}_{original_filename}"
-        upload_path = os.path.join(UPLOAD_FOLDER, upload_filename)
-        file.save(upload_path)
-        processed_filename = f"ocr_{file_id}_{original_filename}"
-        processed_path = os.path.join(PROCESSED_FOLDER, processed_filename)
-        best_ocr_with_tesseract(upload_path, processed_path)
-        return jsonify({
-            'success': True,
-            'message': 'PDF processado com OCR Tesseract!',
-            'original_filename': original_filename,
-            'processed_filename': processed_filename,
-            'file_id': file_id,
-            'download_url': f'/api/download/{processed_filename}',
-            'ocr_mode': 'tesseract'
-        })
-    except Exception as e:
-        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500
+    """Endpoint removido: OCR não está mais disponível."""
+    return jsonify({'error': 'Funcionalidade de OCR removida. Só é possível processar PDFs com texto pesquisável.'}), 400
 
 @ocr_bp.route('/api/ocr-traditional', methods=['POST'])
 def ocr_traditional():

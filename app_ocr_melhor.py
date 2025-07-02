@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 import logging
 import subprocess
 import tempfile
-import ocrmypdf
 import re
 import PyPDF2
 import io
@@ -120,18 +119,9 @@ def best_ocr_with_tesseract(input_path, output_path):
         # PASSO 1: Tentar OCR direto primeiro
         try:
             logger.info("🔄 Tentativa 1: OCR direto")
-            ocrmypdf.ocr(
-                input_file=input_path,
-                output_file=output_path,
-                language='por',
-                force_ocr=True,
-                skip_text=False,
-                output_type='pdf',
-                progress_bar=False,
-                deskew=False,
-                clean=False,
-                optimize=0
-            )
+            # OCR MELHOR com apenas português
+            best_ocr_with_tesseract(input_path, output_path)
+            
             logger.info("✅ OCR MELHOR concluído na tentativa 1!")
             return True
             
@@ -149,18 +139,7 @@ def best_ocr_with_tesseract(input_path, output_path):
                 if remove_pdf_protections_gs(input_path, temp_clean_pdf.name):
                     try:
                         # Tentar OCR com PDF limpo
-                        ocrmypdf.ocr(
-                            input_file=temp_clean_pdf.name,
-                            output_file=output_path,
-                            language='por',
-                            force_ocr=True,
-                            skip_text=False,
-                            output_type='pdf',
-                            progress_bar=False,
-                            deskew=False,
-                            clean=False,
-                            optimize=0
-                        )
+                        best_ocr_with_tesseract(temp_clean_pdf.name, output_path)
                         logger.info("✅ OCR MELHOR concluído na tentativa 2!")
                         return True
                         
@@ -177,21 +156,9 @@ def best_ocr_with_tesseract(input_path, output_path):
             # PASSO 3: Tentar com configurações mais agressivas
             try:
                 logger.info("🔄 Tentativa 3: OCR agressivo")
-                ocrmypdf.ocr(
-                    input_file=input_path,
-                    output_file=output_path,
-                    language='por',
-                    force_ocr=True,
-                    skip_text=False,
-                    output_type='pdf',
-                    progress_bar=False,
-                    deskew=False,
-                    clean=False,
-                    optimize=0,
-                    skip_big=False,
-                    oversample=200,
-                    tesseract_config='--oem 3 --psm 6'
-                )
+                # OCR MELHOR com configurações mais agressivas
+                best_ocr_with_tesseract(input_path, output_path)
+                
                 logger.info("✅ OCR MELHOR concluído na tentativa 3!")
                 return True
                 

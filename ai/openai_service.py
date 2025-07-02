@@ -286,8 +286,11 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
         else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
         
-        print(f"🔑 Usando chave API: {Config.OPENAI_API_KEY[:20]}...")
-        
+        if not Config.OPENAI_API_KEY:
+            raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida! Por favor, configure antes de usar a API da OpenAI.")
+        api_key_preview = Config.OPENAI_API_KEY[:20]
+        print(f"🔑 Usando chave API: {api_key_preview}...")
+
         print("📡 Enviando requisição para OpenAI...")
         client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
         response = client.chat.completions.create(

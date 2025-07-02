@@ -1,13 +1,10 @@
-# Funções de OCR, Ghostscript e utilitários relacionados
-
-# (O conteúdo será movido do app_ocr_melhor.py) 
+# Funções utilitárias relacionadas a PDF
 
 import os
 import shutil
 import subprocess
 import tempfile
 import logging
-import ocrmypdf
 
 logger = logging.getLogger(__name__)
 
