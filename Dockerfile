@@ -17,5 +17,5 @@ RUN apt-get update && \
 # Expõe a porta padrão do Flask
 EXPOSE 5000
 
-# Comando para rodar o app com Gunicorn
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"] 
+# Comando para rodar o app em modo debug para facilitar logs
+CMD ["python", "app.py"] 
