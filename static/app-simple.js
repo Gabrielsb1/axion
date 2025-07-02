@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Axion - Solução Registral iniciando...');
     setupEventListeners();
     
-    // Inicializar opções do ChatGPT (já que está selecionado por padrão)
+    // Opções do ChatGPT sempre visíveis (OCR foi removido)
     const chatgptOptions = document.getElementById('chatgptOptions');
     if (chatgptOptions) {
         chatgptOptions.style.display = 'block';
@@ -378,17 +378,8 @@ function clearFormFields(serviceId) {
 // Handle method change
 function handleMethodChange(event) {
     const method = event.target.value;
-    const chatgptOptions = document.getElementById('chatgptOptions');
-    
-    if (chatgptOptions) {
-        if (method === 'chatgpt') {
-            chatgptOptions.style.display = 'block';
-        } else {
-            chatgptOptions.style.display = 'none';
-        }
-    }
-    
     console.log('Método de processamento alterado para:', method);
+    // OCR foi removido, apenas ChatGPT disponível
 }
 
 // Handle model change
