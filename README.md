@@ -218,8 +218,49 @@ Para suporte ou dúvidas:
 
 ---
 
+## Deploy no Render
+
+### 1. Configurar Variáveis de Ambiente
+No painel do Render, vá em **Environment** e adicione:
+```
+OPENAI_API_KEY=sua-chave-da-openai-aqui
+```
+
+### 2. Testar se a API está funcionando
+Após o deploy, teste se a API key está configurada corretamente:
+```
+https://seu-app.onrender.com/api/test-openai
+```
+
+Se retornar erro, verifique se a variável `OPENAI_API_KEY` está configurada corretamente no Render.
+
+### 3. Logs de Erro
+Se o processamento falhar com erro 500, verifique:
+- Se a API key está configurada
+- Se o PDF contém texto pesquisável (não é imagem escaneada)
+- Os logs do Render para mais detalhes
+
+---
+
 ## Observações
 - O sistema NÃO possui mais OCR. Apenas PDFs pesquisáveis (com texto) são processados.
 - O botão "Processar" só habilita ao selecionar um arquivo válido.
-- Se tiver problemas com o botão, verifique o console do navegador para erros de JS.
-- Para deploy, utilize apenas as dependências listadas em `requirements.txt`. 
+- Se tiver problemas com o botão, verifique o console do navegador (F12).
+- Para PDFs escaneados, use outro sistema com OCR.
+
+## Estrutura do Projeto
+```
+axion/
+├── app.py                 # Aplicação principal Flask
+├── config.py             # Configurações
+├── requirements.txt      # Dependências Python
+├── api/
+│   ├── routes_ai.py      # Endpoints do ChatGPT
+│   └── routes_utils.py   # Endpoints utilitários
+├── ai/
+│   └── openai_service.py # Serviço de integração OpenAI
+└── static/
+    ├── index.html        # Interface principal
+    ├── app-simple.js     # JavaScript principal
+    └── styles.css        # Estilos
+``` 

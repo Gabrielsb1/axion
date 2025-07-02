@@ -18,6 +18,38 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
+@ai_bp.route('/api/test-openai', methods=['GET'])
+def test_openai():
+    """Endpoint de teste para verificar se a API key da OpenAI está configurada"""
+    try:
+        if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY == 'CHAVE-AQUI':
+            return jsonify({
+                'error': 'API key da OpenAI não configurada',
+                'message': 'Configure a variável de ambiente OPENAI_API_KEY no Render'
+            }), 400
+        
+        # Teste simples com a API
+        import openai
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "Responda apenas 'OK' se você está funcionando."}],
+            temperature=0.0,
+            max_tokens=10
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'API da OpenAI está funcionando',
+            'response': response.choices[0].message.content
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Erro ao testar API da OpenAI: {str(e)}',
+            'api_key_configured': bool(Config.OPENAI_API_KEY and Config.OPENAI_API_KEY != 'CHAVE-AQUI')
+        }), 500
+
 @ai_bp.route('/api/process-file', methods=['POST'])
 def process_file_chatgpt():
     """Endpoint otimizado para processamento com ChatGPT - extrai texto diretamente do PDF"""
@@ -29,6 +61,13 @@ def process_file_chatgpt():
             return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
         if not allowed_file(file.filename):
             return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
+        
+        # Verificar se a API key está configurada
+        if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY == 'CHAVE-AQUI':
+            return jsonify({
+                'error': 'API key da OpenAI não configurada',
+                'message': 'Configure a variável de ambiente OPENAI_API_KEY no Render'
+            }), 400
         
         # Obter tipo de serviço
         service_type = request.form.get('service', 'matricula')
