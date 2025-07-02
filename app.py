@@ -1,6 +1,5 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from api.routes_ocr import ocr_bp
 from api.routes_ai import ai_bp
 from api.routes_utils import utils_bp
 import os
@@ -9,7 +8,6 @@ app = Flask(__name__, static_folder='static')
 CORS(app)
 
 # Registrar blueprints
-app.register_blueprint(ocr_bp)
 app.register_blueprint(ai_bp)
 app.register_blueprint(utils_bp)
 
