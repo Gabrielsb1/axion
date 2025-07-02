@@ -284,9 +284,11 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Texto da escritura:\n" + text
             )
         else:
+            print(f"❌ Tipo de serviço não suportado: {service_type}")
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
         
         if not Config.OPENAI_API_KEY:
+            print("❌ API key não configurada")
             raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida! Por favor, configure antes de usar a API da OpenAI.")
         api_key_preview = Config.OPENAI_API_KEY[:20]
         print(f"🔑 Usando chave API: {api_key_preview}...")
@@ -330,4 +332,6 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             
     except Exception as e:
         print(f"❌ Erro geral na extração OpenAI: {str(e)}")
+        import traceback
+        print(f"📋 Traceback: {traceback.format_exc()}")
         return {"error": f"Erro na comunicação com OpenAI: {str(e)}", "raw": None} 

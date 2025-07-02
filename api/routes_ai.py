@@ -65,16 +65,22 @@ def test_openai():
 def process_file_chatgpt():
     """Endpoint otimizado para processamento com ChatGPT - extrai texto diretamente do PDF"""
     try:
+        print("🚀 Iniciando processamento de arquivo...")
+        
         if 'file' not in request.files:
+            print("❌ Nenhum arquivo enviado")
             return jsonify({'error': 'Nenhum arquivo enviado'}), 400
         file = request.files['file']
         if file.filename == '':
+            print("❌ Nenhum arquivo selecionado")
             return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
         if not allowed_file(file.filename):
+            print(f"❌ Tipo de arquivo não permitido: {file.filename}")
             return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
         
         # Verificar se a API key está configurada
         if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY == 'CHAVE-AQUI':
+            print("❌ API key não configurada")
             return jsonify({
                 'error': 'API key da OpenAI não configurada',
                 'message': 'Configure a variável de ambiente OPENAI_API_KEY no Render'
@@ -88,23 +94,33 @@ def process_file_chatgpt():
         file_id = str(uuid.uuid4())
         upload_filename = f"{file_id}_{original_filename}"
         upload_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
+        
+        print(f"📁 Salvando arquivo em: {upload_path}")
         file.save(upload_path)
+        print(f"✅ Arquivo salvo com sucesso")
         
         # Extrair texto diretamente do PDF (sem OCR)
         text_content = ""
         try:
+            print("📖 Extraindo texto do PDF...")
             with open(upload_path, 'rb') as f:
                 pdf_reader = PyPDF2.PdfReader(f)
-                for page in pdf_reader.pages:
-                    text_content += page.extract_text() + "\n"
+                print(f"📄 PDF tem {len(pdf_reader.pages)} páginas")
+                for i, page in enumerate(pdf_reader.pages):
+                    page_text = page.extract_text()
+                    text_content += page_text + "\n"
+                    print(f"📄 Página {i+1}: {len(page_text)} caracteres")
         except Exception as e:
+            print(f"❌ Erro ao extrair texto do PDF: {str(e)}")
             return jsonify({'error': f'Erro ao extrair texto do PDF: {str(e)}'}), 500
         
         # Limpar e normalizar texto
         text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+        print(f"📝 Texto extraído: {len(text_content)} caracteres")
         
         # Se o texto estiver vazio, retornar erro (ChatGPT não usa OCR)
         if not text_content or len(text_content.strip()) < 50:
+            print("❌ PDF não contém texto suficiente")
             return jsonify({
                 'error': 'PDF não contém texto pesquisável. Use OCR Tesseract para PDFs escaneados.',
                 'message': 'O ChatGPT funciona apenas com PDFs que já contêm texto.'
@@ -115,7 +131,13 @@ def process_file_chatgpt():
         print(f"🎯 Modelo recebido no backend: {model}")
         
         # Extrair campos com OpenAI
+        print("🤖 Iniciando extração com OpenAI...")
         campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
+        print(f"✅ Campos extraídos: {len(campos) if isinstance(campos, dict) else 'erro'}")
+        
+        if 'error' in campos:
+            print(f"❌ Erro na extração: {campos['error']}")
+            return jsonify(campos), 500
         
         return jsonify({
             'success': True,
@@ -130,4 +152,7 @@ def process_file_chatgpt():
         })
         
     except Exception as e:
+        print(f"❌ Erro geral no processamento: {str(e)}")
+        import traceback
+        print(f"📋 Traceback: {traceback.format_exc()}")
         return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
