@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 # Funções para integração com OpenAI/ChatGPT
 
 # (O conteúdo será movido do app_ocr_melhor.py) 
@@ -299,7 +300,6 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             temperature=0.0,
             max_tokens=1024
         )
-        
         content = response.choices[0].message.content
         print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")
         

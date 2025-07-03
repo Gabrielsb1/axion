@@ -8,7 +8,7 @@ import re
 import tempfile
 from werkzeug.utils import secure_filename
 from ai.openai_service import extract_fields_with_openai
-import PyPDF2
+import pypdf
 from config import Config
 
 ai_bp = Blueprint('ai', __name__)
@@ -44,7 +44,7 @@ def process_file_chatgpt():
         text_content = ""
         try:
             with open(upload_path, 'rb') as f:
-                pdf_reader = PyPDF2.PdfReader(f)
+                pdf_reader = pypdf.PdfReader(f)
                 for page in pdf_reader.pages:
                     text_content += page.extract_text() + "\n"
         except Exception as e:
