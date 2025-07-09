@@ -20,22 +20,3 @@ Os custos de uso da API são de responsabilidade do usuário da chave.
 
 ---
 
-## Registro de Software no INPI
-
-O AxionDocs está preparado para registro de direitos autorais no INPI (SRDA), garantindo proteção legal ao código-fonte e à documentação técnica. O registro é recomendado para assegurar a autoria e facilitar negociações comerciais e disputas judiciais.
-
-- Documentação técnica disponível em `documentacao_tecnica_axion_ocr.md` (renomeie para `documentacao_tecnica_axiondocs.md` se desejar)
-- Código-fonte e arquivos principais organizados conforme exigências do INPI
-- Termos de licença e autoria incluídos nos arquivos principais
-
-Para registrar:
-1. Acesse o sistema e-INPI: https://www.gov.br/inpi/pt-br/servicos/software
-2. Siga as instruções para anexar código, documentação e termo de responsabilidade
-3. Pague a GRU e acompanhe o processo online
-
----
-
-## Contato
-
-João Gabriel Santos Barros  
-Email: joaogabriel@email.com  
