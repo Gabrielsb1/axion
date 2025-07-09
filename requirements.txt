@@ -9,4 +9,4 @@ cryptography==41.0.7
 ocrmypdf==15.4.2
 Pillow==10.0.1
 reportlab==4.0.4
-pikepdf==8.6.2 
+pikepdf==9.9.0 
