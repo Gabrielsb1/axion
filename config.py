@@ -40,6 +40,7 @@ class Config:
     ENCRYPT_TEMP_FILES = True
     USE_TEMP_DIRECTORY = True
     TEMP_DIRECTORY = tempfile.gettempdir() + '/axion_secure'
+    os.makedirs(TEMP_DIRECTORY, exist_ok=True)
     
     # Configurações de auditoria
     AUDIT_LOGGING = True
@@ -67,7 +68,7 @@ class Config:
     PORT = 5000
     
     # Chave da OpenAI API
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or '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'  # Temporário para teste local
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or ''  # Temporário para teste local
     
     @staticmethod
     def init_app(app):

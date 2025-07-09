@@ -16,8 +16,6 @@ from flask_cors import CORS
 from api.routes_ai import ai_bp
 from api.routes_utils import utils_bp
 from config import Config
-import os
-os.makedirs('/tmp/axion_secure', exist_ok=True)
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
