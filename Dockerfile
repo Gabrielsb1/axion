@@ -9,7 +9,7 @@ COPY . /app
 
 # Instala dependências do sistema e Python
 RUN apt-get update && \
-    apt-get install -y poppler-utils && \
+    apt-get install -y poppler-utils tesseract-ocr ghostscript && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
