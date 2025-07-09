@@ -1,4 +1,16 @@
-# config.py - Configurações do sistema Axion OCR
+"""
+AxionDocs - Sistema OCR integrado com API OpenAI
+Desenvolvido por João Gabriel Santos Barros (2025)
+
+Licenciado sob MIT License - consulte LICENSE.txt
+
+Este software é fornecido "no estado em que se encontra", sem garantias.
+
+O uso da API OpenAI requer chave configurada via variável de ambiente: OPENAI_API_KEY.
+Os custos gerados são responsabilidade do usuário da chave.
+
+Projeto iniciado como parte do TCC no Cartório de Registro de Imóveis de São Luís.
+"""
 
 import os
 import tempfile
@@ -55,7 +67,7 @@ class Config:
     PORT = 5000
     
     # Chave da OpenAI API
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or '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'  # Temporário para teste local
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or ''  # Temporário para teste local
     
     @staticmethod
     def init_app(app):

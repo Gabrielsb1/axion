@@ -1,7 +1,15 @@
 """
-Serviço OCR para processamento de PDFs escaneados
-Transforma PDFs não pesquisáveis em PDFs pesquisáveis
-Adaptado para o sistema Axion
+AxionDocs - Sistema OCR integrado com API OpenAI
+Desenvolvido por João Gabriel Santos Barros (2025)
+
+Licenciado sob MIT License - consulte LICENSE.txt
+
+Este software é fornecido "no estado em que se encontra", sem garantias.
+
+O uso da API OpenAI requer chave configurada via variável de ambiente: OPENAI_API_KEY.
+Os custos gerados são responsabilidade do usuário da chave.
+
+Projeto iniciado como parte do TCC no Cartório de Registro de Imóveis de São Luís.
 """
 
 import os
