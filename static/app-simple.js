@@ -116,7 +116,8 @@ function setupEventListeners() {
         'fileInputContratos',
         'fileInputEscrituras',
         'fileInputQualificacao',
-        'fileInputMemorial'
+        'fileInputMemorial',
+        'fileInputOCR'
     ];
     
     fileInputs.forEach(inputId => {
@@ -137,7 +138,8 @@ function setupEventListeners() {
         'processFileContratos',
         'processFileEscrituras',
         'processFileQualificacao',
-        'processFileMemorial'
+        'processFileMemorial',
+        'processFileOCR'
     ];
     
     processButtons.forEach(buttonId => {
@@ -191,6 +193,25 @@ function setupEventListeners() {
     if (downloadExcelBtn) {
         downloadExcelBtn.addEventListener('click', downloadExcel);
         console.log('✅ Download Excel listener configurado');
+    }
+    
+    // OCR specific listeners
+    const processOCRBtn = document.getElementById('processFileOCR');
+    if (processOCRBtn) {
+        processOCRBtn.addEventListener('click', processOCRFile);
+        console.log('✅ Process OCR button listener configurado');
+    }
+    
+    const downloadOCRPDFBtn = document.getElementById('downloadOCRPDF');
+    if (downloadOCRPDFBtn) {
+        downloadOCRPDFBtn.addEventListener('click', downloadOCRPDF);
+        console.log('✅ Download OCR PDF button listener configurado');
+    }
+    
+    const downloadOCRTextBtn = document.getElementById('downloadOCRText');
+    if (downloadOCRTextBtn) {
+        downloadOCRTextBtn.addEventListener('click', downloadOCRText);
+        console.log('✅ Download OCR Text button listener configurado');
     }
     
     // Abas de serviços
@@ -393,7 +414,15 @@ function handleModelChange(event) {
 // Handle file select
 function handleFileSelect(event, serviceId) {
     const files = event.target.files;
-    const buttonId = `processFile${serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}`;
+    let buttonId;
+    
+    // Tratamento especial para OCR (mantém maiúsculo)
+    if (serviceId === 'ocr') {
+        buttonId = 'processFileOCR';
+    } else {
+        buttonId = `processFile${serviceId.charAt(0).toUpperCase() + serviceId.slice(1)}`;
+    }
+    
     const processButton = document.getElementById(buttonId);
     
     console.log(`🔍 handleFileSelect chamado para ${serviceId}`);
@@ -450,13 +479,16 @@ async function processFile(serviceId) {
         }
         
         await processMultipleFiles(serviceId);
+    } else if (serviceId === 'ocr') {
+        // Processamento OCR - usa função específica
+        await processOCRFile();
     } else {
         // Processamento normal - arquivo único
-    if (!currentFile) {
+        if (!currentFile) {
             showAlert('Nenhum arquivo selecionado', 'warning');
-        return;
-    }
-    
+            return;
+        }
+        
         await processSingleFile(serviceId);
     }
 }
@@ -1494,4 +1526,134 @@ async function downloadOCRFile(downloadUrl, filename) {
         console.error('Erro no download:', error);
         showAlert(`Erro no download: ${error.message}`, 'danger');
     }
+}
+
+// Funções específicas para OCR
+async function processOCRFile() {
+    const fileInput = document.getElementById('fileInputOCR');
+    const processButton = document.getElementById('processFileOCR');
+    const statusDiv = document.getElementById('ocrStatus');
+    
+    // Verificar se já está processando
+    if (processButton.disabled) {
+        console.log('OCR já está sendo processado, ignorando clique duplo');
+        return;
+    }
+    
+    if (!fileInput.files[0]) {
+        showAlert('Por favor, selecione um arquivo PDF', 'warning');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+        showAlert('Apenas arquivos PDF são permitidos para OCR', 'warning');
+        return;
+    }
+    
+    // Obter configurações OCR
+    const language = 'por'; // Apenas português para melhor velocidade e precisão
+    const quality = document.getElementById('ocrQuality').value;
+    const deskew = 'false'; // Sempre desabilitado para velocidade
+    
+    // Preparar interface
+    processButton.disabled = true;
+    processButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processando...';
+    statusDiv.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Processando OCR...</strong><br>
+            Arquivo: ${file.name}<br>
+            Qualidade: ${quality}<br>
+            Idioma: Português<br>
+            Assinatura digital: Será removida automaticamente<br>
+            Corrigir rotação: Não (otimizado para velocidade)
+        </div>
+    `;
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('language', language);
+        formData.append('quality', quality);
+        formData.append('deskew', deskew);
+        
+        console.log('Iniciando processamento OCR...');
+        const response = await fetch('/api/ocr', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Atualizar interface com resultados
+            updateOCRInterface(result);
+            showAlert('OCR processado com sucesso!', 'success');
+        } else {
+            throw new Error(result.error || 'Erro desconhecido no processamento OCR');
+        }
+        
+    } catch (error) {
+        console.error('Erro no processamento OCR:', error);
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Erro no processamento OCR:</strong><br>
+                ${error.message}
+            </div>
+        `;
+        showAlert('Erro no processamento OCR', 'danger');
+    } finally {
+        processButton.disabled = false;
+        processButton.innerHTML = '<i class="fas fa-play me-1"></i>Processar OCR';
+    }
+}
+
+function updateOCRInterface(result) {
+    // Habilitar botões de download
+    document.getElementById('downloadOCRPDF').disabled = false;
+    document.getElementById('downloadOCRText').disabled = false;
+    
+    // Armazenar dados para download
+    window.ocrResult = result;
+    
+    // Atualizar status
+    const statusDiv = document.getElementById('ocrStatus');
+    statusDiv.innerHTML = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>OCR processado com sucesso!</strong><br>
+            Arquivo: ${result.original_filename}<br>
+            Páginas processadas: ${result.pages_processed}<br>
+            Tempo de processamento: ${result.processing_time.toFixed(2)} segundos<br>
+            Texto extraído: ${result.ocr_info?.text_length || 0} caracteres
+        </div>
+    `;
+}
+
+async function downloadOCRPDF() {
+    if (!window.ocrResult) {
+        showAlert('Nenhum resultado OCR disponível para download', 'warning');
+        return;
+    }
+    
+    // Usar apenas o nome original do arquivo, não o output_filename que contém file_id duplicado
+    const downloadUrl = `/api/ocr/download/${window.ocrResult.file_id}?filename=${window.ocrResult.original_filename}`;
+    const filename = `ocr_pesquisavel_${window.ocrResult.original_filename}`;
+    
+    await downloadOCRFile(downloadUrl, filename);
+}
+
+async function downloadOCRText() {
+    if (!window.ocrResult) {
+        showAlert('Nenhum resultado OCR disponível para download', 'warning');
+        return;
+    }
+    
+    // Usar apenas o nome original do arquivo, não o output_filename que contém file_id duplicado
+    const downloadUrl = `/api/ocr/text/${window.ocrResult.file_id}?filename=${window.ocrResult.original_filename}`;
+    const filename = `texto_extraido_${window.ocrResult.original_filename.replace('.pdf', '.txt')}`;
+    
+    await downloadOCRFile(downloadUrl, filename);
 }

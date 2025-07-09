@@ -1,22 +1,20 @@
 @echo off
 echo ========================================
-echo    Axion - Sistema OCR Completo
+echo    INSTALACAO AUTOMATICA - AXION
 echo ========================================
 echo.
 
-echo [1/7] Verificando Python...
-python --version >nul 2>&1
-if errorlevel 1 (
+echo [1/8] Verificando Python...
+python --version
+if %errorlevel% neq 0 (
     echo ❌ ERRO: Python nao encontrado!
-    echo Por favor, instale o Python 3.12+ primeiro.
-    echo Download: https://www.python.org/downloads/
+    echo Instale Python 3.12 de: https://www.python.org/downloads/
     pause
     exit /b 1
 )
-echo ✅ Python encontrado!
 
 echo.
-echo [2/7] Verificando Tesseract OCR...
+echo [2/8] Verificando Tesseract OCR...
 tesseract --version >nul 2>&1
 if errorlevel 1 (
     echo ⚠️ Tesseract nao encontrado!
@@ -24,7 +22,6 @@ if errorlevel 1 (
     echo 1. Baixe de: https://github.com/UB-Mannheim/tesseract/wiki
     echo 2. Instale e adicione ao PATH do sistema
     echo 3. Reinicie este script
-    echo.
     set /p continue="Deseja continuar mesmo assim? (s/n): "
     if /i not "%continue%"=="s" (
         pause
@@ -35,7 +32,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/7] Verificando qpdf...
+echo [3/8] Verificando qpdf...
 qpdf --version >nul 2>&1
 if errorlevel 1 (
     echo ⚠️ qpdf nao encontrado!
@@ -44,7 +41,6 @@ if errorlevel 1 (
     echo 2. Extraia para C:\qpdf\
     echo 3. Adicione C:\qpdf\bin ao PATH do sistema
     echo 4. Reinicie este script
-    echo.
     set /p continue="Deseja continuar mesmo assim? (s/n): "
     if /i not "%continue%"=="s" (
         pause
@@ -55,7 +51,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [4/7] Verificando Ghostscript (opcional)...
+echo [4/8] Verificando Ghostscript (opcional)...
 gs --version >nul 2>&1
 if errorlevel 1 (
     echo ⚠️ Ghostscript nao encontrado (opcional para otimizacao)
@@ -67,48 +63,46 @@ if errorlevel 1 (
 )
 
 echo.
-echo [5/7] Criando ambiente virtual...
-if exist venv (
-    echo ✅ Ambiente virtual ja existe.
-) else (
-    python -m venv venv
-    if errorlevel 1 (
-        echo ❌ ERRO: Falha ao criar ambiente virtual!
-        pause
-        exit /b 1
-    )
-    echo ✅ Ambiente virtual criado!
+echo [5/8] Criando ambiente virtual...
+python -m venv venv
+if %errorlevel% neq 0 (
+    echo ❌ ERRO: Falha ao criar ambiente virtual!
+    pause
+    exit /b 1
 )
 
 echo.
-echo [6/7] Ativando ambiente virtual...
+echo [6/8] Ativando ambiente virtual...
 call venv\Scripts\activate.bat
-if errorlevel 1 (
+if %errorlevel% neq 0 (
     echo ❌ ERRO: Falha ao ativar ambiente virtual!
     pause
     exit /b 1
 )
-echo ✅ Ambiente virtual ativado!
 
 echo.
-echo [7/7] Instalando dependencias Python...
+echo [7/8] Instalando dependencias Python...
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-if errorlevel 1 (
+if %errorlevel% neq 0 (
     echo ❌ ERRO: Falha ao instalar dependencias!
     pause
     exit /b 1
 )
-echo ✅ Dependencias instaladas!
+
+echo.
+echo [8/8] Criando diretorios necessarios...
+if not exist "uploads" mkdir uploads
+if not exist "processed" mkdir processed
 
 echo.
 echo ========================================
-echo    Instalacao concluida com sucesso!
+echo    INSTALACAO CONCLUIDA COM SUCESSO!
 echo ========================================
 echo.
 echo 🔧 Testando instalacao...
 python test_nova_ocr.py
-if errorlevel 1 (
+if %errorlevel% neq 0 (
     echo ⚠️ Teste de OCR falhou. Verifique as dependencias.
 ) else (
     echo ✅ Teste de OCR passou!

@@ -1,3 +1,17 @@
+"""
+AxionDocs - Sistema OCR integrado com API OpenAI
+Desenvolvido por João Gabriel Santos Barros (2025)
+
+Licenciado sob MIT License - consulte LICENSE.txt
+
+Este software é fornecido "no estado em que se encontra", sem garantias.
+
+O uso da API OpenAI requer chave configurada via variável de ambiente: OPENAI_API_KEY.
+Os custos gerados são responsabilidade do usuário da chave.
+
+Projeto iniciado como parte do TCC no Cartório de Registro de Imóveis de São Luís.
+"""
+# pyright: reportAttributeAccessIssue=false
 # Funções para integração com OpenAI/ChatGPT
 
 # (O conteúdo será movido do app_ocr_melhor.py) 
@@ -284,29 +298,21 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Texto da escritura:\n" + text
             )
         else:
-            print(f"❌ Tipo de serviço não suportado: {service_type}")
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
         
         if not Config.OPENAI_API_KEY:
-            print("❌ API key não configurada")
             raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida! Por favor, configure antes de usar a API da OpenAI.")
         api_key_preview = Config.OPENAI_API_KEY[:20]
         print(f"🔑 Usando chave API: {api_key_preview}...")
 
         print("📡 Enviando requisição para OpenAI...")
-        try:
-            # Configurar a API key (sintaxe da versão 0.28.1)
-            openai.api_key = Config.OPENAI_API_KEY
-            response = openai.ChatCompletion.create(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0,
-                max_tokens=2048
-            )
-        except Exception as client_error:
-            print(f"❌ Erro ao inicializar cliente OpenAI: {str(client_error)}")
-            return {"error": f"Erro na comunicação com OpenAI: {str(client_error)}", "raw": None}
-        
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=1024
+        )
         content = response.choices[0].message.content
         print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")
         
@@ -315,22 +321,23 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             return {"error": "Resposta vazia da OpenAI", "raw": None}
         
         try:
-            match = re.search(r'\{[\s\S]+\}', content)
-            if not match:
-                print("❌ JSON não encontrado na resposta da OpenAI")
-                print(f"📄 Conteúdo recebido: {content[:500]}...")
-                return {"error": "A resposta da OpenAI não contém um JSON válido.", "raw": content}
-            
-            try:
+            # Limpeza do conteúdo para remover blocos markdown
+            def clean_json_response(response_text):
+                response_text = re.sub(r'^```json\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
+                response_text = re.sub(r'^```\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
+                return response_text.strip()
+
+            cleaned_content = clean_json_response(content)
+            match = re.search(r'\{[\s\S]+\}', cleaned_content)
+            if match:
                 result = json.loads(match.group(0))
                 print("✅ JSON extraído com sucesso")
                 print(f"📊 Campos extraídos: {list(result.keys())}")
                 return clean_and_validate_fields(result, service_type)
-            except json.JSONDecodeError as e:
-                print("❌ Erro ao decodificar JSON extraído:", str(e))
-                print(f"📄 JSON extraído: {match.group(0)[:200]}...")
-                return {"error": f"Erro ao decodificar JSON extraído: {str(e)}", "raw": content}
-                
+            result = json.loads(cleaned_content)
+            print("✅ JSON direto processado com sucesso")
+            print(f"📊 Campos extraídos: {list(result.keys())}")
+            return clean_and_validate_fields(result, service_type)
         except Exception as e:
             print(f"❌ Erro ao processar JSON: {str(e)}")
             print(f"📄 Conteúdo recebido: {content[:200]}...")
@@ -338,6 +345,4 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             
     except Exception as e:
         print(f"❌ Erro geral na extração OpenAI: {str(e)}")
-        import traceback
-        print(f"📋 Traceback: {traceback.format_exc()}")
         return {"error": f"Erro na comunicação com OpenAI: {str(e)}", "raw": None} 
