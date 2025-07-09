@@ -308,13 +308,20 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             return {"error": "Resposta vazia da OpenAI", "raw": None}
         
         try:
-            match = re.search(r'\{[\s\S]+\}', content)
+            # Limpeza do conteúdo para remover blocos markdown
+            def clean_json_response(response_text):
+                response_text = re.sub(r'^```json\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
+                response_text = re.sub(r'^```\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
+                return response_text.strip()
+
+            cleaned_content = clean_json_response(content)
+            match = re.search(r'\{[\s\S]+\}', cleaned_content)
             if match:
                 result = json.loads(match.group(0))
                 print("✅ JSON extraído com sucesso")
                 print(f"📊 Campos extraídos: {list(result.keys())}")
                 return clean_and_validate_fields(result, service_type)
-            result = json.loads(content)
+            result = json.loads(cleaned_content)
             print("✅ JSON direto processado com sucesso")
             print(f"📊 Campos extraídos: {list(result.keys())}")
             return clean_and_validate_fields(result, service_type)

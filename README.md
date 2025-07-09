@@ -1,14 +1,36 @@
-# Axion - Sistema de OCR Tesseract
+# Axion - Sistema de Extração de Dados Sensíveis
 
-Sistema web para transformar arquivos PDF não pesquisáveis em PDFs pesquisáveis usando OCR (Tesseract) com backend Python Flask e frontend HTML+JS.
+Sistema web para extração de dados de documentos sensíveis (matrículas, contratos, escrituras) usando IA (ChatGPT) com backend Python Flask e frontend HTML+JS.
+
+## 🔒 Segurança de Dados Sensíveis
+
+**IMPORTANTE**: Este sistema foi projetado para processar documentos sensíveis com máxima segurança:
+
+### Medidas de Segurança Implementadas:
+- **Processamento em Memória**: Arquivos são processados temporariamente sem salvar permanentemente
+- **Criptografia Automática**: Arquivos temporários são criptografados em disco
+- **Limpeza Automática**: Arquivos são removidos automaticamente após processamento
+- **Auditoria Completa**: Todas as operações são registradas para auditoria
+- **Exclusão Segura**: Arquivos são sobrescritos antes da exclusão
+
+### Configurações de Segurança:
+- Arquivos são mantidos por no máximo 24h (desenvolvimento) ou 2h (produção)
+- Limpeza automática a cada 1h (desenvolvimento) ou 30min (produção)
+- Criptografia de arquivos temporários habilitada por padrão
+- Logs de auditoria para rastreamento de operações
+
+### Para Limpar Arquivos Existentes:
+```bash
+python cleanup_existing_files.py
+```
 
 ## 🚀 Funcionalidades
 
 - **Upload de PDFs**: Interface web para envio de arquivos PDF
-- **OCR Tesseract**: Processamento automático com Tesseract OCR
-- **PDFs Pesquisáveis**: Geração de PDFs com texto pesquisável
-- **Download Automático**: Download dos arquivos processados
+- **IA ChatGPT**: Processamento automático com OpenAI GPT
+- **Extração de Dados**: Identificação automática de campos relevantes
 - **Interface Moderna**: Interface web responsiva e intuitiva
+- **Processamento Seguro**: Sem armazenamento permanente de dados sensíveis
 
 ## 📋 Pré-requisitos
 
