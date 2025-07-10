@@ -1455,11 +1455,11 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-user-check me-2"></i>Dados de Qualificação</h5>
+                                    <h5 class="mb-0 me-3"><i class="fas fa-user-check me-2"></i>Análise de Qualificação</h5>
                                     <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputQualificacao" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
+                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputQualificacao" accept=".pdf" style="width: 400px;" multiple>
                                         <button class="btn btn-success btn-sm" id="processFileQualificacao" disabled>
-                                            <i class="fas fa-play me-1"></i>Processar
+                                            <i class="fas fa-play me-1"></i>Analisar Kit Completo
                                         </button>
                                     </div>
                                 </div>
@@ -1477,16 +1477,210 @@
                             </div>
                         </div>
 
+                        <!-- Status e Progresso -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-info-circle me-2"></i>Status da Análise</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="qualificacaoStatus"></div>
+                                <div id="qualificacaoProgress" class="mt-3" style="display: none;">
+                                    <div class="progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Analisando documentos...</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Documentos Enviados -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-folder-open me-2"></i>Documentos Enviados</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="documentosEnviados" class="row">
+                                    <!-- Documentos serão listados aqui -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checklist de Qualificação -->
                         <div class="card">
                             <div class="card-header">
-                                <h5><i class="fas fa-user-check me-2"></i>Qualificação</h5>
+                                <h5><i class="fas fa-clipboard-check me-2"></i>Checklist de Qualificação</h5>
                             </div>
                             <div class="card-body">
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Serviço em Desenvolvimento</strong>
+                                    <strong>Kit de Documentos para Análise:</strong>
                                     <br>
-                                    Esta funcionalidade será implementada em breve.
+                                    Envie todos os documentos relacionados ao registro de contrato para análise completa.
+                                </div>
+
+                                <!-- 1. Documentos Obrigatórios -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>1. Documentos Obrigatórios</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">✅ Contrato</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkContrato" disabled>
+                                                                <label class="form-check-label" for="checkContrato">Contrato principal</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">✅ Matrícula</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkMatricula" disabled>
+                                                                <label class="form-check-label" for="checkMatricula">Matrícula do imóvel</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">✅ Certidão ITBI</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkCertidaoITBI" disabled>
+                                                                <label class="form-check-label" for="checkCertidaoITBI">Certidão de ITBI</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">✅ Procuração</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkProcuracao" disabled>
+                                                                <label class="form-check-label" for="checkProcuracao">Procuração (se aplicável)</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">✅ CND</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkCND" disabled>
+                                                                <label class="form-check-label" for="checkCND">Certidão Negativa de Débitos</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Documentos Complementares -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i>2. Documentos Complementares</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">📄 Certidão Simplificada</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkCertidaoSimplificada" disabled>
+                                                                <label class="form-check-label" for="checkCertidaoSimplificada">Certidão simplificada</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">📄 Declaração 1ª Aquisição</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkDeclaracaoPrimeiraAquisicao" disabled>
+                                                                <label class="form-check-label" for="checkDeclaracaoPrimeiraAquisicao">Declaração de primeira aquisição</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">📄 Aforamento/CAT</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkAforamentoCAT" disabled>
+                                                                <label class="form-check-label" for="checkAforamentoCAT">Aforamento ou CAT</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">📄 Boletim de Cadastro</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkBoletimCadastro" disabled>
+                                                                <label class="form-check-label" for="checkBoletimCadastro">Boletim de cadastro</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">📄 Outros Documentos</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="checkOutrosDocumentos" disabled>
+                                                                <label class="form-check-label" for="checkOutrosDocumentos">Outros documentos relevantes</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Análise da IA -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fas fa-robot me-2"></i>3. Análise da Inteligência Artificial</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="mb-3">
+                                                            <label for="analiseQualificacao" class="form-label fw-bold">Análise Completa</label>
+                                                            <textarea class="form-control" id="analiseQualificacao" rows="8" readonly placeholder="A IA analisará cada documento e fornecerá uma análise completa da qualificação..."></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="observacoesQualificacao" class="form-label fw-bold">Observações e Recomendações</label>
+                                                            <textarea class="form-control" id="observacoesQualificacao" rows="4" readonly placeholder="Observações sobre documentos faltantes ou problemas identificados..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Status Final -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>4. Status Final da Qualificação</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="statusQualificacao" class="form-label fw-bold">Status</label>
+                                                            <select class="form-select" id="statusQualificacao" disabled>
+                                                                <option value="">Aguardando análise...</option>
+                                                                <option value="aprovado">✅ Aprovado</option>
+                                                                <option value="pendente">⚠️ Pendente</option>
+                                                                <option value="reprovado">❌ Reprovado</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="pontuacaoQualificacao" class="form-label fw-bold">Pontuação</label>
+                                                            <input type="text" class="form-control" id="pontuacaoQualificacao" readonly placeholder="0/100">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

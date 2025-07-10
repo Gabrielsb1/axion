@@ -1796,3 +1796,321 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
 }
 
 const certidaoTipoSelect = document.getElementById('certidaoTipoSelect');
+
+// === ABA QUALIFICAÇÃO ===
+const fileInputQualificacao = document.getElementById('fileInputQualificacao');
+const processFileQualificacao = document.getElementById('processFileQualificacao');
+const qualificacaoStatus = document.getElementById('qualificacaoStatus');
+const qualificacaoProgress = document.getElementById('qualificacaoProgress');
+const documentosEnviados = document.getElementById('documentosEnviados');
+
+// Variáveis para qualificação
+let qualificacaoData = null;
+let documentosSelecionados = [];
+
+if (fileInputQualificacao && processFileQualificacao) {
+    fileInputQualificacao.addEventListener('change', (event) => {
+        const files = Array.from(event.target.files);
+        documentosSelecionados = files;
+        
+        // Habilitar botão se há arquivos
+        processFileQualificacao.disabled = files.length === 0;
+        
+        // Limpar status anterior
+        qualificacaoStatus.innerHTML = '';
+        qualificacaoProgress.style.display = 'none';
+        
+        // Mostrar documentos selecionados
+        displayDocumentosSelecionados(files);
+        
+        // Limpar checklist
+        clearQualificacaoChecklist();
+    });
+
+    processFileQualificacao.addEventListener('click', async () => {
+        if (documentosSelecionados.length === 0) return;
+        
+        await processQualificacao();
+    });
+}
+
+function displayDocumentosSelecionados(files) {
+    const container = document.getElementById('documentosEnviados');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const fileCard = document.createElement('div');
+        fileCard.className = 'col-md-6 col-lg-4 mb-3';
+        fileCard.innerHTML = `
+            <div class="card border-primary">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-file-pdf text-primary me-2"></i>
+                        <div class="flex-grow-1">
+                            <small class="text-muted d-block">Documento ${index + 1}</small>
+                            <strong class="d-block text-truncate" title="${file.name}">${file.name}</strong>
+                            <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(fileCard);
+    });
+}
+
+function clearQualificacaoChecklist() {
+    // Limpar checkboxes obrigatórios
+    const obrigatorios = ['checkContrato', 'checkMatricula', 'checkCertidaoITBI', 'checkProcuracao', 'checkCND'];
+    obrigatorios.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+        }
+    });
+    
+    // Limpar checkboxes complementares
+    const complementares = ['checkCertidaoSimplificada', 'checkDeclaracaoPrimeiraAquisicao', 'checkAforamentoCAT', 'checkBoletimCadastro', 'checkOutrosDocumentos'];
+    complementares.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+        }
+    });
+    
+    // Limpar campos de análise
+    const analise = document.getElementById('analiseQualificacao');
+    const observacoes = document.getElementById('observacoesQualificacao');
+    const status = document.getElementById('statusQualificacao');
+    const pontuacao = document.getElementById('pontuacaoQualificacao');
+    
+    if (analise) analise.value = '';
+    if (observacoes) observacoes.value = '';
+    if (status) status.value = '';
+    if (pontuacao) pontuacao.value = '';
+}
+
+async function processQualificacao() {
+    if (documentosSelecionados.length === 0) {
+        showAlert('Nenhum documento selecionado', 'warning');
+        return;
+    }
+    
+    // Preparar interface
+    processFileQualificacao.disabled = true;
+    processFileQualificacao.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analisando...';
+    
+    // Mostrar progresso
+    qualificacaoProgress.style.display = 'block';
+    const progressBar = qualificacaoProgress.querySelector('.progress-bar');
+    progressBar.style.width = '0%';
+    
+    // Status inicial
+    qualificacaoStatus.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Iniciando análise de qualificação...</strong><br>
+            Documentos selecionados: ${documentosSelecionados.length}<br>
+            Processando cada documento individualmente...
+        </div>
+    `;
+    
+    try {
+        // Preparar FormData com múltiplos arquivos
+        const formData = new FormData();
+        documentosSelecionados.forEach((file, index) => {
+            formData.append('files[]', file);
+        });
+        
+        // Adicionar modelo selecionado
+        const modelRadios = document.querySelectorAll('input[name="chatgptModel"]');
+        let selectedModel = 'gpt-3.5-turbo';
+        modelRadios.forEach(radio => {
+            if (radio.checked) {
+                selectedModel = radio.value;
+            }
+        });
+        formData.append('model', selectedModel);
+        
+        // Simular progresso
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = `${progress}%`;
+        }, 500);
+        
+        console.log('Iniciando análise de qualificação...');
+        const response = await fetch('/api/qualificacao', {
+            method: 'POST',
+            body: formData
+        });
+        
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('Erro ao parsear JSON:', jsonError);
+            throw new Error('Resposta inválida do servidor');
+        }
+        
+        if (result.success) {
+            // Armazenar dados
+            qualificacaoData = result;
+            
+            // Atualizar interface com resultados
+            updateQualificacaoInterface(result);
+            showAlert('Análise de qualificação concluída!', 'success');
+        } else {
+            throw new Error(result.error || 'Erro desconhecido na análise de qualificação');
+        }
+        
+    } catch (error) {
+        console.error('Erro na análise de qualificação:', error);
+        qualificacaoStatus.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Erro na análise de qualificação:</strong><br>
+                ${error.message}
+            </div>
+        `;
+        showAlert('Erro na análise de qualificação', 'danger');
+    } finally {
+        processFileQualificacao.disabled = false;
+        processFileQualificacao.innerHTML = '<i class="fas fa-play me-1"></i>Analisar Kit Completo';
+        qualificacaoProgress.style.display = 'none';
+    }
+}
+
+function updateQualificacaoInterface(result) {
+    // Atualizar status
+    qualificacaoStatus.innerHTML = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Análise de qualificação concluída!</strong><br>
+            Documentos processados: ${result.documentos_analisados.length}<br>
+            Modelo utilizado: ${result.model}<br>
+            Texto total analisado: ${result.total_text_length} caracteres
+        </div>
+    `;
+    
+    // Atualizar checklist baseado na análise da IA
+    updateQualificacaoChecklist(result.campos);
+    
+    // Atualizar campos de análise
+    const analise = document.getElementById('analiseQualificacao');
+    const observacoes = document.getElementById('observacoesQualificacao');
+    const status = document.getElementById('statusQualificacao');
+    const pontuacao = document.getElementById('pontuacaoQualificacao');
+    
+    if (analise) analise.value = result.campos.analise_completa || '';
+    if (observacoes) observacoes.value = result.campos.observacoes_recomendacoes || '';
+    if (status) {
+        status.value = result.campos.status_qualificacao || '';
+        status.disabled = false;
+    }
+    if (pontuacao) pontuacao.value = result.campos.pontuacao_qualificacao || '0/100';
+}
+
+function updateQualificacaoChecklist(campos) {
+    // Mapear campos da IA para checkboxes
+    const mapeamento = {
+        'contrato_presente': 'checkContrato',
+        'matricula_presente': 'checkMatricula',
+        'certidao_itbi_presente': 'checkCertidaoITBI',
+        'procuracao_presente': 'checkProcuracao',
+        'cnd_presente': 'checkCND',
+        'certidao_simplificada_presente': 'checkCertidaoSimplificada',
+        'declaracao_primeira_aquisicao_presente': 'checkDeclaracaoPrimeiraAquisicao',
+        'aforamento_cat_presente': 'checkAforamentoCAT',
+        'boletim_cadastro_presente': 'checkBoletimCadastro',
+        'outros_documentos_presente': 'checkOutrosDocumentos'
+    };
+    
+    // Atualizar cada checkbox
+    Object.entries(mapeamento).forEach(([campoIA, checkboxId]) => {
+        const checkbox = document.getElementById(checkboxId);
+        if (checkbox) {
+            const valor = campos[campoIA];
+            checkbox.checked = valor === 'Sim';
+            checkbox.disabled = false;
+            
+            // Adicionar classe visual
+            if (valor === 'Sim') {
+                checkbox.classList.add('text-success');
+            } else {
+                checkbox.classList.remove('text-success');
+            }
+        }
+    });
+}
+
+// Funções de download para qualificação
+function downloadQualificacaoWord() {
+    if (!qualificacaoData) {
+        showAlert('Nenhum resultado de qualificação disponível', 'warning');
+        return;
+    }
+    
+    const data = formatQualificacaoDataForDownload(qualificacaoData);
+    downloadWordFile('qualificacao', data);
+}
+
+function downloadQualificacaoPDF() {
+    if (!qualificacaoData) {
+        showAlert('Nenhum resultado de qualificação disponível', 'warning');
+        return;
+    }
+    
+    const data = formatQualificacaoDataForDownload(qualificacaoData);
+    downloadPDFFile('qualificacao', data);
+}
+
+function downloadQualificacaoJSON() {
+    if (!qualificacaoData) {
+        showAlert('Nenhum resultado de qualificação disponível', 'warning');
+        return;
+    }
+    
+    const data = formatQualificacaoDataForDownload(qualificacaoData);
+    downloadJSONFile('qualificacao', data);
+}
+
+function formatQualificacaoDataForDownload(data) {
+    return {
+        titulo: 'Análise de Qualificação - Kit de Documentos',
+        data_processamento: new Date().toLocaleString('pt-BR'),
+        documentos_analisados: data.documentos_analisados,
+        analise_completa: data.campos.analise_completa,
+        observacoes_recomendacoes: data.campos.observacoes_recomendacoes,
+        status_qualificacao: data.campos.status_qualificacao,
+        pontuacao_qualificacao: data.campos.pontuacao_qualificacao,
+        documentos_faltantes: data.campos.documentos_faltantes,
+        problemas_identificados: data.campos.problemas_identificados,
+        recomendacoes_especificas: data.campos.recomendacoes_especificas,
+        modelo_utilizado: data.model,
+        total_texto_analisado: data.total_text_length
+    };
+}
+
+// Configurar botões de download da qualificação
+const downloadButtonsQualificacao = [
+    { id: 'downloadWordQualificacao', func: downloadQualificacaoWord },
+    { id: 'downloadPDFQualificacao', func: downloadQualificacaoPDF },
+    { id: 'downloadJSONQualificacao', func: downloadQualificacaoJSON }
+];
+
+downloadButtonsQualificacao.forEach(button => {
+    const element = document.getElementById(button.id);
+    if (element) {
+        element.addEventListener('click', () => button.func());
+        console.log(`✅ Download button ${button.id} listener configurado`);
+    }
+});

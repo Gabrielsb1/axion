@@ -103,6 +103,19 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
             'onus_certidao_negativa',
             'nome_solicitante'
         ]
+    elif service_type == 'qualificacao':
+        expected_fields = [
+            # Documentos Obrigatórios
+            'contrato_presente', 'matricula_presente', 'certidao_itbi_presente', 
+            'procuracao_presente', 'cnd_presente',
+            # Documentos Complementares
+            'certidao_simplificada_presente', 'declaracao_primeira_aquisicao_presente',
+            'aforamento_cat_presente', 'boletim_cadastro_presente', 'outros_documentos_presente',
+            # Análise da IA
+            'analise_completa', 'observacoes_recomendacoes', 'status_qualificacao',
+            'pontuacao_qualificacao', 'documentos_faltantes', 'documentos_complementares_faltantes',
+            'problemas_identificados', 'recomendacoes_especificas'
+        ]
     else:
         expected_fields = []
     
@@ -383,6 +396,36 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "- nome_solicitante: Nome completo do solicitante da certidão\n"
                 "Exemplo de formato esperado: {\"cnm\": \"123456\", \"descricao_imovel\": \"Casa residencial...\", \"proprietarios\": \"João Silva, CPF: 123.456.789-00...\", ...}\n"
                 "Texto da matrícula:\n" + text
+            )
+        elif service_type == "qualificacao":
+            prompt = (
+                "Analise os documentos enviados para qualificação de registro de contrato. "
+                "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
+                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
+                "Campos a extrair:\n"
+                "DOCUMENTOS OBRIGATÓRIOS:\n"
+                "- contrato_presente: Se o contrato principal está presente (Sim/Não)\n"
+                "- matricula_presente: Se a matrícula do imóvel está presente (Sim/Não)\n"
+                "- certidao_itbi_presente: Se a certidão de ITBI está presente (Sim/Não)\n"
+                "- procuracao_presente: Se a procuração está presente (Sim/Não)\n"
+                "- cnd_presente: Se a CND está presente (Sim/Não)\n"
+                "DOCUMENTOS COMPLEMENTARES:\n"
+                "- certidao_simplificada_presente: Se a certidão simplificada está presente (Sim/Não)\n"
+                "- declaracao_primeira_aquisicao_presente: Se a declaração de primeira aquisição está presente (Sim/Não)\n"
+                "- aforamento_cat_presente: Se o aforamento ou CAT está presente (Sim/Não)\n"
+                "- boletim_cadastro_presente: Se o boletim de cadastro está presente (Sim/Não)\n"
+                "- outros_documentos_presente: Se outros documentos relevantes estão presentes (Sim/Não)\n"
+                "ANÁLISE DA IA:\n"
+                "- analise_completa: Análise completa dos documentos enviados, identificando cada tipo de documento e sua relevância\n"
+                "- observacoes_recomendacoes: Observações sobre documentos faltantes, problemas identificados e recomendações\n"
+                "- status_qualificacao: Status da qualificação (aprovado/pendente/reprovado)\n"
+                "- pontuacao_qualificacao: Pontuação de 0 a 100 baseada na completude dos documentos\n"
+                "- documentos_faltantes: Lista de documentos obrigatórios que estão faltando\n"
+                "- documentos_complementares_faltantes: Lista de documentos complementares que poderiam melhorar a qualificação\n"
+                "- problemas_identificados: Problemas ou inconsistências identificadas nos documentos\n"
+                "- recomendacoes_especificas: Recomendações específicas para completar a qualificação\n"
+                "Exemplo de formato esperado: {\"contrato_presente\": \"Sim\", \"matricula_presente\": \"Sim\", \"analise_completa\": \"Análise completa...\", ...}\n"
+                "Documentos analisados:\n" + text
             )
         else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
