@@ -14,17 +14,19 @@ export function setupEventListeners(ui, getCurrentData, setCurrentData, getCurre
         }
     });
 
-    // File input da aba matrícula
+    // File input da aba matrícula (múltiplos arquivos)
     if (ui.elements.fileInputMatricula) {
         ui.elements.fileInputMatricula.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            setCurrentFile(file);
-            if (file) {
-                ui.updateStatus(`Arquivo selecionado: ${file.name}`, 'info');
+            const files = event.target.files;
+            if (files.length > 0) {
+                const fileNames = Array.from(files).map(f => f.name).join(', ');
+                ui.updateStatus(`${files.length} arquivo(s) selecionado(s): ${fileNames}`, 'info');
                 // Habilitar botão de processar
                 if (ui.elements.processFileMatricula) {
                     ui.elements.processFileMatricula.disabled = false;
                 }
+                // Armazenar todos os arquivos
+                setCurrentFile(files);
             } else {
                 ui.updateStatus('Nenhum arquivo selecionado', 'warning');
                 if (ui.elements.processFileMatricula) {

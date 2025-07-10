@@ -12,7 +12,16 @@ const services = {
     matricula: {
         name: 'Matrícula 3º RI',
         icon: 'fas fa-file-contract',
-        fields: ['matricula', 'dataMatricula', 'descricaoImovel', 'endereco', 'areaPrivativa', 'areaTotal', 'garagem', 'proprietarios', 'livroAnterior', 'folhaAnterior', 'matriculaAnterior', 'tipoTitulo', 'valorTitulo', 'comprador', 'cpfCnpj', 'valorITBI', 'numeroDAM', 'dataPagamentoITBI']
+        fields: [
+            // CADASTRO
+            'inscricaoImobiliaria', 'rip',
+            // DADOS DO IMÓVEL
+            'tipoImovel', 'tipoLogradouro', 'cep', 'nomeLogradouro', 'numeroLote', 'bloco', 'pavimento', 'andar', 'loteamento', 'numeroLoteamento', 'quadra', 'bairro', 'cidade', 'dominialidade', 'areaTotal', 'areaConstruida', 'areaPrivativa', 'areaUsoComum', 'areaCorrespondente', 'fracaoIdeal',
+            // DADOS PESSOAIS
+            'cpfCnpj', 'nomeCompleto', 'sexo', 'nacionalidade', 'estadoCivil', 'profissao', 'rg', 'cnh', 'enderecoCompleto', 'regimeCasamento', 'dataCasamento', 'matriculaCasamento', 'naturezaJuridica', 'representanteLegal',
+            // INFORMAÇÕES UTILIZADAS PARA OS ATOS
+            'valorTransacao', 'valorAvaliacao', 'dataAlienacao', 'formaAlienacao', 'valorDivida', 'valorAlienacaoContrato', 'tipoOnus'
+        ]
     },
     contratos: {
         name: 'Contratos',
@@ -361,11 +370,14 @@ function getServiceName(serviceId) {
 function clearFormFields(serviceId) {
     if (serviceId === 'matricula') {
         const fields = [
-            'matricula', 'dataMatricula', 'descricaoImovel', 'endereco',
-            'areaPrivativa', 'areaTotal', 'garagem', 'proprietarios',
-            'livroAnterior', 'folhaAnterior', 'matriculaAnterior',
-            'tipoTitulo', 'valorTitulo', 'comprador', 'cpfCnpj',
-            'valorITBI', 'numeroDAM', 'dataPagamentoITBI'
+            // CADASTRO
+            'inscricaoImobiliaria', 'rip',
+            // DADOS DO IMÓVEL
+            'tipoImovel', 'tipoLogradouro', 'cep', 'nomeLogradouro', 'numeroLote', 'bloco', 'pavimento', 'andar', 'loteamento', 'numeroLoteamento', 'quadra', 'bairro', 'cidade', 'dominialidade', 'areaTotal', 'areaConstruida', 'areaPrivativa', 'areaUsoComum', 'areaCorrespondente', 'fracaoIdeal',
+            // DADOS PESSOAIS
+            'cpfCnpj', 'nomeCompleto', 'sexo', 'nacionalidade', 'estadoCivil', 'profissao', 'rg', 'cnh', 'enderecoCompleto', 'regimeCasamento', 'dataCasamento', 'matriculaCasamento', 'naturezaJuridica', 'representanteLegal',
+            // INFORMAÇÕES UTILIZADAS PARA OS ATOS
+            'valorTransacao', 'valorAvaliacao', 'dataAlienacao', 'formaAlienacao', 'valorDivida', 'valorAlienacaoContrato', 'tipoOnus'
         ];
         
         fields.forEach(field => {
@@ -1657,3 +1669,87 @@ async function downloadOCRText() {
     
     await downloadOCRFile(downloadUrl, filename);
 }
+
+// === ABA CERTIDÃO ===
+const fileInputCertidao = document.getElementById('fileInputCertidao');
+const processFileCertidao = document.getElementById('processFileCertidao');
+const downloadCertidaoPDF = document.getElementById('downloadCertidaoPDF');
+const certidaoStatus = document.getElementById('certidaoStatus');
+const certidaoPreview = document.getElementById('certidaoPreview');
+
+let certidaoPDFBlob = null;
+
+if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
+    fileInputCertidao.addEventListener('change', () => {
+        processFileCertidao.disabled = !fileInputCertidao.files.length;
+        certidaoStatus.innerHTML = '';
+        certidaoPreview.innerHTML = '';
+        downloadCertidaoPDF.disabled = true;
+        certidaoPDFBlob = null;
+    });
+
+    processFileCertidao.addEventListener('click', async () => {
+        if (!fileInputCertidao.files.length) return;
+        const file = fileInputCertidao.files[0];
+        certidaoStatus.innerHTML = '<div class="alert alert-info">Processando certidão, aguarde...</div>';
+        certidaoPreview.innerHTML = '';
+        processFileCertidao.disabled = true;
+        downloadCertidaoPDF.disabled = true;
+        certidaoPDFBlob = null;
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            // Não enviar mais modelo ou tipo
+            const response = await fetch('/api/certidao', {
+                method: 'POST',
+                body: formData
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                certidaoPDFBlob = blob;
+                // Capturar tipo e motivo dos headers
+                const tipo = response.headers.get('X-Certidao-Tipo');
+                const motivo = response.headers.get('X-Certidao-Motivo');
+                let info = '';
+                if (tipo && motivo) {
+                    let tipoLabel = '';
+                    if (tipo === 'STForeiro') tipoLabel = 'Foreira';
+                    else if (tipo === 'STPositiva') tipoLabel = 'Positiva';
+                    else if (tipo === 'STNegativa') tipoLabel = 'Negativa';
+                    else tipoLabel = tipo;
+                    info = `<div class='alert alert-secondary mb-2'><b>Tipo de Certidão:</b> ${tipoLabel}<br/><b>Motivo:</b> ${motivo}</div>`;
+                }
+                certidaoStatus.innerHTML = info + '<div class="alert alert-success">Certidão gerada com sucesso! Clique para baixar.</div>';
+                downloadCertidaoPDF.disabled = false;
+                certidaoPreview.innerHTML = '<span class="text-success">PDF pronto para download.</span>';
+            } else {
+                let errorMsg = 'Erro ao gerar certidão.';
+                try {
+                    const err = await response.json();
+                    errorMsg = err.error || errorMsg;
+                } catch {}
+                certidaoStatus.innerHTML = `<div class="alert alert-danger">${errorMsg}</div>`;
+            }
+        } catch (e) {
+            certidaoStatus.innerHTML = `<div class="alert alert-danger">Erro inesperado: ${e}</div>`;
+        } finally {
+            processFileCertidao.disabled = false;
+        }
+    });
+
+    downloadCertidaoPDF.addEventListener('click', () => {
+        if (!certidaoPDFBlob) return;
+        const url = URL.createObjectURL(certidaoPDFBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'certidao_gerada.pdf';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    });
+}
+
+const certidaoTipoSelect = document.getElementById('certidaoTipoSelect');

@@ -43,25 +43,57 @@ const DOM_ELEMENTS = {
     uploadTemplate: 'uploadTemplate',
     generatedDocuments: 'generatedDocuments',
     
-    // Campos de dados
-    matricula: 'matricula',
-    dataMatricula: 'dataMatricula',
-    descricaoImovel: 'descricaoImovel',
-    endereco: 'endereco',
-    areaPrivativa: 'areaPrivativa',
+    // Campos de dados da matrícula
+    // CADASTRO
+    inscricaoImobiliaria: 'inscricaoImobiliaria',
+    rip: 'rip',
+    
+    // DADOS DO IMÓVEL
+    tipoImovel: 'tipoImovel',
+    tipoLogradouro: 'tipoLogradouro',
+    cep: 'cep',
+    nomeLogradouro: 'nomeLogradouro',
+    numeroLote: 'numeroLote',
+    bloco: 'bloco',
+    pavimento: 'pavimento',
+    andar: 'andar',
+    loteamento: 'loteamento',
+    numeroLoteamento: 'numeroLoteamento',
+    quadra: 'quadra',
+    bairro: 'bairro',
+    cidade: 'cidade',
+    dominialidade: 'dominialidade',
     areaTotal: 'areaTotal',
-    garagem: 'garagem',
-    proprietarios: 'proprietarios',
-    livroAnterior: 'livroAnterior',
-    folhaAnterior: 'folhaAnterior',
-    matriculaAnterior: 'matriculaAnterior',
-    tipoTitulo: 'tipoTitulo',
-    valorTitulo: 'valorTitulo',
-    comprador: 'comprador',
+    areaConstruida: 'areaConstruida',
+    areaPrivativa: 'areaPrivativa',
+    areaUsoComum: 'areaUsoComum',
+    areaCorrespondente: 'areaCorrespondente',
+    fracaoIdeal: 'fracaoIdeal',
+    
+    // DADOS PESSOAIS
     cpfCnpj: 'cpfCnpj',
-    valorITBI: 'valorITBI',
-    numeroDAM: 'numeroDAM',
-    dataPagamentoITBI: 'dataPagamentoITBI'
+    nomeCompleto: 'nomeCompleto',
+    sexo: 'sexo',
+    nacionalidade: 'nacionalidade',
+    estadoCivil: 'estadoCivil',
+    profissao: 'profissao',
+    rg: 'rg',
+    cnh: 'cnh',
+    enderecoCompleto: 'enderecoCompleto',
+    regimeCasamento: 'regimeCasamento',
+    dataCasamento: 'dataCasamento',
+    matriculaCasamento: 'matriculaCasamento',
+    naturezaJuridica: 'naturezaJuridica',
+    representanteLegal: 'representanteLegal',
+    
+    // INFORMAÇÕES UTILIZADAS PARA OS ATOS
+    valorTransacao: 'valorTransacao',
+    valorAvaliacao: 'valorAvaliacao',
+    dataAlienacao: 'dataAlienacao',
+    formaAlienacao: 'formaAlienacao',
+    valorDivida: 'valorDivida',
+    valorAlienacaoContrato: 'valorAlienacaoContrato',
+    tipoOnus: 'tipoOnus'
 };
 
 // Utilitários

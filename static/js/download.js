@@ -4,29 +4,65 @@ import { downloadTextAPI } from './api.js';
 // Utilitário para formatar dados estruturados em texto
 function formatStructuredData(data) {
     let txt = '';
-    txt += 'Informações Básicas\n';
-    txt += `Número da Matrícula: ${data.matricula || ''}\n`;
-    txt += `Data da Matrícula: ${data.dataMatricula || ''}\n`;
-    txt += `Descrição do Imóvel: ${data.descricaoImovel || ''}\n`;
-    txt += `Endereço: ${data.endereco || ''}\n`;
-    txt += '\nÁreas e Garagem\n';
-    txt += `Área Privativa (m²): ${data.areaPrivativa || ''}\n`;
-    txt += `Área Total (m²): ${data.areaTotal || ''}\n`;
-    txt += `Garagem/Vagas: ${data.garagem || ''}\n`;
-    txt += '\nProprietários\n';
-    txt += `Nome dos Proprietários: ${data.proprietarios || ''}\n`;
-    txt += `Livro Anterior: ${data.livroAnterior || ''}\n`;
-    txt += `Folha Anterior: ${data.folhaAnterior || ''}\n`;
-    txt += `Matrícula Anterior: ${data.matriculaAnterior || ''}\n`;
-    txt += '\nTransação\n';
-    txt += `Tipo do Título: ${data.tipoTitulo || ''}\n`;
-    txt += `Valor do Título: ${data.valorTitulo || ''}\n`;
-    txt += `Comprador: ${data.comprador || ''}\n`;
-    txt += `CPF/CNPJ: ${data.cpfCnpj || ''}\n`;
-    txt += '\nITBI\n';
-    txt += `Valor do ITBI: ${data.valorITBI || ''}\n`;
-    txt += `Número da DAM: ${data.numeroDAM || ''}\n`;
-    txt += `Data de Pagamento ITBI: ${data.dataPagamentoITBI || ''}\n`;
+    
+    // CADASTRO
+    txt += '=== CADASTRO ===\n';
+    txt += `Inscrição Imobiliária: ${data.inscricao_imobiliaria || ''}\n`;
+    txt += `RIP: ${data.rip || ''}\n`;
+    txt += '\n';
+    
+    // DADOS DO IMÓVEL
+    txt += '=== DADOS DO IMÓVEL ===\n';
+    txt += `Tipo de Imóvel: ${data.tipo_imovel || ''}\n`;
+    txt += `Tipo de Logradouro: ${data.tipo_logradouro || ''}\n`;
+    txt += `CEP: ${data.cep || ''}\n`;
+    txt += `Nome do Logradouro: ${data.nome_logradouro || ''}\n`;
+    txt += `Número do Lote: ${data.numero_lote || ''}\n`;
+    txt += `Bloco: ${data.bloco || ''}\n`;
+    txt += `Pavimento: ${data.pavimento || ''}\n`;
+    txt += `Andar: ${data.andar || ''}\n`;
+    txt += `Loteamento: ${data.loteamento || ''}\n`;
+    txt += `Número do Loteamento: ${data.numero_loteamento || ''}\n`;
+    txt += `Quadra: ${data.quadra || ''}\n`;
+    txt += `Bairro: ${data.bairro || ''}\n`;
+    txt += `Cidade: ${data.cidade || ''}\n`;
+    txt += `Dominialidade: ${data.dominialidade || ''}\n`;
+    txt += `Área Total: ${data.area_total || ''}\n`;
+    txt += `Área Construída: ${data.area_construida || ''}\n`;
+    txt += `Área Privativa: ${data.area_privativa || ''}\n`;
+    txt += `Área de Uso Comum: ${data.area_uso_comum || ''}\n`;
+    txt += `Área Correspondente: ${data.area_correspondente || ''}\n`;
+    txt += `Fração Ideal: ${data.fracao_ideal || ''}\n`;
+    txt += '\n';
+    
+    // DADOS PESSOAIS
+    txt += '=== DADOS PESSOAIS ===\n';
+    txt += `CPF/CNPJ: ${data.cpf_cnpj || ''}\n`;
+    txt += `Nome Completo: ${data.nome_completo || ''}\n`;
+    txt += `Sexo: ${data.sexo || ''}\n`;
+    txt += `Nacionalidade: ${data.nacionalidade || ''}\n`;
+    txt += `Estado Civil: ${data.estado_civil || ''}\n`;
+    txt += `Profissão: ${data.profissao || ''}\n`;
+    txt += `RG: ${data.rg || ''}\n`;
+    txt += `CNH: ${data.cnh || ''}\n`;
+    txt += `Endereço Completo: ${data.endereco_completo || ''}\n`;
+    txt += `Regime de Casamento: ${data.regime_casamento || ''}\n`;
+    txt += `Data do Casamento: ${data.data_casamento || ''}\n`;
+    txt += `Matrícula do Casamento: ${data.matricula_casamento || ''}\n`;
+    txt += `Natureza Jurídica: ${data.natureza_juridica || ''}\n`;
+    txt += `Representante Legal: ${data.representante_legal || ''}\n`;
+    txt += '\n';
+    
+    // INFORMAÇÕES PARA ATOS
+    txt += '=== INFORMAÇÕES PARA ATOS ===\n';
+    txt += `Valor da Transação: ${data.valor_transacao || ''}\n`;
+    txt += `Valor de Avaliação: ${data.valor_avaliacao || ''}\n`;
+    txt += `Data da Alienação: ${data.data_alienacao || ''}\n`;
+    txt += `Forma de Alienação: ${data.forma_alienacao || ''}\n`;
+    txt += `Valor da Dívida: ${data.valor_divida || ''}\n`;
+    txt += `Valor da Alienação do Contrato: ${data.valor_alienacao_contrato || ''}\n`;
+    txt += `Tipo de Ônus: ${data.tipo_onus || ''}\n`;
+    
     return txt;
 }
 

@@ -25,11 +25,23 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
     """Limpa e valida os campos extraídos pela OpenAI"""
     if service_type == 'matricula':
         expected_fields = [
-            'numero_matricula', 'data_matricula', 'descricao_imovel', 'endereco',
-            'area_privativa', 'area_total', 'garagem_vagas', 'proprietarios',
-            'livro_anterior', 'folha_anterior', 'matricula_anterior', 'tipo_titulo',
-            'valor_titulo', 'comprador', 'cpf_cnpj', 'valor_itbi', 'numero_dam',
-            'data_pagamento_itbi'
+            # CADASTRO
+            'inscricao_imobiliaria', 'rip',
+            
+            # DADOS DO IMÓVEL
+            'tipo_imovel', 'tipo_logradouro', 'cep', 'nome_logradouro', 'numero_lote',
+            'bloco', 'pavimento', 'andar', 'loteamento', 'numero_loteamento', 'quadra',
+            'bairro', 'cidade', 'dominialidade', 'area_total', 'area_construida',
+            'area_privativa', 'area_uso_comum', 'area_correspondente', 'fracao_ideal',
+            
+            # DADOS PESSOAIS
+            'cpf_cnpj', 'nome_completo', 'sexo', 'nacionalidade', 'estado_civil',
+            'profissao', 'rg', 'cnh', 'endereco_completo', 'regime_casamento',
+            'data_casamento', 'matricula_casamento', 'natureza_juridica', 'representante_legal',
+            
+            # INFORMAÇÕES UTILIZADAS PARA OS ATOS
+            'valor_transacao', 'valor_avaliacao', 'data_alienacao', 'forma_alienacao',
+            'valor_divida', 'valor_alienacao_contrato', 'tipo_onus'
         ]
     elif service_type == 'minuta':
         expected_fields = [
@@ -80,6 +92,17 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
             # 8. Cláusulas e Declarações Importantes
             'declaracao_tributos', 'responsabilidade_registro', 'declaracao_quitacao', 'imovel_livre_desembaracado', 'fe_publica_tabeliao', 'assinaturas'
         ]
+    elif service_type == 'certidao':
+        expected_fields = [
+            'cnm',
+            'descricao_imovel',
+            'proprietarios',
+            'senhorio_enfiteuta',
+            'inscricao_imobiliaria',
+            'rip',
+            'onus_certidao_negativa',
+            'nome_solicitante'
+        ]
     else:
         expected_fields = []
     
@@ -125,8 +148,55 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Extraia os seguintes campos do texto da matrícula de imóvel abaixo. "
                 "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
                 "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
-                "Campos a extrair: numero_matricula, data_matricula, descricao_imovel, endereco, area_privativa, area_total, garagem_vagas, proprietarios, livro_anterior, folha_anterior, matricula_anterior, tipo_titulo, valor_titulo, comprador, cpf_cnpj, valor_itbi, numero_dam, data_pagamento_itbi.\n"
-                "Exemplo de formato esperado: {\"numero_matricula\": \"123\", \"data_matricula\": \"01/01/2023\", ...}\n"
+                "Campos a extrair:\n"
+                "CADASTRO:\n"
+                "- inscricao_imobiliaria: Inscrição imobiliária\n"
+                "- rip: RIP\n"
+                "DADOS DO IMÓVEL:\n"
+                "- tipo_imovel: Tipo de imóvel (terreno, unidade autônoma, lote etc.)\n"
+                "- tipo_logradouro: Tipo de logradouro (rua, avenida, estrada etc.)\n"
+                "- cep: CEP\n"
+                "- nome_logradouro: Nome do logradouro\n"
+                "- numero_lote: Número do lote/unidade autônoma\n"
+                "- bloco: Bloco (para unidades autônomas)\n"
+                "- pavimento: Pavimento (para unidades autônomas)\n"
+                "- andar: Andar (para unidades autônomas)\n"
+                "- loteamento: Loteamento\n"
+                "- numero_loteamento: Número do lote\n"
+                "- quadra: Quadra\n"
+                "- bairro: Bairro\n"
+                "- cidade: Cidade\n"
+                "- dominialidade: Dominialidade\n"
+                "- area_total: Área total\n"
+                "- area_construida: Área construída\n"
+                "- area_privativa: Área privativa (para unidades autônomas)\n"
+                "- area_uso_comum: Área de uso comum (para unidades autônomas)\n"
+                "- area_correspondente: Área correspondente (para unidades autônomas)\n"
+                "- fracao_ideal: Fração ideal (para unidades autônomas)\n"
+                "DADOS PESSOAIS:\n"
+                "- cpf_cnpj: CPF/CNPJ\n"
+                "- nome_completo: Nome completo\n"
+                "- sexo: Sexo\n"
+                "- nacionalidade: Nacionalidade\n"
+                "- estado_civil: Estado civil\n"
+                "- profissao: Profissão\n"
+                "- rg: RG\n"
+                "- cnh: CNH\n"
+                "- endereco_completo: Endereço completo (logradouro, número, complemento, bairro, cidade)\n"
+                "- regime_casamento: Regime de casamento\n"
+                "- data_casamento: Data do casamento\n"
+                "- matricula_casamento: Matrícula/termo da certidão de casamento\n"
+                "- natureza_juridica: Natureza jurídica da empresa (se pessoa jurídica)\n"
+                "- representante_legal: Nome completo do representante legal (se pessoa jurídica)\n"
+                "INFORMAÇÕES UTILIZADAS PARA OS ATOS:\n"
+                "- valor_transacao: Valor da transação\n"
+                "- valor_avaliacao: Valor de avaliação\n"
+                "- data_alienacao: Data da alienação\n"
+                "- forma_alienacao: Forma de alienação\n"
+                "- valor_divida: Valor da dívida\n"
+                "- valor_alienacao_contrato: Valor da alienação constante do contrato\n"
+                "- tipo_onus: Tipo de ônus\n"
+                "Exemplo de formato esperado: {\"inscricao_imobiliaria\": \"123\", \"tipo_imovel\": \"terreno\", ...}\n"
                 "Texto da matrícula:\n" + text
             )
         elif service_type == "minuta":
@@ -296,6 +366,23 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "- assinaturas: Assinaturas (ou menção à fé pública do tabelião)\n"
                 "Exemplo de formato esperado: {\"tipo_escritura\": \"Compra e Venda\", \"numero_livro\": \"123\", ...}\n"
                 "Texto da escritura:\n" + text
+            )
+        elif service_type == "certidao":
+            prompt = (
+                "Extraia os seguintes campos do texto de uma matrícula imobiliária abaixo. "
+                "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
+                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
+                "Campos a extrair:\n"
+                "- cnm: Cadastro Nacional de Matrícula (número da matrícula)\n"
+                "- descricao_imovel: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
+                "- proprietarios: Nome(s) completo(s) dos proprietários atuais e seus dados (CPF, RG, endereço, estado civil)\n"
+                "- senhorio_enfiteuta: Nome do senhorio direto e enfiteuta (se aplicável)\n"
+                "- inscricao_imobiliaria: Inscrição imobiliária (número de inscrição no cartório)\n"
+                "- rip: RIP (Registro de Imóveis Públicos) se houver\n"
+                "- onus_certidao_negativa: Ônus reais, restrições judiciais e administrativas, ou certidão negativa (transcreva o texto completo referente a esses itens)\n"
+                "- nome_solicitante: Nome completo do solicitante da certidão\n"
+                "Exemplo de formato esperado: {\"cnm\": \"123456\", \"descricao_imovel\": \"Casa residencial...\", \"proprietarios\": \"João Silva, CPF: 123.456.789-00...\", ...}\n"
+                "Texto da matrícula:\n" + text
             )
         else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
