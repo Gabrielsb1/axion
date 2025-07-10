@@ -157,7 +157,7 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
         if "digital signature" in error_msg.lower() or "signature" in error_msg.lower():
             logging.warning(f"PDF com assinatura digital detectado, tentando processar mesmo assim: {pdf_entrada}")
             try:
-                # Segunda tentativa: OCR com skip_text para PDFs assinados
+                # Segunda tentativa: OCR com opções especiais para PDFs assinados
                 ocrmypdf.ocr(
                     pdf_entrada,
                     pdf_saida,
@@ -166,13 +166,26 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
                     language='por',
                     output_type='pdf',
                     skip_text=True,  # Pula texto existente para evitar conflitos
-                    skip_big=True,   # Pula páginas grandes
                     skip_pdf_validation=True  # Pula validação de PDF
                 )
                 logging.info(f"OCR aplicado com sucesso (modo assinatura): {pdf_saida}")
             except Exception as e2:
                 logging.error(f"Erro no OCR de {pdf_entrada} (modo assinatura): {e2}")
-                raise e2
+                # Terceira tentativa: OCR mais básico
+                try:
+                    logging.warning(f"Tentando OCR básico para PDF assinado: {pdf_entrada}")
+                    ocrmypdf.ocr(
+                        pdf_entrada,
+                        pdf_saida,
+                        deskew=False,
+                        force_ocr=False,
+                        language='por',
+                        output_type='pdf'
+                    )
+                    logging.info(f"OCR aplicado com sucesso (modo básico): {pdf_saida}")
+                except Exception as e3:
+                    logging.error(f"Erro no OCR básico de {pdf_entrada}: {e3}")
+                    raise e3
         else:
             logging.error(f"Erro no OCR de {pdf_entrada}: {e}")
             raise

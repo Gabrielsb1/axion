@@ -57,6 +57,8 @@ RUN apt-get install -y \
 
 **Problema resolvido**: Adicionado qpdf ao Dockerfile para remoção de assinaturas digitais.
 
+**Problema resolvido**: Corrigido parâmetro `skip_big` que não é suportado na versão atual do ocrmypdf.
+
 ### 2. Verificação Robusta do OCR
 
 Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
@@ -71,8 +73,9 @@ Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
 Implementei um sistema robusto para lidar com PDFs que possuem assinatura digital:
 
 - **Primeira tentativa**: OCR normal
-- **Segunda tentativa**: OCR com opções especiais (`skip_text=True`, `skip_big=True`, `skip_pdf_validation=True`)
-- **Terceira tentativa**: Remoção de assinatura com qpdf + OCR
+- **Segunda tentativa**: OCR com opções especiais (`skip_text=True`, `skip_pdf_validation=True`)
+- **Terceira tentativa**: OCR básico (`deskew=False`, `force_ocr=False`)
+- **Quarta tentativa**: Remoção de assinatura com qpdf + OCR
 - **Fallback**: OCR com opções especiais mesmo sem qpdf disponível
 
 ### 4. Scripts de Teste
