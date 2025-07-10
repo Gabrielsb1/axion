@@ -1596,7 +1596,14 @@ async function processOCRFile() {
             body: formData
         });
         
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('Erro ao parsear JSON:', jsonError);
+            console.log('Response text:', await response.text());
+            throw new Error('Resposta inválida do servidor');
+        }
         
         if (result.success) {
             // Atualizar interface com resultados

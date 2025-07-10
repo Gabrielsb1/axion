@@ -165,8 +165,7 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
                     force_ocr=True,
                     language='por',
                     output_type='pdf',
-                    skip_text=True,  # Pula texto existente para evitar conflitos
-                    skip_pdf_validation=True  # Pula validação de PDF
+                    skip_text=True  # Pula texto existente para evitar conflitos
                 )
                 logging.info(f"OCR aplicado com sucesso (modo assinatura): {pdf_saida}")
             except Exception as e2:
