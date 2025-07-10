@@ -371,17 +371,23 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             prompt = (
                 "Extraia os seguintes campos do texto de uma matrícula imobiliária abaixo. "
                 "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
-                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
+                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n\n"
                 "Campos a extrair:\n"
                 "- cnm: Cadastro Nacional de Matrícula (número da matrícula)\n"
                 "- descricao_imovel: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
-                "- proprietarios: Nome(s) completo(s) dos proprietários atuais e seus dados (CPF, RG, endereço, estado civil)\n"
+                "- proprietarios: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. "
+                "Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. "
+                "Não inclua proprietários antigos ou substituídos. "
+                "Se houver mais de um proprietário atual (ex: coproprietários ou cônjuges), liste todos no mesmo campo.\n"
                 "- senhorio_enfiteuta: Nome do senhorio direto e enfiteuta (se aplicável)\n"
                 "- inscricao_imobiliaria: Inscrição imobiliária (número de inscrição no cartório)\n"
                 "- rip: RIP (Registro de Imóveis Públicos) se houver\n"
                 "- onus_certidao_negativa: Ônus reais, restrições judiciais e administrativas, ou certidão negativa (transcreva o texto completo referente a esses itens)\n"
-                "- nome_solicitante: Nome completo do solicitante da certidão\n"
-                "Exemplo de formato esperado: {\"cnm\": \"123456\", \"descricao_imovel\": \"Casa residencial...\", \"proprietarios\": \"João Silva, CPF: 123.456.789-00...\", ...}\n"
+                "- nome_solicitante: Nome completo do solicitante da certidão\n\n"
+                "Exemplo de formato esperado:\n"
+                "{\"cnm\": \"123456\", \"descricao_imovel\": \"Casa residencial localizada na Rua X...\", "
+                "\"proprietarios\": \"João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em...\", "
+                "... }\n\n"
                 "Texto da matrícula:\n" + text
             )
         else:
