@@ -34,9 +34,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     # Verifica se o tesseract está funcionando
     tesseract --version && \
-    tesseract --list-langs && \
-    # Testa se o OCR está funcionando
-    python test_ocr_simple.py
+    tesseract --list-langs
 
 # Expõe a porta padrão do Flask
 EXPOSE 5000

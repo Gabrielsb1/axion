@@ -17,6 +17,7 @@ WARNING:root:ocrmypdf não está disponível. OCR não funcionará.
 3. **Verificação inadequada**: O código não verificava adequadamente se as dependências estavam funcionando.
 
 4. **Pacotes obsoletos**: Alguns pacotes Qt4 não estão disponíveis no Debian Bookworm, causando falha no build.
+5. **Incompatibilidade de versões**: O `ocrmypdf` 15.4.2 não é compatível com o `pikepdf` 9.9.0.
 
 ## Soluções Implementadas
 
@@ -48,6 +49,8 @@ RUN apt-get install -y \
 
 **Problema resolvido**: Removidos pacotes Qt4 obsoletos (`libqtgui4`, `libqtwebkit4`, `libqt4-test`) que não estão disponíveis no Debian Bookworm.
 
+**Problema resolvido**: Atualizada versão do `ocrmypdf` para 16.10.4 para ser compatível com `pikepdf` 9.9.0.
+
 ### 2. Verificação Robusta do OCR
 
 Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
@@ -77,7 +80,7 @@ python test_ocr_local.py
 ```
 
 ### No Ambiente Docker
-O teste simplificado é executado automaticamente durante o build do Docker.
+O teste é executado apenas na inicialização da aplicação, não durante o build do Docker.
 
 ## Status Atual
 
