@@ -24,12 +24,40 @@ from security import secure_manager
 # Caminho do qpdf - ajuste conforme necessário
 QPDF_PATH = r"C:\Users\gabri\OneDrive\Documentos\qpdf-12.2.0-mingw64\bin\qpdf.exe"
 
+# Verificação mais robusta do ocrmypdf
+OCR_AVAILABLE = False
 try:
     import ocrmypdf
-    OCR_AVAILABLE = True
-except ImportError:
+    # Teste adicional para verificar se o ocrmypdf está funcionando
+    try:
+        # Teste básico para verificar se o ocrmypdf pode ser usado
+        ocrmypdf.__version__
+        OCR_AVAILABLE = True
+        logging.info(f"ocrmypdf disponível - versão: {ocrmypdf.__version__}")
+    except Exception as e:
+        OCR_AVAILABLE = False
+        logging.warning(f"ocrmypdf importado mas não funcional: {e}")
+except ImportError as e:
     OCR_AVAILABLE = False
+    logging.warning(f"ocrmypdf não está disponível. OCR não funcionará. Erro: {e}")
+
+# Verificação do Tesseract
+TESSERACT_AVAILABLE = False
+try:
+    result = subprocess.run(['tesseract', '--version'], 
+                          capture_output=True, text=True, timeout=10)
+    if result.returncode == 0:
+        TESSERACT_AVAILABLE = True
+        logging.info(f"Tesseract disponível: {result.stdout.split()[1] if result.stdout else 'versão desconhecida'}")
+    else:
+        logging.warning(f"Tesseract não está funcionando: {result.stderr}")
+except Exception as e:
+    logging.warning(f"Tesseract não encontrado: {e}")
+
+if not OCR_AVAILABLE:
     logging.warning("ocrmypdf não está disponível. OCR não funcionará.")
+if not TESSERACT_AVAILABLE:
+    logging.warning("Tesseract não está disponível. OCR não funcionará.")
 
 try:
     from PyPDF2 import PdfReader, PdfWriter
@@ -105,6 +133,9 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
     if not OCR_AVAILABLE:
         raise Exception("OCR não está disponível. Instale ocrmypdf: pip install ocrmypdf")
     
+    if not TESSERACT_AVAILABLE:
+        raise Exception("Tesseract não está disponível. Instale tesseract-ocr")
+    
     try:
         ocrmypdf.ocr(
             pdf_entrada,
@@ -127,6 +158,12 @@ def process_pdf_with_ocr(input_file_path, output_file_path, options=None):
         return {
             'success': False,
             'error': 'OCR não está disponível. Instale ocrmypdf: pip install ocrmypdf'
+        }
+    
+    if not TESSERACT_AVAILABLE:
+        return {
+            'success': False,
+            'error': 'Tesseract não está disponível. Instale tesseract-ocr'
         }
     
     start_time = time.time()
