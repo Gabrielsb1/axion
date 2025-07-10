@@ -275,7 +275,16 @@ function setupEventListeners() {
                 });
                 
                 if (response.ok) {
-                    const result = await response.json();
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (jsonError) {
+                        const textResponse = await response.text();
+                        console.error('Erro ao fazer parse do JSON:', jsonError);
+                        console.error('Resposta recebida:', textResponse);
+                        throw new Error('Resposta inválida do servidor');
+                    }
+                    
                     if (result.success) {
                         ocrTesseractStatus.innerHTML = `
                             <div class="alert alert-success">
@@ -285,13 +294,21 @@ function setupEventListeners() {
                                 </button>
                             </div>
                         `;
-                } else {
+                    } else {
                         throw new Error(result.error || 'Erro desconhecido');
-                }
+                    }
                 } else {
-                    const errorData = await response.json();
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (jsonError) {
+                        const textResponse = await response.text();
+                        console.error('Erro ao fazer parse do JSON de erro:', jsonError);
+                        console.error('Resposta de erro recebida:', textResponse);
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
                     throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-            }
+                }
             } catch (err) {
                 console.error('Erro no OCR:', err);
                 ocrTesseractStatus.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro: ${err.message}</div>`;
@@ -559,7 +576,15 @@ async function processSingleFile(serviceId) {
             throw new Error(`Erro no processamento do arquivo ${currentFile.name}: HTTP ${response.status}`);
         }
         
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            const textResponse = await response.text();
+            console.error('Erro ao fazer parse do JSON:', jsonError);
+            console.error('Resposta recebida:', textResponse);
+            throw new Error('Resposta inválida do servidor');
+        }
         
         if (result.success) {
             // Usar result.campos do ChatGPT
@@ -864,7 +889,15 @@ async function processMultipleFiles(serviceId) {
                 throw new Error(`Erro no arquivo ${file.name}: HTTP ${response.status}`);
             }
             
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                const textResponse = await response.text();
+                console.error('Erro ao fazer parse do JSON:', jsonError);
+                console.error('Resposta recebida:', textResponse);
+                throw new Error('Resposta inválida do servidor');
+            }
             
             if (result.success) {
                 // Adicionar dados processados ao array
@@ -1734,7 +1767,10 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
                 try {
                     const err = await response.json();
                     errorMsg = err.error || errorMsg;
-                } catch {}
+                } catch (jsonError) {
+                    console.error('Erro ao fazer parse do JSON de erro:', jsonError);
+                    // Se não conseguir fazer parse, manter a mensagem padrão
+                }
                 certidaoStatus.innerHTML = `<div class="alert alert-danger">${errorMsg}</div>`;
             }
         } catch (e) {

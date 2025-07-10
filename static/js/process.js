@@ -66,7 +66,18 @@ export async function processFile(files, ui, setCurrentData) {
             });
 
             if (response.ok) {
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    // Se não conseguir fazer parse do JSON, tentar ler como texto
+                    const textResponse = await response.text();
+                    console.error('Erro ao fazer parse do JSON:', jsonError);
+                    console.error('Resposta recebida:', textResponse);
+                    ui.updateStatus(`Erro no processamento do arquivo ${file.name}: Resposta inválida do servidor`, 'danger');
+                    ui.showAlert(`Erro no processamento do arquivo ${file.name}: Resposta inválida do servidor`, 'danger');
+                    return;
+                }
                 
                 // Combinar os dados extraídos
                 if (data.campos) {
@@ -75,7 +86,18 @@ export async function processFile(files, ui, setCurrentData) {
                 
                 processedCount++;
             } else {
-                const errorData = await response.json();
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (jsonError) {
+                    // Se não conseguir fazer parse do JSON de erro, tentar ler como texto
+                    const textResponse = await response.text();
+                    console.error('Erro ao fazer parse do JSON de erro:', jsonError);
+                    console.error('Resposta de erro recebida:', textResponse);
+                    ui.updateStatus(`Erro no arquivo ${file.name}: Erro no servidor`, 'danger');
+                    ui.showAlert(`Erro no processamento do arquivo ${file.name}: Erro no servidor`, 'danger');
+                    return;
+                }
                 ui.updateStatus(`Erro no arquivo ${file.name}: ${errorData.error}`, 'danger');
                 ui.showAlert(`Erro no processamento do arquivo ${file.name}: ${errorData.error}`, 'danger');
                 return;
