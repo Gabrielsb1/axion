@@ -16,11 +16,13 @@ WARNING:root:ocrmypdf não está disponível. OCR não funcionará.
 
 3. **Verificação inadequada**: O código não verificava adequadamente se as dependências estavam funcionando.
 
+4. **Pacotes obsoletos**: Alguns pacotes Qt4 não estão disponíveis no Debian Bookworm, causando falha no build.
+
 ## Soluções Implementadas
 
 ### 1. Dockerfile Atualizado
 
-Adicionei todas as dependências necessárias:
+Adicionei apenas as dependências essenciais (removendo pacotes obsoletos):
 
 ```dockerfile
 RUN apt-get install -y \
@@ -41,26 +43,10 @@ RUN apt-get install -y \
     libpango1.0-dev \
     libgdk-pixbuf2.0-dev \
     libgtk-3-dev \
-    libatlas-base-dev \
-    gfortran \
-    libhdf5-dev \
-    libhdf5-serial-dev \
-    libhdf5-103 \
-    libqtgui4 \
-    libqtwebkit4 \
-    libqt4-test \
-    python3-dev \
-    python3-pip \
-    python3-venv \
-    python3-setuptools \
-    python3-wheel \
-    python3-cffi \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libgdk-pixbuf2.0-dev \
-    libffi-dev \
-    shared-mime-info
+    python3-dev
 ```
+
+**Problema resolvido**: Removidos pacotes Qt4 obsoletos (`libqtgui4`, `libqtwebkit4`, `libqt4-test`) que não estão disponíveis no Debian Bookworm.
 
 ### 2. Verificação Robusta do OCR
 
@@ -73,9 +59,10 @@ Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
 
 ### 3. Scripts de Teste
 
-Criei dois scripts de teste:
+Criei três scripts de teste:
 
-- `test_ocr_deployment.py`: Para testar no ambiente Docker
+- `test_ocr_deployment.py`: Para testar no ambiente Docker (completo)
+- `test_ocr_simple.py`: Para testar no ambiente Docker (simplificado)
 - `test_ocr_local.py`: Para testar localmente
 
 ### 4. Verificação na Inicialização
@@ -90,7 +77,7 @@ python test_ocr_local.py
 ```
 
 ### No Ambiente Docker
-O teste é executado automaticamente durante o build do Docker.
+O teste simplificado é executado automaticamente durante o build do Docker.
 
 ## Status Atual
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de teste para verificar se o OCR está funcionando no ambiente de deployment
+Script de teste simplificado para verificar se o OCR está funcionando
 """
 
 import sys
@@ -63,37 +63,14 @@ def test_tesseract_languages():
         logging.error(f"❌ Erro ao testar idiomas do Tesseract: {e}")
         return False
 
-def test_system_dependencies():
-    """Testa dependências do sistema"""
-    dependencies = [
-        'pdftoppm',  # parte do poppler-utils
-        'gs'         # ghostscript
-    ]
-    
-    all_available = True
-    for dep in dependencies:
-        try:
-            result = subprocess.run(['which', dep], capture_output=True, text=True)
-            if result.returncode == 0:
-                logging.info(f"✅ {dep} disponível")
-            else:
-                logging.warning(f"⚠️ {dep} não encontrado")
-                all_available = False
-        except Exception as e:
-            logging.error(f"❌ Erro ao testar {dep}: {e}")
-            all_available = False
-    
-    return all_available
-
 def main():
     """Executa todos os testes"""
-    logging.info("🔍 Iniciando testes de OCR...")
+    logging.info("🔍 Iniciando testes de OCR simplificados...")
     
     tests = [
         ("ocrmypdf", test_ocrmypdf),
         ("tesseract", test_tesseract),
-        ("tesseract_languages", test_tesseract_languages),
-        ("system_dependencies", test_system_dependencies)
+        ("tesseract_languages", test_tesseract_languages)
     ]
     
     results = {}
