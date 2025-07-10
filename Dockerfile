@@ -14,6 +14,7 @@ RUN apt-get update && \
         tesseract-ocr \
         tesseract-ocr-por \
         ghostscript \
+        qpdf \
         libmagic1 \
         libffi-dev \
         libssl-dev \

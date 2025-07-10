@@ -18,6 +18,7 @@ WARNING:root:ocrmypdf não está disponível. OCR não funcionará.
 
 4. **Pacotes obsoletos**: Alguns pacotes Qt4 não estão disponíveis no Debian Bookworm, causando falha no build.
 5. **Incompatibilidade de versões**: O `ocrmypdf` 15.4.2 não é compatível com o `pikepdf` 9.9.0.
+6. **PDFs com assinatura digital**: Alguns PDFs têm assinatura digital que impede o processamento OCR.
 
 ## Soluções Implementadas
 
@@ -31,6 +32,7 @@ RUN apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-por \
     ghostscript \
+    qpdf \
     libmagic1 \
     libffi-dev \
     libssl-dev \
@@ -51,6 +53,10 @@ RUN apt-get install -y \
 
 **Problema resolvido**: Atualizada versão do `ocrmypdf` para 16.10.4 para ser compatível com `pikepdf` 9.9.0.
 
+**Problema resolvido**: Melhorado tratamento de PDFs com assinatura digital usando opções especiais do ocrmypdf.
+
+**Problema resolvido**: Adicionado qpdf ao Dockerfile para remoção de assinaturas digitais.
+
 ### 2. Verificação Robusta do OCR
 
 Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
@@ -60,7 +66,16 @@ Atualizei o `ai/ocr_service.py` para fazer verificações mais detalhadas:
 - Verifica se o idioma português está disponível
 - Fornece mensagens de erro mais detalhadas
 
-### 3. Scripts de Teste
+### 3. Tratamento de PDFs com Assinatura Digital
+
+Implementei um sistema robusto para lidar com PDFs que possuem assinatura digital:
+
+- **Primeira tentativa**: OCR normal
+- **Segunda tentativa**: OCR com opções especiais (`skip_text=True`, `skip_big=True`, `skip_pdf_validation=True`)
+- **Terceira tentativa**: Remoção de assinatura com qpdf + OCR
+- **Fallback**: OCR com opções especiais mesmo sem qpdf disponível
+
+### 4. Scripts de Teste
 
 Criei três scripts de teste:
 
@@ -68,7 +83,7 @@ Criei três scripts de teste:
 - `test_ocr_simple.py`: Para testar no ambiente Docker (simplificado)
 - `test_ocr_local.py`: Para testar localmente
 
-### 4. Verificação na Inicialização
+### 5. Verificação na Inicialização
 
 O `app.py` agora verifica e exibe o status do OCR na inicialização.
 

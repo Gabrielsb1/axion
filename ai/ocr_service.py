@@ -22,7 +22,12 @@ from config import Config
 from security import secure_manager
 
 # Caminho do qpdf - ajuste conforme necessário
-QPDF_PATH = r"C:\Users\gabri\OneDrive\Documentos\qpdf-12.2.0-mingw64\bin\qpdf.exe"
+import platform
+if platform.system() == "Windows":
+    QPDF_PATH = r"C:\Users\gabri\OneDrive\Documentos\qpdf-12.2.0-mingw64\bin\qpdf.exe"
+else:
+    # No Linux/Docker, usar qpdf do sistema
+    QPDF_PATH = "qpdf"
 
 # Verificação mais robusta do ocrmypdf
 OCR_AVAILABLE = False
@@ -137,6 +142,7 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
         raise Exception("Tesseract não está disponível. Instale tesseract-ocr")
     
     try:
+        # Primeira tentativa: OCR normal
         ocrmypdf.ocr(
             pdf_entrada,
             pdf_saida,
@@ -147,8 +153,29 @@ def aplicar_ocr(pdf_entrada, pdf_saida):
         )
         logging.info(f"OCR aplicado com sucesso: {pdf_saida}")
     except Exception as e:
-        logging.error(f"Erro no OCR de {pdf_entrada}: {e}")
-        raise
+        error_msg = str(e)
+        if "digital signature" in error_msg.lower() or "signature" in error_msg.lower():
+            logging.warning(f"PDF com assinatura digital detectado, tentando processar mesmo assim: {pdf_entrada}")
+            try:
+                # Segunda tentativa: OCR com skip_text para PDFs assinados
+                ocrmypdf.ocr(
+                    pdf_entrada,
+                    pdf_saida,
+                    deskew=True,
+                    force_ocr=True,
+                    language='por',
+                    output_type='pdf',
+                    skip_text=True,  # Pula texto existente para evitar conflitos
+                    skip_big=True,   # Pula páginas grandes
+                    skip_pdf_validation=True  # Pula validação de PDF
+                )
+                logging.info(f"OCR aplicado com sucesso (modo assinatura): {pdf_saida}")
+            except Exception as e2:
+                logging.error(f"Erro no OCR de {pdf_entrada} (modo assinatura): {e2}")
+                raise e2
+        else:
+            logging.error(f"Erro no OCR de {pdf_entrada}: {e}")
+            raise
 
 def process_pdf_with_ocr(input_file_path, output_file_path, options=None):
     """
@@ -170,32 +197,43 @@ def process_pdf_with_ocr(input_file_path, output_file_path, options=None):
     temp_files = []
     
     try:
-        # Verificar se o PDF tem assinatura digital
-        if is_pdf_signed(input_file_path):
-            logging.info(f"PDF assinado detectado: {input_file_path}")
-            
-            # Criar arquivo temporário para qpdf
-            temp_qpdf_path = input_file_path + '_qpdf_temp.pdf'
-            temp_files.append(temp_qpdf_path)
-            
-            # Remover assinatura com qpdf
-            if remove_signature_qpdf(input_file_path, temp_qpdf_path):
-                # Reescrever PDF para limpar metadados
-                temp_clean_path = input_file_path + '_clean_temp.pdf'
-                temp_files.append(temp_clean_path)
-                
-                if reescrever_pdf_sem_assinatura(temp_qpdf_path, temp_clean_path):
-                    # Aplicar OCR no PDF limpo
-                    aplicar_ocr(temp_clean_path, output_file_path)
-                else:
-                    # Fallback: aplicar OCR diretamente no arquivo qpdf
-                    aplicar_ocr(temp_qpdf_path, output_file_path)
-            else:
-                # Fallback: aplicar OCR no arquivo original
-                aplicar_ocr(input_file_path, output_file_path)
-        else:
-            # PDF sem assinatura, aplicar OCR diretamente
+        # Tentar OCR diretamente primeiro
+        try:
             aplicar_ocr(input_file_path, output_file_path)
+        except Exception as e:
+            error_msg = str(e)
+            if "digital signature" in error_msg.lower() or "signature" in error_msg.lower():
+                logging.info(f"PDF com assinatura digital detectado, tentando limpar: {input_file_path}")
+                
+                # Verificar se o PDF tem assinatura digital
+                if is_pdf_signed(input_file_path):
+                    # Criar arquivo temporário para qpdf
+                    temp_qpdf_path = input_file_path + '_qpdf_temp.pdf'
+                    temp_files.append(temp_qpdf_path)
+                    
+                    # Remover assinatura com qpdf
+                    if remove_signature_qpdf(input_file_path, temp_qpdf_path):
+                        # Reescrever PDF para limpar metadados
+                        temp_clean_path = input_file_path + '_clean_temp.pdf'
+                        temp_files.append(temp_clean_path)
+                        
+                        if reescrever_pdf_sem_assinatura(temp_qpdf_path, temp_clean_path):
+                            # Aplicar OCR no PDF limpo
+                            aplicar_ocr(temp_clean_path, output_file_path)
+                        else:
+                            # Fallback: aplicar OCR diretamente no arquivo qpdf
+                            aplicar_ocr(temp_qpdf_path, output_file_path)
+                    else:
+                        # Fallback: tentar OCR com opções especiais para PDFs assinados
+                        logging.warning("qpdf não disponível, tentando OCR com opções especiais")
+                        aplicar_ocr(input_file_path, output_file_path)
+                else:
+                    # Se não detectou assinatura mas deu erro, tentar OCR com opções especiais
+                    logging.warning("Erro no OCR, tentando com opções especiais")
+                    aplicar_ocr(input_file_path, output_file_path)
+            else:
+                # Re-raise o erro original se não for relacionado a assinatura
+                raise
         
         # Calcular tempo de processamento
         processing_time = time.time() - start_time
