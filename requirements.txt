@@ -10,3 +10,6 @@ ocrmypdf==16.10.4
 Pillow==10.0.1
 reportlab==4.0.4
 pikepdf==9.9.0 
+pandas
+python-docx
+openpyxl 

@@ -1,6 +1,6 @@
 # Endpoints relacionados ao ChatGPT/OpenAI
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, current_app
 import os
 import uuid
 import shutil
@@ -11,8 +11,12 @@ from ai.openai_service import extract_fields_with_openai
 import pypdf
 from config import Config
 from security import secure_manager
+import pandas as pd
 
 ai_bp = Blueprint('ai', __name__)
+
+# Dicionário global para armazenar arquivos de memorial
+memorial_files = {}
 
 def allowed_file(filename):
     """Verifica se o arquivo tem extensão permitida"""
@@ -677,3 +681,223 @@ def process_validacao_juridica():
             if Config.SECURE_PROCESSING:
                 secure_manager.cleanup_file(temp_file, user_ip)
         return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
+
+@ai_bp.route('/api/memorial', methods=['POST'])
+def process_memorial():
+    """Endpoint para processar arquivos DOCX de memorial de incorporação"""
+    import time
+    start_time = time.time()
+    temp_files = []
+    user_ip = request.remote_addr
+    
+    try:
+        if 'files[]' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+        
+        files = request.files.getlist('files[]')
+        if not files or all(file.filename == '' for file in files):
+            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
+        
+        # Validar arquivos - apenas DOCX
+        valid_files = []
+        for file in files:
+            if file.filename and file.filename.lower().endswith('.docx'):
+                valid_files.append(file)
+            else:
+                return jsonify({'error': f'Arquivo inválido: {file.filename}. Apenas arquivos DOCX são permitidos.'}), 400
+        
+        if not valid_files:
+            return jsonify({'error': 'Nenhum arquivo DOCX válido encontrado'}), 400
+        
+        print(f"📁 Processando {len(valid_files)} arquivos DOCX para memorial...")
+        
+        # Importar funções do extrator otimizado
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        from extrator_memorial_otimizado import processar_arquivo_otimizado as processar_arquivo
+        
+        # Processar arquivos em paralelo para melhor performance
+        todos_dfs = []
+        documentos_processados = []
+        
+        # Usar ThreadPoolExecutor para processamento paralelo
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        def processar_arquivo_single(file_info):
+            i, file = file_info
+            try:
+                original_filename = secure_filename(file.filename or f'arquivo_{i}.docx')
+                
+                # Processar arquivo de forma segura
+                if Config.SECURE_PROCESSING:
+                    temp_file_path, file_id = secure_manager.process_file_securely(
+                        file, original_filename, user_ip
+                    )
+                else:
+                    file_id = str(uuid.uuid4())
+                    upload_filename = f"{file_id}_{original_filename}"
+                    temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
+                    file.save(temp_file_path)
+                
+                # Descriptografar arquivo se necessário
+                if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+                    temp_file_path = secure_manager.decrypt_file(temp_file_path)
+                
+                # Verificar se arquivo existe
+                if not os.path.exists(temp_file_path):
+                    return {
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'rows_extracted': 0,
+                        'error': 'Arquivo não encontrado após descriptografia',
+                        'df': None,
+                        'temp_file': None
+                    }
+                
+                # Processar arquivo DOCX usando o extrator
+                try:
+                    df = processar_arquivo(temp_file_path)
+                except Exception as process_error:
+                    return {
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'rows_extracted': 0,
+                        'error': f'Erro no processamento: {str(process_error)}',
+                        'df': None,
+                        'temp_file': temp_file_path
+                    }
+                
+                if df is not None and not df.empty:
+                    return {
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'rows_extracted': len(df),
+                        'tipo_documento': df['Tipo Documento'].iloc[0] if 'Tipo Documento' in df.columns else 'desconhecido',
+                        'df': df,
+                        'temp_file': temp_file_path
+                    }
+                else:
+                    return {
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'rows_extracted': 0,
+                        'error': 'Nenhum dado extraído',
+                        'df': None,
+                        'temp_file': temp_file_path
+                    }
+                    
+            except Exception as e:
+                return {
+                    'filename': original_filename if 'original_filename' in locals() else f'arquivo_{i}.docx',
+                    'file_id': file_id if 'file_id' in locals() else 'unknown',
+                    'rows_extracted': 0,
+                    'error': str(e),
+                    'df': None,
+                    'temp_file': temp_file_path if 'temp_file_path' in locals() else None
+                }
+        
+        # Processar arquivos em paralelo
+        with ThreadPoolExecutor(max_workers=min(4, len(valid_files))) as executor:
+            future_to_file = {
+                executor.submit(processar_arquivo_single, (i, file)): i 
+                for i, file in enumerate(valid_files)
+            }
+            
+            for future in as_completed(future_to_file):
+                result = future.result()
+                documentos_processados.append({
+                    'filename': result['filename'],
+                    'file_id': result['file_id'],
+                    'rows_extracted': result['rows_extracted'],
+                    'tipo_documento': result.get('tipo_documento', 'desconhecido'),
+                    'error': result.get('error', None)
+                })
+                
+                if result['df'] is not None:
+                    todos_dfs.append(result['df'])
+                
+                if result['temp_file']:
+                    temp_files.append(result['temp_file'])
+        
+        # Combinar todos os dados
+        if todos_dfs:
+            resultado = pd.concat(todos_dfs, ignore_index=True)
+            
+            # Converter para formato JSON
+            dados_json = resultado.to_dict('records')
+            
+            # Criar arquivo Excel temporário
+            excel_filename = f"memorial_{uuid.uuid4()}.xlsx"
+            excel_path = os.path.join(Config.PROCESSED_FOLDER, excel_filename)
+            resultado.to_excel(excel_path, index=False)
+            
+            # Armazenar referência do arquivo para download posterior
+            memorial_files[excel_filename] = excel_path
+            
+            # Calcular tempo de processamento
+            end_time = time.time()
+            processing_time = end_time - start_time
+            
+            response_data = {
+                'success': True,
+                'message': f'Processamento concluído! {len(todos_dfs)} arquivo(s) processado(s)',
+                'data': dados_json,
+                'columns': resultado.columns.tolist(),
+                'excel_file': excel_filename,
+                'total_rows': len(resultado),
+                'documentos_processados': documentos_processados,
+                'processing_time': round(processing_time, 2),
+                'resumo': {
+                    'arquivos_processados': len(valid_files),
+                    'dados_extraidos': len(resultado),
+                    'tipos_encontrados': resultado['Formato'].value_counts().to_dict() if 'Formato' in resultado.columns else {}
+                }
+            }
+            
+            print(f"✅ Processamento concluído: {len(resultado)} registros extraídos")
+            print(f"📊 Dados JSON criados: {len(dados_json)} registros")
+            print(f"📊 Primeiro registro: {dados_json[0] if dados_json else 'N/A'}")
+            return jsonify(response_data)
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Nenhum dado foi extraído dos arquivos fornecidos',
+                'documentos_processados': documentos_processados
+            }), 400
+            
+    except Exception as e:
+        print(f"❌ Erro geral no processamento de memorial: {str(e)}")
+        return jsonify({'error': f'Erro no processamento: {str(e)}'}), 500
+    
+    finally:
+        # Limpeza de arquivos temporários
+        for temp_file in temp_files:
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+            except Exception as e:
+                print(f"⚠️ Erro ao limpar arquivo temporário {temp_file}: {e}") 
+
+@ai_bp.route('/api/memorial/download/<filename>', methods=['GET'])
+def download_memorial_excel(filename):
+    """Endpoint para download do arquivo Excel do memorial"""
+    try:
+        if filename not in memorial_files:
+            return jsonify({'error': 'Arquivo não encontrado'}), 404
+        
+        file_path = memorial_files[filename]
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'Arquivo não existe no servidor'}), 404
+        
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        print(f"❌ Erro ao fazer download do arquivo {filename}: {str(e)}")
+        return jsonify({'error': f'Erro ao fazer download: {str(e)}'}), 500 

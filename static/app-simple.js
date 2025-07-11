@@ -7,6 +7,9 @@ let currentService = 'matricula'; // Serviço atual
 let processedFiles = []; // Array para armazenar dados de múltiplos arquivos
 let currentFiles = []; // Array para armazenar arquivos selecionados
 
+// Variáveis para memorial
+let memorialData = null; // Dados do processamento de memorial
+
 // Configuração dos serviços
 const services = {
     matricula: {
@@ -409,7 +412,7 @@ function handleFileSelect(event, serviceId) {
     console.log(`🔍 Botão encontrado:`, processButton);
     console.log(`🔍 Arquivos selecionados:`, files);
     
-    if (serviceId === 'certidao') {
+    if (serviceId === 'certidao' || serviceId === 'memorial') {
         // Para alta produção - múltiplos arquivos
         if (files && files.length > 0) {
             currentFiles = Array.from(files);
@@ -461,6 +464,14 @@ async function processFile(serviceId) {
     } else if (serviceId === 'ocr') {
         // Processamento OCR - usa função específica
         await processOCRFile();
+    } else if (serviceId === 'memorial') {
+        // Processamento de memorial - múltiplos arquivos DOCX
+        if (!currentFiles || currentFiles.length === 0) {
+            showAlert('Nenhum arquivo DOCX selecionado', 'warning');
+            return;
+        }
+        
+        await processMemorialFiles();
     } else {
         // Processamento normal - arquivo único
         if (!currentFile) {
@@ -492,11 +503,13 @@ async function processSingleFile(serviceId) {
         formData.append('service', serviceId);
         
         // Adicionar configurações de processamento
-        const processingMethod = document.querySelector('input[name="processingMethod"]:checked').value;
+        const processingMethodElement = document.querySelector('input[name="processingMethod"]:checked');
+        const processingMethod = processingMethodElement ? processingMethodElement.value : 'chatgpt';
         formData.append('method', processingMethod);
         
         if (processingMethod === 'chatgpt') {
-            const model = document.querySelector('input[name="chatgptModel"]:checked').value;
+            const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
+            const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
             formData.append('model', model);
             console.log('🔧 Modelo selecionado para envio:', model);
         }
@@ -506,7 +519,8 @@ async function processSingleFile(serviceId) {
         console.log('Serviço:', serviceId);
         console.log('Método:', processingMethod);
         if (processingMethod === 'chatgpt') {
-            const model = document.querySelector('input[name="chatgptModel"]:checked').value;
+            const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
+            const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
             console.log('Modelo:', model);
         }
         
@@ -812,11 +826,13 @@ async function processMultipleFiles(serviceId) {
             formData.append('method', 'chatgpt'); // Sempre usar ChatGPT para alta produção
             
             // Obter configurações de processamento
-            const processingMethod = document.querySelector('input[name="processingMethod"]:checked').value;
+            const processingMethodElement = document.querySelector('input[name="processingMethod"]:checked');
+            const processingMethod = processingMethodElement ? processingMethodElement.value : 'chatgpt';
             let useAdvancedModel = 'true'; // Padrão para alta produção
             
             if (processingMethod === 'chatgpt') {
-                const model = document.querySelector('input[name="chatgptModel"]:checked').value;
+                const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
+                const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
                 useAdvancedModel = (model === 'gpt-4o').toString();
                 console.log('Modelo selecionado:', model, 'useAdvancedModel:', useAdvancedModel);
             }
@@ -2064,3 +2080,274 @@ downloadButtonsQualificacao.forEach(button => {
         console.log(`✅ Download button ${button.id} listener configurado`);
     }
 });
+
+// Processamento de arquivos DOCX de memorial
+async function processMemorialFiles() {
+    try {
+        // Iniciar cronômetro
+        const startTime = Date.now();
+        let timerInterval;
+        
+        // Função para atualizar o cronômetro
+        const updateTimer = () => {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            const timerElement = document.getElementById('memorialTimer');
+            if (timerElement) {
+                timerElement.textContent = `${elapsed}s`;
+            }
+        };
+        
+        // Exibir status de processamento com design moderno e cronômetro
+        document.getElementById('memorialStatus').innerHTML = `
+            <div class="alert alert-info border-0 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">Processando...</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="alert-heading mb-1">Processando Memorial</h5>
+                        <p class="mb-0">Extraindo dados dos arquivos DOCX...</p>
+                        <small class="text-muted"><i class="fas fa-clock me-1"></i>Tempo: <span id="memorialTimer">0.0s</span></small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Iniciar atualização do cronômetro
+        timerInterval = setInterval(updateTimer, 100);
+        
+        console.log(`Iniciando processamento de ${currentFiles.length} arquivo(s) DOCX...`);
+        
+        const formData = new FormData();
+        currentFiles.forEach(file => {
+            formData.append('files[]', file);
+        });
+        
+        const response = await fetch('/api/memorial', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        // Parar o cronômetro
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        
+        if (response.ok && result.success) {
+            console.log('✅ Processamento de memorial concluído:', result);
+            updateMemorialInterface(result);
+        } else {
+            console.error('❌ Erro no processamento de memorial:', result);
+            document.getElementById('memorialStatus').innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro: ${result.error || 'Erro desconhecido'}</div>`;
+        }
+        
+    } catch (error) {
+        // Parar o cronômetro em caso de erro
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        console.error('❌ Erro ao processar memorial:', error);
+        document.getElementById('memorialStatus').innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro de conexão: ${error.message}</div>`;
+    }
+}
+
+function updateMemorialInterface(result) {
+    // Armazenar dados para download
+    memorialData = result;
+    
+    console.log('🔍 Resultado completo recebido:', result);
+    console.log('🔍 Dados disponíveis:', result.data ? result.data.length : 'N/A');
+    console.log('🔍 Resumo:', result.resumo);
+    
+    // Atualizar status com animação e tempo de processamento
+    const processingTime = result.processing_time || 0;
+    const timeText = processingTime > 0 ? ` (${processingTime}s)` : '';
+    
+    document.getElementById('memorialStatus').innerHTML = `
+        <div class="alert alert-success border-0 shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle fa-2x text-success"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5 class="alert-heading mb-1">Processamento Concluído!${timeText}</h5>
+                    <p class="mb-0">${result.message}</p>
+                    ${processingTime > 0 ? `<small class="text-muted"><i class="fas fa-clock me-1"></i>Tempo de processamento: ${processingTime} segundos</small>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Exibir resumo com design moderno
+    const resumo = result.resumo;
+    let resumoHTML = `
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Processamento</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="display-6 text-primary fw-bold">${resumo.arquivos_processados}</div>
+                            <div class="text-muted small">Arquivos Processados</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="display-6 text-success fw-bold">${resumo.dados_extraidos}</div>
+                            <div class="text-muted small">Registros Extraídos</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="display-6 text-info fw-bold">${processingTime}s</div>
+                            <div class="text-muted small">Tempo de Processamento</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="mb-3"><i class="fas fa-tags me-2"></i>Tipos de Documento Encontrados:</h6>
+                            <div class="row">
+    `;
+    
+    for (const [tipo, quantidade] of Object.entries(resumo.tipos_encontrados)) {
+        const badgeClass = tipo === 'torre' ? 'bg-primary' : tipo === 'bloco' ? 'bg-info' : 'bg-secondary';
+        resumoHTML += `
+            <div class="col-md-6 mb-2">
+                <span class="badge ${badgeClass} fs-6 px-3 py-2">
+                    <i class="fas fa-building me-1"></i>${tipo.toUpperCase()}: ${quantidade}
+                </span>
+            </div>
+        `;
+    }
+    
+    resumoHTML += `
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('memorialResults').innerHTML = resumoHTML;
+    
+    // Exibir tabela de dados com design melhorado
+    if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        console.log('📊 Dados recebidos para tabela:', result.data.length, 'registros');
+        console.log('📊 Primeiro registro:', result.data[0]);
+        console.log('📊 Colunas disponíveis:', Object.keys(result.data[0]));
+        const tableHTML = createMemorialTable(result.data, processingTime, result.columns);
+        document.getElementById('memorialTable').innerHTML = tableHTML;
+    } else {
+        console.log('⚠️ Nenhum dado para exibir na tabela');
+        console.log('⚠️ Tipo de dados:', typeof result.data);
+        console.log('⚠️ É array?', Array.isArray(result.data));
+        document.getElementById('memorialTable').innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Nenhum dado encontrado para exibir na tabela</div>';
+    }
+}
+
+function createMemorialTable(data, processingTime = 0, columnsFromBackend = null) {
+    if (!data || data.length === 0) return '<div class="alert alert-warning">Nenhum dado para exibir</div>';
+    // Use a ordem das colunas do backend se fornecida
+    let columns = columnsFromBackend && Array.isArray(columnsFromBackend) ? columnsFromBackend : Object.keys(data[0]).filter(col => col !== 'Arquivo');
+    
+    let tableHTML = `
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Dados Extraídos (${data.length} registros)</h5>
+                    ${processingTime > 0 ? `<small class="text-light"><i class="fas fa-clock me-1"></i>Processado em ${processingTime}s</small>` : ''}
+                </div>
+                <div>
+                    <button class="btn btn-light btn-sm" onclick="downloadMemorialExcel()" title="Baixar Excel">
+                        <i class="fas fa-file-excel me-1"></i>Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-primary">
+                            <tr>
+    `;
+    
+    // Cabeçalho com ícones
+    const columnIcons = {
+        'Formato': 'fas fa-building',
+        'Apartamento': 'fas fa-home',
+        'Tipo': 'fas fa-tag',
+        'Torre/Bloco': 'fas fa-layer-group',
+        'Área Privativa (m²)': 'fas fa-ruler-combined',
+        'Área Comum (m²)': 'fas fa-share-alt',
+        'Área Total (m²)': 'fas fa-calculator',
+        'Fração Ideal (%)': 'fas fa-percentage',
+        'Área Terreno (m²)': 'fas fa-map',
+        'Descrição': 'fas fa-align-left',
+        'Número da Casa': 'fas fa-home',
+        'Área do Terreno (m²)': 'fas fa-map',
+        'Área Construída (m²)': 'fas fa-ruler-combined',
+        'Área Comum Real (m²)': 'fas fa-share-alt',
+        'Área Total Real (m²)': 'fas fa-calculator',
+        'Fração Ideal': 'fas fa-percentage'
+    };
+    
+    columns.forEach(column => {
+        const icon = columnIcons[column] || 'fas fa-columns';
+        tableHTML += `<th><i class="${icon} me-1"></i>${column}</th>`;
+    });
+    
+    tableHTML += `
+                            </tr>
+                        </thead>
+                        <tbody>
+    `;
+    
+    // Dados com formatação
+    data.forEach((row, index) => {
+        const rowClass = index % 2 === 0 ? '' : 'table-light';
+        tableHTML += `<tr class="${rowClass}">`;
+        columns.forEach(column => {
+            const value = row[column] || '';
+            let formattedValue = value;
+            
+            // Formatação especial para valores numéricos
+            if (column.includes('Área') && value && !isNaN(value)) {
+                formattedValue = parseFloat(value).toFixed(2);
+            } else if (column.includes('Fração') && value && !isNaN(value)) {
+                formattedValue = parseFloat(value).toFixed(2) + '%';
+            }
+            
+            tableHTML += `<td class="align-middle">${formattedValue}</td>`;
+        });
+        tableHTML += '</tr>';
+    });
+    
+    tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return tableHTML;
+}
+
+// Funções de download para memorial
+function downloadMemorialExcel() {
+    if (!memorialData || !memorialData.excel_file) {
+        showAlert('Nenhum arquivo Excel disponível para download', 'warning');
+        return;
+    }
+    
+    const downloadUrl = `/api/memorial/download/${memorialData.excel_file}`;
+    window.open(downloadUrl, '_blank');
+    showAlert('Download iniciado!', 'success');
+}
+

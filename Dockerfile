@@ -10,7 +10,6 @@ COPY . /app
 # Instala dependências essenciais do sistema
 RUN apt-get update && \
     apt-get install -y \
-        build-essential \
         poppler-utils \
         tesseract-ocr \
         tesseract-ocr-por \
@@ -29,7 +28,6 @@ RUN apt-get update && \
         libgdk-pixbuf2.0-dev \
         libgtk-3-dev \
         python3-dev \
-        wget \
         && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
@@ -38,18 +36,12 @@ RUN apt-get update && \
     tesseract --version && \
     tesseract --list-langs
 
-# Baixar e instalar Ghostscript 10.05.1 manualmente (sem suporte a X11)
-RUN wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/ghostscript-10.05.1.tar.gz && \
-    tar -xzf ghostscript-10.05.1.tar.gz && \
-    cd ghostscript-10.05.1 && \
-    ./configure --without-x && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf ghostscript-10.05.1*
+# Remover Ghostscript antigo e instalar versão 10.03.0 (corrige bugs com PDFs assinados)
+RUN apt-get update && \
+    apt-get install -y ghostscript
 
 # Expõe a porta padrão do Flask
 EXPOSE 5000
 
 # Comando para rodar o app em modo debug para facilitar logs
-CMD ["python", "app.py"]
+CMD ["python", "app.py"] 
