@@ -13,7 +13,6 @@ RUN apt-get update && \
         poppler-utils \
         tesseract-ocr \
         tesseract-ocr-por \
-        ghostscript \
         qpdf \
         libmagic1 \
         libffi-dev \
@@ -36,6 +35,16 @@ RUN apt-get update && \
     # Verifica se o tesseract está funcionando
     tesseract --version && \
     tesseract --list-langs
+
+# Remover Ghostscript antigo e instalar versão 10.03.0 (corrige bugs com PDFs assinados)
+RUN apt-get update && \
+    apt-get install -y wget && \
+    apt-get remove --purge -y ghostscript && \
+    wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs1003/ghostscript-10.03.0-linux-x86_64.tgz && \
+    tar -xzf ghostscript-10.03.0-linux-x86_64.tgz && \
+    mv ghostscript-10.03.0-linux-x86_64/gs-1003-linux-x86_64 /usr/bin/gs && \
+    chmod +x /usr/bin/gs && \
+    rm -rf ghostscript-10.03.0-linux-x86_64*
 
 # Expõe a porta padrão do Flask
 EXPOSE 5000
