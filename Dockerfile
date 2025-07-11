@@ -38,15 +38,15 @@ RUN apt-get update && \
     tesseract --version && \
     tesseract --list-langs
 
-# Baixar e instalar Ghostscript 10.05.1 manualmente (compilando a partir do código-fonte)
+# Baixar e instalar Ghostscript 10.05.1 manualmente (sem suporte a X11)
 RUN wget https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/ghostscript-10.05.1.tar.gz && \
     tar -xzf ghostscript-10.05.1.tar.gz && \
     cd ghostscript-10.05.1 && \
-    ./configure && \
+    ./configure --without-x && \
     make && \
     make install && \
     cd .. && \
-    rm -rf ghostscript-10.05.1* 
+    rm -rf ghostscript-10.05.1*
 
 # Expõe a porta padrão do Flask
 EXPOSE 5000
