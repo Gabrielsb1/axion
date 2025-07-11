@@ -476,12 +476,15 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             )
         elif service_type == "validacao_juridica":
             prompt = (
-                "Analise os documentos para validação jurídica. Responda APENAS em JSON válido.\n"
+                "Analise os documentos para validação jurídica. Responda APENAS em JSON válido, sem texto adicional.\n"
                 "IMPORTANTE: Você deve retornar um objeto JSON com os campos do checklist, NÃO os nomes dos arquivos.\n"
                 "Para cada item do checklist, responda Sim/Não/N/A e forneça justificativa.\n"
                 "Para itens não aplicáveis ao tipo de documento, use 'N/A' com justificativa 'Não aplicável ao tipo de documento'.\n"
                 "IMPORTANTE: Nas justificativas, sempre mencione de qual documento específico foi extraída a informação.\n"
                 "Exemplo: 'Informação extraída do documento [nome_do_arquivo.pdf]: [detalhes da informação]'\n"
+                "CRÍTICO: Use apenas aspas duplas (\") para strings, não aspas simples (').\n"
+                "CRÍTICO: Não use quebras de linha dentro das strings JSON.\n"
+                "CRÍTICO: Certifique-se de que todas as strings estão corretamente fechadas.\n"
                 "FORMATO OBRIGATÓRIO: {\"item1\": \"Sim\", \"justificativa_item1\": \"Informação extraída do documento [arquivo.pdf]: [detalhes]\", \"item2\": \"N/A\", \"justificativa_item2\": \"Não aplicável ao tipo de documento\", ...}\n"
                 "Campos obrigatórios (responda TODOS):\n"
                 "PRENOTAÇÃO: item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12,item13\n"
@@ -524,13 +527,24 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
 
             cleaned_content = clean_json_response(content)
             
+            # Função para tentar corrigir JSON malformado
+            def try_fix_json(json_str):
+                # Remover quebras de linha dentro de strings
+                json_str = re.sub(r'"\s*\n\s*"', ' ', json_str)
+                # Corrigir vírgulas finais
+                json_str = re.sub(r',\s*}', '}', json_str)
+                json_str = re.sub(r',\s*]', ']', json_str)
+                # Corrigir aspas não fechadas
+                json_str = re.sub(r'([^"])\s*$', r'\1"', json_str)
+                # Remover caracteres especiais problemáticos
+                json_str = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_str)
+                return json_str
+            
             # Tentar encontrar JSON válido
             match = re.search(r'\{[\s\S]+\}', cleaned_content)
             if match:
                 json_str = match.group(0)
-                # Tentar corrigir strings não terminadas
-                json_str = re.sub(r'([^"])\s*$', r'\1"', json_str)  # Adicionar aspas se necessário
-                json_str = re.sub(r'([^"])\s*,\s*$', r'\1",', json_str)  # Corrigir vírgulas
+                json_str = try_fix_json(json_str)
                 
                 try:
                     result = json.loads(json_str)
@@ -539,22 +553,29 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                     return clean_and_validate_fields(result, service_type)
                 except json.JSONDecodeError as json_error:
                     print(f"⚠️ Erro no JSON extraído: {json_error}")
-                    # Tentar processar como JSON direto
+                    # Tentar processar como JSON direto com correções
                     try:
-                        result = json.loads(cleaned_content)
+                        fixed_content = try_fix_json(cleaned_content)
+                        result = json.loads(fixed_content)
                         print("✅ JSON direto processado com sucesso")
                         print(f"📊 Campos extraídos: {list(result.keys())}")
                         return clean_and_validate_fields(result, service_type)
                     except json.JSONDecodeError:
                         print("❌ Falha em ambos os métodos de parsing JSON")
-                        print(f"📄 Conteúdo recebido: {content[:500]}...")
+                        print(f"📄 Conteúdo recebido: {content[:1000]}...")
                         return {"error": f"Erro ao interpretar resposta da OpenAI: JSON malformado", "raw": content}
             
             # Se não encontrou JSON com regex, tentar direto
-            result = json.loads(cleaned_content)
-            print("✅ JSON direto processado com sucesso")
-            print(f"📊 Campos extraídos: {list(result.keys())}")
-            return clean_and_validate_fields(result, service_type)
+            try:
+                fixed_content = try_fix_json(cleaned_content)
+                result = json.loads(fixed_content)
+                print("✅ JSON direto processado com sucesso")
+                print(f"📊 Campos extraídos: {list(result.keys())}")
+                return clean_and_validate_fields(result, service_type)
+            except json.JSONDecodeError:
+                print("❌ Falha em todos os métodos de parsing JSON")
+                print(f"📄 Conteúdo recebido: {content[:1000]}...")
+                return {"error": f"Erro ao interpretar resposta da OpenAI: JSON malformado", "raw": content}
             
         except Exception as e:
             print(f"❌ Erro ao processar JSON: {str(e)}")
