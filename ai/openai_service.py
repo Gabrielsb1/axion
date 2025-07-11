@@ -116,6 +116,47 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
             'pontuacao_qualificacao', 'documentos_faltantes', 'documentos_complementares_faltantes',
             'problemas_identificados', 'recomendacoes_especificas'
         ]
+    elif service_type == 'validacao_juridica':
+        expected_fields = [
+            # Checklist 2024-ABR - Validação Jurídica Completa
+            # PRENOTAÇÃO (MATRÍCULA) - 13 itens
+            'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7', 'item8', 'item9', 'item10', 'item11', 'item12', 'item13',
+            
+            # TÍTULO - 27 itens
+            'itemT1', 'itemT2', 'itemT3', 'itemT4', 'itemT5', 'itemT6', 'itemT7', 'itemT8', 'itemT9', 'itemT10', 'itemT11', 'itemT12', 'itemT13',
+            'itemT14', 'itemT15', 'itemT16', 'itemT17', 'itemT18', 'itemT19', 'itemT20', 'itemT21', 'itemT22', 'itemT23', 'itemT24', 'itemT25', 'itemT26', 'itemT27',
+            
+            # CONFERÊNCIA - 22 itens
+            'itemC1', 'itemC2', 'itemC3', 'itemC4', 'itemC5', 'itemC6', 'itemC7', 'itemC8', 'itemC9', 'itemC10', 'itemC11', 'itemC12', 'itemC13',
+            'itemC14', 'itemC15', 'itemC16', 'itemC17', 'itemC18', 'itemC19', 'itemC20', 'itemC21', 'itemC22',
+            
+            # REGISTRO - 12 itens
+            'itemR1', 'itemR2', 'itemR3', 'itemR4', 'itemR5', 'itemR6', 'itemR7', 'itemR8', 'itemR9', 'itemR10', 'itemR11', 'itemR12',
+            
+            # Justificativas - Todos os itens
+            'justificativa_item1', 'justificativa_item2', 'justificativa_item3', 'justificativa_item4', 'justificativa_item5',
+            'justificativa_item6', 'justificativa_item7', 'justificativa_item8', 'justificativa_item9', 'justificativa_item10',
+            'justificativa_item11', 'justificativa_item12', 'justificativa_item13',
+            'justificativa_itemT1', 'justificativa_itemT2', 'justificativa_itemT3', 'justificativa_itemT4', 'justificativa_itemT5',
+            'justificativa_itemT6', 'justificativa_itemT7', 'justificativa_itemT8', 'justificativa_itemT9', 'justificativa_itemT10',
+            'justificativa_itemT11', 'justificativa_itemT12', 'justificativa_itemT13', 'justificativa_itemT14', 'justificativa_itemT15',
+            'justificativa_itemT16', 'justificativa_itemT17', 'justificativa_itemT18', 'justificativa_itemT19', 'justificativa_itemT20',
+            'justificativa_itemT21', 'justificativa_itemT22', 'justificativa_itemT23', 'justificativa_itemT24', 'justificativa_itemT25',
+            'justificativa_itemT26', 'justificativa_itemT27',
+            'justificativa_itemC1', 'justificativa_itemC2', 'justificativa_itemC3', 'justificativa_itemC4', 'justificativa_itemC5',
+            'justificativa_itemC6', 'justificativa_itemC7', 'justificativa_itemC8', 'justificativa_itemC9', 'justificativa_itemC10',
+            'justificativa_itemC11', 'justificativa_itemC12', 'justificativa_itemC13', 'justificativa_itemC14', 'justificativa_itemC15',
+            'justificativa_itemC16', 'justificativa_itemC17', 'justificativa_itemC18', 'justificativa_itemC19', 'justificativa_itemC20',
+            'justificativa_itemC21', 'justificativa_itemC22',
+            'justificativa_itemR1', 'justificativa_itemR2', 'justificativa_itemR3', 'justificativa_itemR4', 'justificativa_itemR5',
+            'justificativa_itemR6', 'justificativa_itemR7', 'justificativa_itemR8', 'justificativa_itemR9', 'justificativa_itemR10',
+            'justificativa_itemR11', 'justificativa_itemR12',
+            
+            # Análise Final
+            'analise_completa', 'observacoes_recomendacoes', 'status_validacao',
+            'pontuacao_validacao', 'problemas_identificados', 'recomendacoes_especificas',
+            'fundamento_legal'
+        ]
     else:
         expected_fields = []
     
@@ -433,6 +474,24 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Exemplo de formato esperado: {\"contrato_presente\": \"Sim\", \"matricula_presente\": \"Sim\", \"analise_completa\": \"Análise completa...\", ...}\n"
                 "Documentos analisados:\n" + text
             )
+        elif service_type == "validacao_juridica":
+            prompt = (
+                "Analise os documentos para validação jurídica. Responda APENAS em JSON válido.\n"
+                "IMPORTANTE: Você deve retornar um objeto JSON com os campos do checklist, NÃO os nomes dos arquivos.\n"
+                "Para cada item do checklist, responda Sim/Não/N/A e forneça justificativa.\n"
+                "Para itens não aplicáveis ao tipo de documento, use 'N/A' com justificativa 'Não aplicável ao tipo de documento'.\n"
+                "IMPORTANTE: Nas justificativas, sempre mencione de qual documento específico foi extraída a informação.\n"
+                "Exemplo: 'Informação extraída do documento [nome_do_arquivo.pdf]: [detalhes da informação]'\n"
+                "FORMATO OBRIGATÓRIO: {\"item1\": \"Sim\", \"justificativa_item1\": \"Informação extraída do documento [arquivo.pdf]: [detalhes]\", \"item2\": \"N/A\", \"justificativa_item2\": \"Não aplicável ao tipo de documento\", ...}\n"
+                "Campos obrigatórios (responda TODOS):\n"
+                "PRENOTAÇÃO: item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12,item13\n"
+                "TÍTULO: itemT1,itemT2,itemT3,itemT4,itemT5,itemT6,itemT7,itemT8,itemT9,itemT10,itemT11,itemT12,itemT13,itemT14,itemT15,itemT16,itemT17,itemT18,itemT19,itemT20,itemT21,itemT22,itemT23,itemT24,itemT25,itemT26,itemT27\n"
+                "CONFERÊNCIA: itemC1,itemC2,itemC3,itemC4,itemC5,itemC6,itemC7,itemC8,itemC9,itemC10,itemC11,itemC12,itemC13,itemC14,itemC15,itemC16,itemC17,itemC18,itemC19,itemC20,itemC21,itemC22\n"
+                "REGISTRO: itemR1,itemR2,itemR3,itemR4,itemR5,itemR6,itemR7,itemR8,itemR9,itemR10,itemR11,itemR12\n"
+                "JUSTIFICATIVAS: justificativa_item1,justificativa_item2,justificativa_item3,justificativa_item4,justificativa_item5,justificativa_item6,justificativa_item7,justificativa_item8,justificativa_item9,justificativa_item10,justificativa_item11,justificativa_item12,justificativa_item13,justificativa_itemT1,justificativa_itemT2,justificativa_itemT3,justificativa_itemT4,justificativa_itemT5,justificativa_itemT6,justificativa_itemT7,justificativa_itemT8,justificativa_itemT9,justificativa_itemT10,justificativa_itemT11,justificativa_itemT12,justificativa_itemT13,justificativa_itemT14,justificativa_itemT15,justificativa_itemT16,justificativa_itemT17,justificativa_itemT18,justificativa_itemT19,justificativa_itemT20,justificativa_itemT21,justificativa_itemT22,justificativa_itemT23,justificativa_itemT24,justificativa_itemT25,justificativa_itemT26,justificativa_itemT27,justificativa_itemC1,justificativa_itemC2,justificativa_itemC3,justificativa_itemC4,justificativa_itemC5,justificativa_itemC6,justificativa_itemC7,justificativa_itemC8,justificativa_itemC9,justificativa_itemC10,justificativa_itemC11,justificativa_itemC12,justificativa_itemC13,justificativa_itemC14,justificativa_itemC15,justificativa_itemC16,justificativa_itemC17,justificativa_itemC18,justificativa_itemC19,justificativa_itemC20,justificativa_itemC21,justificativa_itemC22,justificativa_itemR1,justificativa_itemR2,justificativa_itemR3,justificativa_itemR4,justificativa_itemR5,justificativa_itemR6,justificativa_itemR7,justificativa_itemR8,justificativa_itemR9,justificativa_itemR10,justificativa_itemR11,justificativa_itemR12\n"
+                "ANÁLISE: analise_completa,observacoes_recomendacoes,status_validacao,pontuacao_validacao,problemas_identificados,recomendacoes_especificas,fundamento_legal\n"
+                "Documentos:\n" + text
+            )
         else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
         
@@ -447,7 +506,7 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
-            max_tokens=1024
+            max_tokens=4000  # Limite adequado para o modelo
         )
         content = response.choices[0].message.content
         print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")
@@ -464,19 +523,42 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 return response_text.strip()
 
             cleaned_content = clean_json_response(content)
+            
+            # Tentar encontrar JSON válido
             match = re.search(r'\{[\s\S]+\}', cleaned_content)
             if match:
-                result = json.loads(match.group(0))
-                print("✅ JSON extraído com sucesso")
-                print(f"📊 Campos extraídos: {list(result.keys())}")
-                return clean_and_validate_fields(result, service_type)
+                json_str = match.group(0)
+                # Tentar corrigir strings não terminadas
+                json_str = re.sub(r'([^"])\s*$', r'\1"', json_str)  # Adicionar aspas se necessário
+                json_str = re.sub(r'([^"])\s*,\s*$', r'\1",', json_str)  # Corrigir vírgulas
+                
+                try:
+                    result = json.loads(json_str)
+                    print("✅ JSON extraído e corrigido com sucesso")
+                    print(f"📊 Campos extraídos: {list(result.keys())}")
+                    return clean_and_validate_fields(result, service_type)
+                except json.JSONDecodeError as json_error:
+                    print(f"⚠️ Erro no JSON extraído: {json_error}")
+                    # Tentar processar como JSON direto
+                    try:
+                        result = json.loads(cleaned_content)
+                        print("✅ JSON direto processado com sucesso")
+                        print(f"📊 Campos extraídos: {list(result.keys())}")
+                        return clean_and_validate_fields(result, service_type)
+                    except json.JSONDecodeError:
+                        print("❌ Falha em ambos os métodos de parsing JSON")
+                        print(f"📄 Conteúdo recebido: {content[:500]}...")
+                        return {"error": f"Erro ao interpretar resposta da OpenAI: JSON malformado", "raw": content}
+            
+            # Se não encontrou JSON com regex, tentar direto
             result = json.loads(cleaned_content)
             print("✅ JSON direto processado com sucesso")
             print(f"📊 Campos extraídos: {list(result.keys())}")
             return clean_and_validate_fields(result, service_type)
+            
         except Exception as e:
             print(f"❌ Erro ao processar JSON: {str(e)}")
-            print(f"📄 Conteúdo recebido: {content[:200]}...")
+            print(f"📄 Conteúdo recebido: {content[:500]}...")
             return {"error": f"Erro ao interpretar resposta da OpenAI: {str(e)}", "raw": content}
             
     except Exception as e:

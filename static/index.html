@@ -37,7 +37,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Método de Processamento</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="processingMethod" id="methodChatGPT" value="chatgpt" checked disabled>
+                                <input class="form-check-input" type="radio" name="processingMethod" id="methodChatGPT" value="chatgpt" checked>
                                 <label class="form-check-label" for="methodChatGPT">
                                     <i class="fas fa-robot me-1"></i>OPEN AI
                                     <small class="text-muted d-block">Processamento inteligente com IA</small>
@@ -105,6 +105,7 @@
                             <i class="fas fa-user-check me-2"></i>Qualificação
                         </button>
                     </li>
+
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="memorial-tab" data-bs-toggle="tab" data-bs-target="#memorial" type="button" role="tab">
                             <i class="fas fa-file-alt me-2"></i>Memorial
@@ -128,7 +129,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-file-contract me-2"></i>Matrículas</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputMatricula" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;" multiple>
-                                        <button class="btn btn-success btn-sm" id="processFileMatricula" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileMatricula">
                                             <i class="fas fa-play me-1"></i>Processar
                                         </button>
                                     </div>
@@ -502,7 +503,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-file-text me-2"></i>Dados da Minuta</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputMinuta" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileMinuta" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileMinuta">
                                             <i class="fas fa-play me-1"></i>Processar
                                         </button>
                                     </div>
@@ -599,7 +600,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-file-signature me-2"></i>Dados dos Contratos</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputContratos" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileContratos" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileContratos">
                                             <i class="fas fa-play me-1"></i>Processar
                                         </button>
                                     </div>
@@ -999,7 +1000,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-scroll me-2"></i>Dados das Escrituras</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputEscrituras" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileEscrituras" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileEscrituras">
                                             <i class="fas fa-play me-1"></i>Processar
                                         </button>
                                     </div>
@@ -1458,7 +1459,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-user-check me-2"></i>Análise de Qualificação</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputQualificacao" accept=".pdf" style="width: 400px;" multiple>
-                                        <button class="btn btn-success btn-sm" id="processFileQualificacao" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileQualificacao">
                                             <i class="fas fa-play me-1"></i>Analisar Kit Completo
                                         </button>
                                     </div>
@@ -1508,180 +1509,655 @@
                         <!-- Checklist de Qualificação -->
                         <div class="card">
                             <div class="card-header">
-                                <h5><i class="fas fa-clipboard-check me-2"></i>Checklist de Qualificação</h5>
+                                <h5><i class="fas fa-clipboard-check me-2"></i>CHECKLIST – CONTRATOS EM GERAL</h5>
                             </div>
                             <div class="card-body">
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Kit de Documentos para Análise:</strong>
+                                    <strong>Análise Individual de Documentos:</strong>
                                     <br>
-                                    Envie todos os documentos relacionados ao registro de contrato para análise completa.
+                                    Envie os documentos que possui para análise individual. A IA analisará cada documento separadamente.
                                 </div>
 
-                                <!-- 1. Documentos Obrigatórios -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="card border-primary">
-                                            <div class="card-header bg-primary text-white">
-                                                <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>1. Documentos Obrigatórios</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">✅ Contrato</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkContrato" disabled>
-                                                                <label class="form-check-label" for="checkContrato">Contrato principal</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">✅ Matrícula</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkMatricula" disabled>
-                                                                <label class="form-check-label" for="checkMatricula">Matrícula do imóvel</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">✅ Certidão ITBI</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkCertidaoITBI" disabled>
-                                                                <label class="form-check-label" for="checkCertidaoITBI">Certidão de ITBI</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">✅ Procuração</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkProcuracao" disabled>
-                                                                <label class="form-check-label" for="checkProcuracao">Procuração (se aplicável)</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">✅ CND</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkCND" disabled>
-                                                                <label class="form-check-label" for="checkCND">Certidão Negativa de Débitos</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- ANÁLISE E ELABORAÇÃO -->
+                                <h3 class="mt-4"><i class="fas fa-search me-2"></i>ANÁLISE E ELABORAÇÃO</h3>
+                                
+                                <!-- PRENOTAÇÃO -->
+                                <h4 class="mt-3"><i class="fas fa-file-alt me-2"></i>PRENOTAÇÃO</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover checklist-table">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th style="width: 60%">Pergunta</th>
+                                                <th style="width: 8%">SIM</th>
+                                                <th style="width: 8%">NÃO</th>
+                                                <th style="width: 8%">N/A</th>
+                                                <th style="width: 16%">Justificativa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-primary checklist-item-number">1)</div>
+                                                    <div class="checklist-item-text">Há outro protocolo mais antigo vinculado à(s) matrícula(s) objeto do presente contrato?</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Verificar os avisos de matrícula.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item1" id="item1_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item1" id="item1_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item1" id="item1_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item1" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-primary checklist-item-number">2)</div>
+                                                    <div class="checklist-item-text">Tratando-se de reingresso, conferir se todas as pendências foram sanadas, e se toda documentação foi reapresentada;</div>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item2" id="item2_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item2" id="item2_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item2" id="item2_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item2" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-primary checklist-item-number">3)</div>
+                                                    <div class="checklist-item-text">Verificar se constou o nome correto do apresentante no protocolo.</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Caso esteja incorreto, fazer a correção no protocolo e informar o setor de atendimento e coordenador.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item3" id="item3_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item3" id="item3_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item3" id="item3_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item3" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">4)</div>
+                                                    <div class="checklist-item-text">O título foi apresentado juntamente com as certidões de inteiro teor e de situação jurídica ou de ônus reais e de ações reais ou pessoais reipersecutórias (dentro do prazo de validade de 30 dias), comprobatórias do registro anterior?</div>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item4" id="item4_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item4" id="item4_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item4" id="item4_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item4" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">5)</div>
+                                                    <div class="checklist-item-text">A nova matrícula preenche os requisitos do Art. 176, § 1º, inciso II, da Lei n.º 6.015/1973 – Lei de Registros Públicos? (REQUISITOS ESSENCIAIS PARA ABERTURA)</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Verificar circunscrição.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item5" id="item5_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item5" id="item5_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item5" id="item5_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item5" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">6)</div>
+                                                    <div class="checklist-item-text">Verificar dominialidade do imóvel. (terrenos foreiros à União ou ao Município, bem como terrenos de Marinha)?</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Se não constar nenhuma informação na matrícula, solicitar certidão de dominialidade.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item6" id="item6_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item6" id="item6_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item6" id="item6_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item6" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">7)</div>
+                                                    <div class="checklist-item-text">Em caso de abertura de matrícula, o imóvel for foreiro à União, tem RIP?</div>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item7" id="item7_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item7" id="item7_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item7" id="item7_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item7" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">8)</div>
+                                                    <div class="checklist-item-text">Incide sobre o imóvel algum ônus?</div>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item8" id="item8_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item8" id="item8_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item8" id="item8_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item8" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">9)</div>
+                                                    <div class="checklist-item-text">Para o caso de existir ônus, foi apresentado termo de autorização para o cancelamento de ônus ou constou no contrato cláusula que autorize esse cancelamento?</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Em caso de cédula de crédito imobiliário, deve constar o cancelamento específico ou termo de autorização referente a CCI.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item9" id="item9_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item9" id="item9_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item9" id="item9_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item9" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">10)</div>
+                                                    <div class="checklist-item-text">Constou a qualificação completa dos proprietários? Verificar se já tem cadastro ou imóvel nesta Serventia.</div>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item10" id="item10_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item10" id="item10_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item10" id="item10_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item10" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">11)</div>
+                                                    <div class="checklist-item-text">Em matrícula pertencente a esta Serventia, consta a inscrição imobiliária do imóvel/número de RIP?</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Caso não tenha constado na abertura, proceder com a Averbação de Inscrição Imobiliária com o Boletim Imobiliário, acompanhado de requerimento (específico ou genérico).</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item11" id="item11_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item11" id="item11_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item11" id="item11_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item11" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">12)</div>
+                                                    <div class="checklist-item-text">A inscrição imobiliária que consta na matrícula do imóvel é a mesma da certidão de ITBI apresentada?</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Caso não, proceder com a averbação de atualização de Inscrição Imobiliária com o Boletim Imobiliário, acompanhado de requerimento (específico ou genérico).</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item12" id="item12_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item12" id="item12_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item12" id="item12_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item12" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td>
+                                                    <div class="fw-bold text-success checklist-item-number">13)</div>
+                                                    <div class="checklist-item-text">Repasse para o 1º RI - Análise de repasse/cobrança em casos de matrícula-mãe e matrícula-filha:</div>
+                                                    <small class="text-muted checklist-item-obs"><i class="fas fa-info-circle me-1"></i>Verificar se o serviço envolve apenas a matrícula-filha ou também a matrícula-mãe. Se envolver apenas matrícula-filha: aplicar repasse simples. Se envolver matrícula-mãe e matrícula-filha (ex.: cancelamento de alienação fiduciária em ambas): aplicar repasse composto. Confirmar os valores atualizados de repasse antes de realizar a cobrança.</small>
+                                                </td>
+                                                <td class="text-center"><input type="radio" name="item13" id="item13_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item13" id="item13_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="item13" id="item13_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_item13" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                <!-- 2. Documentos Complementares -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="card border-success">
-                                            <div class="card-header bg-success text-white">
-                                                <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i>2. Documentos Complementares</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">📄 Certidão Simplificada</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkCertidaoSimplificada" disabled>
-                                                                <label class="form-check-label" for="checkCertidaoSimplificada">Certidão simplificada</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">📄 Declaração 1ª Aquisição</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkDeclaracaoPrimeiraAquisicao" disabled>
-                                                                <label class="form-check-label" for="checkDeclaracaoPrimeiraAquisicao">Declaração de primeira aquisição</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">📄 Aforamento/CAT</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkAforamentoCAT" disabled>
-                                                                <label class="form-check-label" for="checkAforamentoCAT">Aforamento ou CAT</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">📄 Boletim de Cadastro</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkBoletimCadastro" disabled>
-                                                                <label class="form-check-label" for="checkBoletimCadastro">Boletim de cadastro</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">📄 Outros Documentos</label>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkOutrosDocumentos" disabled>
-                                                                <label class="form-check-label" for="checkOutrosDocumentos">Outros documentos relevantes</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- TÍTULO -->
+                                <h4 class="mt-4"><i class="fas fa-file-signature me-2"></i>TÍTULO</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover checklist-table">
+                                        <thead class="table-warning">
+                                            <tr>
+                                                <th style="width: 60%">Pergunta</th>
+                                                <th style="width: 8%">SIM</th>
+                                                <th style="width: 8%">NÃO</th>
+                                                <th style="width: 8%">N/A</th>
+                                                <th style="width: 16%">Justificativa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">1)</div><div class="checklist-item-text">Todas as vias estão iguais?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT1" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">2)</div><div class="checklist-item-text">Todas as vias estão assinadas/possuem data e local de emissão do contrato?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT2" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">3)</div><div class="checklist-item-text">O contrato contém a descrição completa do imóvel e o número da matrícula?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT3" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">4)</div><div class="checklist-item-text">A certidão de ITBI contém a mesma descrição do imóvel conforme o contrato e matrícula do imóvel?</div><small class="text-muted checklist-item-obs">Verificar se a descrição da matrícula é a mesma no contrato, ITBI e matrícula (apartamento, bloco, número, quadra, empreendimento); Sempre consultar a validade da certidão. Verificar se a inscrição imobiliária constante na matrícula é o mesmo constante no contrato (em casos de atualização de inscrição imobiliária).</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT4" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">5)</div><div class="checklist-item-text">O valor base para ITBI é igual ou maior que o valor da transação do imóvel?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT5" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">6)</div><div class="checklist-item-text">As partes indicadas no ITBI são as mesmas do contrato? <span class="checklist-item-obs">OBS: Observar os nomes e CPF.</span></div></td>
+                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT6" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">7)</div><div class="checklist-item-text">O termo de quitação ou contrato foram devidamente assinados pelo(a) representante legal do(a) credor fiduciário(a)/interveniente quitante?</div><small class="text-muted checklist-item-obs">Para o caso de termo de quitação, foi devidamente assinado e com firma reconhecida</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT7" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">8)</div><div class="checklist-item-text">Os transmitentes estão qualificados no título conforme art. 648, V, do CNCGJ/MA? (Em caso de pessoa física: nome completo, RG, CPF, profissão, estado civil e endereço; em caso de pessoa jurídica: consta o número do CNPJ, representação e a sede?)</div><small class="text-muted checklist-item-obs">OBS: Há alguma divergência quanto aos dados constantes da matrícula e do título? (Se for o caso, fazer averbação retificando); OBS: sempre consultar no IMOB se já possui cadastro nesta Serventia.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT8" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">9)</div><div class="checklist-item-text">Em caso de apresentação de declaração de 1ª aquisição, foi assinada pelo(s) comprador(es) com firma devidamente reconhecida?</div><small class="text-muted checklist-item-obs">SEMPRE consultar no site da SEMFAZ e no sistema o CPF do(s) comprador(es), nos campos de adquirente, bem como no campo de proprietário.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT9" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">10)</div><div class="checklist-item-text">Os transmitentes ou adquirentes são casados sob regime diverso do legal?</div><small class="text-muted checklist-item-obs">OBS: se positivo, sempre deverá ser averbado o pacto antenupcial no Livro 2 e se for o caso registrado no Livro 3. OBS: sempre consultar no IMOB se já possui pacto registrado sob o livro 3 nesta Serventia.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT10" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">11)</div><div class="checklist-item-text">Se o(s) adquirente (s) e/ou transmitente(s) estiver(em) representado(s) por procurador, constar os dados da representação no texto do registro.</div><small class="text-muted checklist-item-obs">OBS: se não houver os dados da representação, solicitar por meio de Nota Devolutiva.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT11" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">12)</div><div class="checklist-item-text">Nos casos em que a Pessoa Jurídica for representada por sócio/gerente/administrador ou outro representante legal, deve constar no título os Atos Constitutivos da empresa que justifiquem a representação.</div><small class="text-muted checklist-item-obs">OBS: caso não conste, solicitar em nota devolutiva a documentação que justifique.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT12" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">13)</div><div class="checklist-item-text">Sempre que o transmitente for Pessoa Jurídica verificar se consta CND (Certidão Negativa de Débitos), ou há menção sobre a dispensa da referida certidão.</div><small class="text-muted checklist-item-obs">Fazer a conferência da CND por meio da internet e imprimir. OBS: se não for possível consultar, solicitar a certidão. (tratar com Oficial Substituto)</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT13" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">14)</div><div class="checklist-item-text">Foi apresentada a CND do(a) devedor(a) em caso de contrato de mútuo ou CCB?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT14" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">15)</div><div class="checklist-item-text">Se tratando de Pessoa Jurídica, imprimir Certidão Simplificada ou consulta da empresa na respectiva Junta Comercial.</div><small class="text-muted checklist-item-obs">OBS: sempre deve constar no texto do registro o NIRE e a data do ato constitutivo.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT15" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">16)</div><div class="checklist-item-text">Quando tratar-se de firma individual exigir os documentos de pessoa física. (pois não poderá ser registrado em nome da firma individual, por não possuir personalidade jurídica).</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT16" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">17)</div><div class="checklist-item-text">Em caso de terreno foreiro à União, foi apresentada a CAT onerosa com a descrição correta do imóvel e nome e CPF ou CNPJ do outorgante vendedor.</div><small class="text-muted checklist-item-obs">OBS: Fazer a validação da CAT via internet e imprimir.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT17" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">18)</div><div class="checklist-item-text">Em caso de terreno foreiro ao município, foi apresentado o Termo de Transferência de Aforamento ou Escritura Pública de Resgate de Aforamento?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT18" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">19)</div><div class="checklist-item-text">O contrato indica a matrícula, descrição e inscrição imobiliária do imóvel (verificar se houve atualização de inscrição imobiliária)?</div><small class="text-muted checklist-item-obs">Em caso de negativa, observar se a descrição está completa para individualizar o objeto. OBS: Fazer a comparação com o boletim de cadastro imobiliário também</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT19" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">20)</div><div class="checklist-item-text">Existe procuração para o(a) representante legal do(a) credor(a) fiduciário(a)?</div><small class="text-muted checklist-item-obs">A procuração deve estar válida e indicar os poderes específicos. Observar se existe distinção de "grupo" para determinados poderes e se é necessário a assinatura de mais um(a) representante.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT20" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">21)</div><div class="checklist-item-text">Consta no título requerimento genérico em que as partes autorizem a proceder todos os atos que se fizerem necessários?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT21" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">22)</div><div class="checklist-item-text">Deve ser efetuada alguma averbação precedente ou subsequente ao registro referente à qualificação dos proprietários (Exemplo: casamento, pacto antenupcial, retificação de dados)?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT22" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">23)</div><div class="checklist-item-text">Em caso de consolidação de propriedade de credor fiduciário, foram averbados os leilões negativos e a quitação da dívida?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT23" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">24)</div><div class="checklist-item-text">Fazer a conferência de todos os documentos públicos (validar todos os selos).</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT24" id="itemT24_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT24" id="itemT24_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT24" id="itemT24_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT24" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">25)</div><div class="checklist-item-text">A área foi transmitida no IMOB?</div><small class="text-muted checklist-item-obs">OBS: verificar os proprietários com atenção.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemT25" id="itemT25_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT25" id="itemT25_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT25" id="itemT25_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT25" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">26)</div><div class="checklist-item-text">Preencher o checklist do COAF.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT26" id="itemT26_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT26" id="itemT26_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT26" id="itemT26_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT26" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-warning checklist-item-number">27)</div><div class="checklist-item-text">Fazer o orçamento, caso necessário.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemT27" id="itemT27_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT27" id="itemT27_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemT27" id="itemT27_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemT27" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                <!-- 3. Análise da IA -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <div class="card border-info">
-                                            <div class="card-header bg-info text-white">
-                                                <h6 class="mb-0"><i class="fas fa-robot me-2"></i>3. Análise da Inteligência Artificial</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="mb-3">
-                                                            <label for="analiseQualificacao" class="form-label fw-bold">Análise Completa</label>
-                                                            <textarea class="form-control" id="analiseQualificacao" rows="8" readonly placeholder="A IA analisará cada documento e fornecerá uma análise completa da qualificação..."></textarea>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="observacoesQualificacao" class="form-label fw-bold">Observações e Recomendações</label>
-                                                            <textarea class="form-control" id="observacoesQualificacao" rows="4" readonly placeholder="Observações sobre documentos faltantes ou problemas identificados..."></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- CONFERÊNCIA -->
+                                <h4 class="mt-4"><i class="fas fa-check-circle me-2"></i>CONFERÊNCIA</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover checklist-table">
+                                        <thead class="table-info">
+                                            <tr>
+                                                <th style="width: 60%">Pergunta</th>
+                                                <th style="width: 8%">SIM</th>
+                                                <th style="width: 8%">NÃO</th>
+                                                <th style="width: 8%">N/A</th>
+                                                <th style="width: 16%">Justificativa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">1)</div><div class="checklist-item-text">Itens a serem observados de início: a) Dominialidade (se o imóvel é foreiro ao Município ou à União); b) Confirmar a Circunscrição (se realmente pertence à área que abrange o 3º RI); c) Certidões (confirmar validade).</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC1" id="itemC1_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC1" id="itemC1_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC1" id="itemC1_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC1" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">2)</div><div class="checklist-item-text">Em se tratando de reingresso, conferir se todas as pendências descritas na Nota Devolutiva foram sanadas e a documentação anexada ao kit.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC2" id="itemC2_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC2" id="itemC2_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC2" id="itemC2_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC2" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">3)</div><div class="checklist-item-text">Em atos de abertura de matrícula, a descrição do imóvel deverá ser de acordo com as certidões apresentadas, seguindo a padronização da Serventia.</div><small class="text-muted checklist-item-obs">OBS: o nome do condomínio sempre em caixa alta; quando o imóvel for foreiro, o texto será em negrito e sublinhado até esta informação;</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC3" id="itemC3_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC3" id="itemC3_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC3" id="itemC3_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC3" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">4)</div><div class="checklist-item-text">Nome e qualificação dos proprietários permanecerão em conformidade com as certidões, mesmo que contenham erros.</div><small class="text-muted checklist-item-obs">OBS: em caso de erro, verificar se foi realizada a averbação de retificação.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC4" id="itemC4_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC4" id="itemC4_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC4" id="itemC4_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC4" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">5)</div><div class="checklist-item-text">Verificar se os atos anteriores estão assinados.</div><small class="text-muted checklist-item-obs">OBS: caso necessário realizar ato apócrifo.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC5" id="itemC5_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC5" id="itemC5_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC5" id="itemC5_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC5" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">6)</div><div class="checklist-item-text">Nos casos de abertura, conferir se a matrícula foi marcada como temporária e destacar os campos das datas que somente serão preenchidos no momento do registro.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC6" id="itemC6_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC6" id="itemC6_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC6" id="itemC6_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC6" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">7)</div><div class="checklist-item-text">Quando a matrícula já estiver aberta, verificar a ordem dos atos e se o imóvel objeto do título confere com o descrito na matrícula;</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC7" id="itemC7_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC7" id="itemC7_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC7" id="itemC7_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC7" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">8)</div><div class="checklist-item-text">Conferir se o título traz informações completas sobre a qualificação da pessoa física:</div><small class="text-muted checklist-item-obs">OBS: Nome, estado civil, profissão, dados do casamento (se há pacto), qualificação do cônjuge e assinatura e rubrica das partes no título</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC8" id="itemC8_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC8" id="itemC8_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC8" id="itemC8_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC8" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">9)</div><div class="checklist-item-text">Conferir se o título traz informações completas sobre a qualificação da pessoa jurídica:</div><small class="text-muted checklist-item-obs">OBS: Razão Social, número do CNPJ, endereço da sede, CND Federal ou dispensa (no caso do vendedor(a)), Certidão Simplificada e dados do NIRE como registro e última alteração.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC9" id="itemC9_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC9" id="itemC9_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC9" id="itemC9_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC9" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">10)</div><div class="checklist-item-text">Confirmar se alguma das partes foram representadas por procurador e se constou a descrição completa dos dados da procuração.</div><small class="text-muted checklist-item-obs">OBS: Serventia, data, livro e folhas.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC10" id="itemC10_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC10" id="itemC10_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC10" id="itemC10_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC10" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">11)</div><div class="checklist-item-text">Se a representação for feita por Sócio/Gerente/Administrador ou outro representante legal, no modelo do texto não deve constar;</div><small class="text-muted checklist-item-obs">OBS: os dados devem constar apenas no título ou nos documentos apresentados (que devem ser arquivados).</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC11" id="itemC11_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC11" id="itemC11_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC11" id="itemC11_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC11" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">12)</div><div class="checklist-item-text">Verificar atenciosamente todos os valores referentes à Compra e Venda do Imóvel. (Valor da transação, valor da avaliação). No texto, tais valores devem ser dispostos sem espaço entre o cifrão e o primeiro número (Exemplo: R$2.000,00), e descritos também por extenso, sendo a primeira letra maiúscula (Exemplo: Dois mil reais).</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC12" id="itemC12_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC12" id="itemC12_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC12" id="itemC12_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC12" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">13)</div><div class="checklist-item-text">Conferir se os dados da inscrição imobiliária já estão na matrícula e se são os mesmos da certidão de ITBI.</div><small class="text-muted checklist-item-obs">OBS: caso não, proceder com a averbação de atualização de Inscrição Imobiliária com o Boletim Imobiliário, acompanhado de requerimento (específico ou genérico).</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC13" id="itemC13_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC13" id="itemC13_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC13" id="itemC13_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC13" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">14)</div><div class="checklist-item-text">Conferir todos os dados referentes ao ITBI.</div><small class="text-muted checklist-item-obs">OBS: Número da Certidão, número da Guia, data de pagamento, valor pago, valor da transação e da avaliação municipal, data da emissão da certidão.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC14" id="itemC14_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC14" id="itemC14_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC14" id="itemC14_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC14" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">15)</div><div class="checklist-item-text">Confirmar se há no título, requerimento para proceder com as averbações necessárias ao registro.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC15" id="itemC15_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC15" id="itemC15_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC15" id="itemC15_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC15" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">16)</div><div class="checklist-item-text">Os atos foram preenchidos corretamente no sistema?</div><small class="text-muted checklist-item-obs">- Observar se o cadastro do imóvel foi atualizado conforme o ato (inscrição imobiliária e atualização de endereço, por exemplo); - Observar se as caixas de valores foram lançadas corretamente, bem como se foi devidamente exportado para o COAF.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC16" id="itemC16_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC16" id="itemC16_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC16" id="itemC16_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC16" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">17)</div><div class="checklist-item-text">As partes foram cadastradas e atualizadas, quando for o caso, corretamente?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC17" id="itemC17_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC17" id="itemC17_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC17" id="itemC17_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC17" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">18)</div><div class="checklist-item-text">Os valores lançados para os atos respectivos estão corretos?</div><small class="text-muted checklist-item-obs">- Em caso de negativo, corrigir os valores no texto da minuta.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC18" id="itemC18_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC18" id="itemC18_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC18" id="itemC18_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC18" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">19)</div><div class="checklist-item-text">O COAF foi preenchido e assinado? (contratos transmissivos)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC19" id="itemC19_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC19" id="itemC19_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC19" id="itemC19_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC19" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">20)</div><div class="checklist-item-text">As minutas lançadas condizem com os atos a serem praticados no protocolo?</div><small class="text-muted checklist-item-obs">- Observar se a ordem dos atos foi lançada corretamente obedecendo a continuidade</small></td>
+                                                <td class="text-center"><input type="radio" name="itemC20" id="itemC20_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC20" id="itemC20_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC20" id="itemC20_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC20" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">21)</div><div class="checklist-item-text">Conferir se todas as partes assinaram o título (compradores, vendedores, procuradores, credor).</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC21" id="itemC21_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC21" id="itemC21_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC21" id="itemC21_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC21" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-info checklist-item-number">22)</div><div class="checklist-item-text">O kit está em conformidade com a ordem indicada ao final deste documento?</div></td>
+                                                <td class="text-center"><input type="radio" name="itemC22" id="itemC22_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC22" id="itemC22_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemC22" id="itemC22_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemC22" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                <!-- 4. Status Final -->
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="card border-warning">
-                                            <div class="card-header bg-warning text-dark">
-                                                <h6 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>4. Status Final da Qualificação</h6>
+                                <!-- REGISTRO -->
+                                <h4 class="mt-4"><i class="fas fa-stamp me-2"></i>REGISTRO</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover checklist-table">
+                                        <thead class="table-secondary">
+                                            <tr>
+                                                <th style="width: 60%">Pergunta</th>
+                                                <th style="width: 8%">SIM</th>
+                                                <th style="width: 8%">NÃO</th>
+                                                <th style="width: 8%">N/A</th>
+                                                <th style="width: 16%">Justificativa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">1)</div><div class="checklist-item-text">Verificar se toda a documentação pertinente está anexada ao kit do protocolo (exemplo: consulta do hash)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR1" id="itemR1_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR1" id="itemR1_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR1" id="itemR1_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR1" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">2)</div><div class="checklist-item-text">Fazer conferência do nome do apresentante (verificar em todos os protocolos, quando houver mais de um na mesma recepção)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR2" id="itemR2_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR2" id="itemR2_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR2" id="itemR2_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR2" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">3)</div><div class="checklist-item-text">Confirmar que o valor total do protocolo já está pago e será suficiente para o registro do título (a diferença para pagar pode ser até R$300,00)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR3" id="itemR3_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR3" id="itemR3_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR3" id="itemR3_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR3" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">4)</div><div class="checklist-item-text">Atualizar a data de todos os atos e atualizar a matrícula para a definitiva</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR4" id="itemR4_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR4" id="itemR4_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR4" id="itemR4_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR4" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">5)</div><div class="checklist-item-text">Inserir os serviços extras (conforme cada caso; em regra são: prenotação, comunicação, arquivamento, conferência e repasse)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR5" id="itemR5_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR5" id="itemR5_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR5" id="itemR5_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR5" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">6)</div><div class="checklist-item-text">Conferir os valores atribuídos aos atos e a natureza jurídica (conforme a tabela de emolumentos) e se o ato está vinculado ao protocolo correto (quando houver mais de um protocolo na mesma recepção)</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR6" id="itemR6_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR6" id="itemR6_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR6" id="itemR6_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR6" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">7)</div><div class="checklist-item-text">Requisitar todos os selos (serviços extras e atos) e consultar no site do TJ</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR7" id="itemR7_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR7" id="itemR7_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR7" id="itemR7_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR7" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">8)</div><div class="checklist-item-text">Alterar numeração da matrícula e data no texto, bem como, inserir o selo em cada ato</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR8" id="itemR8_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR8" id="itemR8_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR8" id="itemR8_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR8" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">9)</div><div class="checklist-item-text">Conferência final da formatação (fonte, espaço, caracteres) e se todas as correções feitas pela conferência já foram realizadas no texto.</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR9" id="itemR9_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR9" id="itemR9_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR9" id="itemR9_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR9" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">10)</div><div class="checklist-item-text">Conferência final dos cadastros e distribuição da área do imóvel</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR10" id="itemR10_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR10" id="itemR10_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR10" id="itemR10_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR10" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">11)</div><div class="checklist-item-text">Liberar para registro e por fim registrar cada ato</div></td>
+                                                <td class="text-center"><input type="radio" name="itemR11" id="itemR11_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR11" id="itemR11_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR11" id="itemR11_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR11" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                            <tr class="align-middle">
+                                                <td><div class="fw-bold text-secondary checklist-item-number">12)</div><div class="checklist-item-text">Fazer a colagem dos selos (sempre deverão ser colados no título objeto do registro e o kit do protocolo é apenas carimbado)</div><small class="text-muted checklist-item-obs">OBS: quando se tratar de requerimento será colada a etiqueta no original e arquivado no kit do protocolo e deve ser feito uma cópia que será selada e etiquetada para ser entregue ao cliente.</small></td>
+                                                <td class="text-center"><input type="radio" name="itemR12" id="itemR12_sim" value="sim" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR12" id="itemR12_nao" value="nao" class="form-check-input"></td>
+                                                <td class="text-center"><input type="radio" name="itemR12" id="itemR12_na" value="na" class="form-check-input"></td>
+                                                <td><div id="justificativa_itemR12" class="text-danger small justificativa-text"></div></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                             </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="statusQualificacao" class="form-label fw-bold">Status</label>
-                                                            <select class="form-select" id="statusQualificacao" disabled>
-                                                                <option value="">Aguardando análise...</option>
-                                                                <option value="aprovado">✅ Aprovado</option>
-                                                                <option value="pendente">⚠️ Pendente</option>
-                                                                <option value="reprovado">❌ Reprovado</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="pontuacaoQualificacao" class="form-label fw-bold">Pontuação</label>
-                                                            <input type="text" class="form-control" id="pontuacaoQualificacao" readonly placeholder="0/100">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1695,16 +2171,16 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-eye me-2"></i>OCR - PDFs Escaneados</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputOCR" accept=".pdf" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileOCR" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileOCR">
                                             <i class="fas fa-play me-1"></i>Processar OCR
                                         </button>
                                     </div>
                                 </div>
                                 <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2" id="downloadOCRPDF" title="Baixar PDF pesquisável" disabled>
+                                    <button class="btn btn-sm btn-outline-primary me-2" id="downloadOCRPDF" title="Baixar PDF pesquisável">
                                         <i class="fas fa-file-pdf"></i> PDF Pesquisável
                                     </button>
-                                    <button class="btn btn-sm btn-outline-info me-2" id="downloadOCRText" title="Baixar texto extraído" disabled>
+                                    <button class="btn btn-sm btn-outline-info me-2" id="downloadOCRText" title="Baixar texto extraído">
                                         <i class="fas fa-file-text"></i> Texto
                                     </button>
                                 </div>
@@ -1759,7 +2235,7 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-book me-2"></i>Dados do Memorial</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputMemorial" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileMemorial" disabled>
+                                        <button class="btn btn-success btn-sm" id="processFileMemorial">
                                             <i class="fas fa-play me-1"></i>Processar
                                         </button>
                                     </div>
@@ -1801,13 +2277,13 @@
                                     <h5 class="mb-0 me-3"><i class="fas fa-certificate me-2"></i>Certidão de Situação Jurídica</h5>
                                     <div class="d-flex align-items-center">
                                         <input type="file" class="form-control form-control-sm me-2" id="fileInputCertidao" accept=".pdf" style="width: 400px;">
-                                        <button class="btn btn-primary btn-sm" id="processFileCertidao" disabled type="button">
+                                        <button class="btn btn-primary btn-sm" id="processFileCertidao" type="button">
                                             <i class="fas fa-play me-1"></i>Processar Certidão
                                         </button>
                                     </div>
                                 </div>
                                 <div>
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadCertidaoPDF" title="Baixar certidão gerada" disabled type="button">
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadCertidaoPDF" title="Baixar certidão gerada" type="button">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
                                 </div>
@@ -1828,5 +2304,220 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="/static/app-simple.js"></script>
     <script type="module" src="/static/js/main.js"></script>
+            <script type="module" src="/static/js/qualificacao.js"></script>
+        <script src="/static/test_checklist_simple.js"></script>
+        <script>
+        // Função de teste inline para marcação do checklist
+        function testUpdateChecklist(campos) {
+            console.log('🧪 Testando marcação do checklist com:', Object.keys(campos));
+            
+            let itemsProcessados = 0;
+            
+            // Lista completa de todos os itens do checklist
+            const checklistItems = [
+                'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7', 'item8', 'item9', 'item10', 'item11', 'item12', 'item13',
+                'itemT1', 'itemT2', 'itemT3', 'itemT4', 'itemT5', 'itemT6', 'itemT7', 'itemT8', 'itemT9', 'itemT10', 'itemT11', 'itemT12', 'itemT13', 'itemT14', 'itemT15', 'itemT16', 'itemT17', 'itemT18', 'itemT19', 'itemT20', 'itemT21', 'itemT22', 'itemT23', 'itemT24', 'itemT25', 'itemT26', 'itemT27',
+                'itemC1', 'itemC2', 'itemC3', 'itemC4', 'itemC5', 'itemC6', 'itemC7', 'itemC8', 'itemC9', 'itemC10', 'itemC11', 'itemC12', 'itemC13', 'itemC14', 'itemC15', 'itemC16', 'itemC17', 'itemC18', 'itemC19', 'itemC20', 'itemC21', 'itemC22',
+                'itemR1', 'itemR2', 'itemR3', 'itemR4', 'itemR5', 'itemR6', 'itemR7', 'itemR8', 'itemR9', 'itemR10', 'itemR11', 'itemR12'
+            ];
+            
+            checklistItems.forEach(itemId => {
+                const value = campos[itemId];
+                const justificativa = campos[`justificativa_${itemId}`];
+                
+                if (value) {
+                    console.log(`✅ Processando ${itemId}: ${value}`);
+                    
+                    // Atualizar radio buttons
+                    const radioSim = document.getElementById(`${itemId}_sim`);
+                    const radioNao = document.getElementById(`${itemId}_nao`);
+                    const radioNa = document.getElementById(`${itemId}_na`);
+                    
+                    if (radioSim && radioNao && radioNa) {
+                        radioSim.checked = value === 'Sim';
+                        radioNao.checked = value === 'Não';
+                        radioNa.checked = value === 'N/A';
+                        
+                        itemsProcessados++;
+                        console.log(`✅ ${itemId} marcado como: ${value}`);
+                    } else {
+                        console.log(`❌ Elementos não encontrados para ${itemId}`);
+                    }
+                    
+                    // Atualizar justificativa
+                    const justificativaElement = document.getElementById(`justificativa_${itemId}`);
+                    if (justificativaElement && justificativa) {
+                        justificativaElement.textContent = justificativa;
+                        console.log(`✅ Justificativa atualizada para ${itemId}`);
+                    }
+                } else {
+                    console.log(`⚠️ Valor não encontrado para ${itemId}`);
+                }
+            });
+            
+            console.log(`🎯 Total de itens processados: ${itemsProcessados}`);
+            return itemsProcessados;
+        }
+        
+        // Função para testar com dados de exemplo
+        function testChecklistCompleto() {
+            const testData = {
+                "item1": "Sim",
+                "justificativa_item1": "Protocolo antigo verificado e não há vínculos pendentes.",
+                "item2": "Não",
+                "justificativa_item2": "Reingresso detectado mas pendências não foram sanadas.",
+                "item3": "Sim",
+                "justificativa_item3": "Nome do apresentante está correto no protocolo.",
+                "item4": "Sim",
+                "justificativa_item4": "Título apresentado com certidões de inteiro teor e situação jurídica dentro do prazo de validade.",
+                "item5": "Sim",
+                "justificativa_item5": "Nova matrícula preenche requisitos do Art. 176, § 1º, inciso II da Lei 6.015/1973.",
+                "item6": "N/A",
+                "justificativa_item6": "Não se aplica - imóvel não é foreiro.",
+                "item7": "N/A",
+                "justificativa_item7": "Não se aplica - imóvel não é foreiro à União.",
+                "item8": "Não",
+                "justificativa_item8": "Incide ônus sobre o imóvel mas não foi apresentado termo de autorização.",
+                "item9": "N/A",
+                "justificativa_item9": "Não se aplica - não há ônus sobre o imóvel.",
+                "item10": "Sim",
+                "justificativa_item10": "Qualificação completa dos proprietários consta e já possuem cadastro nesta Serventia.",
+                "item11": "Sim",
+                "justificativa_item11": "Inscrição imobiliária consta na matrícula pertencente a esta Serventia.",
+                "item12": "Sim",
+                "justificativa_item12": "Inscrição imobiliária da matrícula é a mesma da certidão de ITBI apresentada.",
+                "item13": "N/A",
+                "justificativa_item13": "Não se aplica - não envolve matrícula-mãe e matrícula-filha.",
+                "itemT1": "Sim",
+                "justificativa_itemT1": "Todas as vias estão iguais e corretas.",
+                "itemT2": "Sim",
+                "justificativa_itemT2": "Todas as vias estão assinadas com data e local de emissão do contrato.",
+                "itemT3": "Sim",
+                "justificativa_itemT3": "Contrato contém descrição completa do imóvel e número da matrícula.",
+                "itemT4": "Sim",
+                "justificativa_itemT4": "Certidão de ITBI contém a mesma descrição do imóvel conforme contrato e matrícula.",
+                "itemT5": "Sim",
+                "justificativa_itemT5": "Valor base para ITBI é igual ao valor da transação do imóvel.",
+                "itemT6": "Sim",
+                "justificativa_itemT6": "Partes indicadas no ITBI são as mesmas do contrato.",
+                "itemT7": "N/A",
+                "justificativa_itemT7": "Não se aplica - não há termo de quitação.",
+                "itemT8": "Sim",
+                "justificativa_itemT8": "Transmitentes estão qualificados conforme art. 648, V do CNCGJ/MA.",
+                "itemT9": "N/A",
+                "justificativa_itemT9": "Não se aplica - não há declaração de 1ª aquisição.",
+                "itemT10": "Não",
+                "justificativa_itemT10": "Transmitentes são casados sob regime diverso do legal, necessita averbação.",
+                "itemT11": "N/A",
+                "justificativa_itemT11": "Não se aplica - não há representação por procurador.",
+                "itemT12": "N/A",
+                "justificativa_itemT12": "Não se aplica - não há pessoa jurídica.",
+                "itemT13": "N/A",
+                "justificativa_itemT13": "Não se aplica - transmitente não é pessoa jurídica.",
+                "itemT14": "N/A",
+                "justificativa_itemT14": "Não se aplica - não há contrato de mútuo ou CCB.",
+                "itemT15": "N/A",
+                "justificativa_itemT15": "Não se aplica - não há pessoa jurídica.",
+                "itemT16": "N/A",
+                "justificativa_itemT16": "Não se aplica - não há firma individual.",
+                "itemT17": "N/A",
+                "justificativa_itemT17": "Não se aplica - terreno não é foreiro à União.",
+                "itemT18": "N/A",
+                "justificativa_itemT18": "Não se aplica - terreno não é foreiro ao município.",
+                "itemT19": "Sim",
+                "justificativa_itemT19": "Contrato indica matrícula, descrição e inscrição imobiliária do imóvel.",
+                "itemT20": "N/A",
+                "justificativa_itemT20": "Não se aplica - não há credor fiduciário.",
+                "itemT21": "Sim",
+                "justificativa_itemT21": "Título contém requerimento genérico autorizando todos os atos necessários.",
+                "itemT22": "N/A",
+                "justificativa_itemT22": "Não se aplica - não há averbações necessárias.",
+                "itemT23": "N/A",
+                "justificativa_itemT23": "Não se aplica - não há consolidação de propriedade.",
+                "itemT24": "Sim",
+                "justificativa_itemT24": "Todos os documentos públicos foram conferidos e selos validados.",
+                "itemT25": "Sim",
+                "justificativa_itemT25": "Área foi transmitida no IMOB com proprietários corretos.",
+                "itemT26": "Sim",
+                "justificativa_itemT26": "Checklist do COAF foi preenchido.",
+                "itemT27": "N/A",
+                "justificativa_itemT27": "Não se aplica - orçamento não é necessário.",
+                "itemC1": "Sim",
+                "justificativa_itemC1": "Dominialidade, circunscrição e certidões foram verificadas.",
+                "itemC2": "N/A",
+                "justificativa_itemC2": "Não se aplica - não é reingresso.",
+                "itemC3": "Sim",
+                "justificativa_itemC3": "Descrição do imóvel está de acordo com as certidões apresentadas.",
+                "itemC4": "Sim",
+                "justificativa_itemC4": "Nome e qualificação dos proprietários estão em conformidade com as certidões.",
+                "itemC5": "Sim",
+                "justificativa_itemC5": "Todos os atos anteriores estão assinados.",
+                "itemC6": "N/A",
+                "justificativa_itemC6": "Não se aplica - não é abertura de matrícula.",
+                "itemC7": "Sim",
+                "justificativa_itemC7": "Ordem dos atos está correta e imóvel confere com a matrícula.",
+                "itemC8": "Sim",
+                "justificativa_itemC8": "Título traz informações completas sobre qualificação da pessoa física.",
+                "itemC9": "N/A",
+                "justificativa_itemC9": "Não se aplica - não há pessoa jurídica.",
+                "itemC10": "N/A",
+                "justificativa_itemC10": "Não se aplica - não há representação por procurador.",
+                "itemC11": "N/A",
+                "justificativa_itemC11": "Não se aplica - não há representação por sócio/gerente.",
+                "itemC12": "Sim",
+                "justificativa_itemC12": "Valores referentes à compra e venda estão corretos e bem formatados.",
+                "itemC13": "Sim",
+                "justificativa_itemC13": "Dados da inscrição imobiliária estão na matrícula e são os mesmos da certidão de ITBI.",
+                "itemC14": "Sim",
+                "justificativa_itemC14": "Todos os dados referentes ao ITBI foram conferidos.",
+                "itemC15": "Sim",
+                "justificativa_itemC15": "Título contém requerimento para proceder com averbações necessárias.",
+                "itemC16": "Sim",
+                "justificativa_itemC16": "Atos foram preenchidos corretamente no sistema.",
+                "itemC17": "Sim",
+                "justificativa_itemC17": "Partes foram cadastradas e atualizadas corretamente.",
+                "itemC18": "Sim",
+                "justificativa_itemC18": "Valores lançados para os atos estão corretos.",
+                "itemC19": "Sim",
+                "justificativa_itemC19": "COAF foi preenchido e assinado.",
+                "itemC20": "Sim",
+                "justificativa_itemC20": "Minutas lançadas condizem com os atos a serem praticados.",
+                "itemC21": "Sim",
+                "justificativa_itemC21": "Todas as partes assinaram o título.",
+                "itemC22": "Sim",
+                "justificativa_itemC22": "Kit está em conformidade com a ordem indicada.",
+                "itemR1": "Sim",
+                "justificativa_itemR1": "Toda documentação pertinente está anexada ao kit do protocolo.",
+                "itemR2": "Sim",
+                "justificativa_itemR2": "Nome do apresentante foi conferido em todos os protocolos.",
+                "itemR3": "Sim",
+                "justificativa_itemR3": "Valor total do protocolo está pago e será suficiente para o registro.",
+                "itemR4": "Sim",
+                "justificativa_itemR4": "Data de todos os atos foi atualizada e matrícula está definitiva.",
+                "itemR5": "Sim",
+                "justificativa_itemR5": "Serviços extras foram inseridos conforme necessário.",
+                "itemR6": "Sim",
+                "justificativa_itemR6": "Valores atribuídos aos atos e natureza jurídica estão corretos.",
+                "itemR7": "Sim",
+                "justificativa_itemR7": "Todos os selos foram requisitados e consultados no site do TJ.",
+                "itemR8": "Sim",
+                "justificativa_itemR8": "Numeração da matrícula e data foram alteradas no texto e selos inseridos.",
+                "itemR9": "Sim",
+                "justificativa_itemR9": "Conferência final da formatação foi realizada e correções aplicadas.",
+                "itemR10": "Sim",
+                "justificativa_itemR10": "Conferência final dos cadastros e distribuição da área foi realizada.",
+                "itemR11": "Sim",
+                "justificativa_itemR11": "Protocolo liberado para registro e cada ato foi registrado.",
+                "itemR12": "Sim",
+                "justificativa_itemR12": "Selos foram colados no título objeto do registro e kit carimbado."
+            };
+            
+            return testUpdateChecklist(testData);
+        }
+        
+        console.log('🧪 Funções de teste do checklist carregadas!');
+        console.log('Use: testUpdateChecklist({...}) ou testChecklistCompleto()');
+        </script>
+
 </body>
 </html> 

@@ -93,6 +93,8 @@ function setupMatriculaEventListeners() {
     });
 }
 
+
+
 // Funções de download específicas para matrícula
 function downloadWordFile() {
     if (!window.currentData) {
@@ -231,5 +233,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Aguardar um pouco para o app-simple.js carregar primeiro
     setTimeout(() => {
         setupMatriculaEventListeners();
+        
+        // Inicializar qualificação se disponível
+        if (typeof setupQualificacaoEventListeners === 'function') {
+            console.log('🚀 Axion - Configurando qualificação...');
+            setupQualificacaoEventListeners();
+        }
     }, 100);
 }); 

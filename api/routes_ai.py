@@ -477,7 +477,7 @@ def process_qualificacao():
         # Analisar com OpenAI
         try:
             from ai.openai_service import extract_fields_with_openai
-            campos = extract_fields_with_openai(texto_completo, model=model, service_type='qualificacao')
+            campos = extract_fields_with_openai(texto_completo, model=model, service_type='validacao_juridica')
         except Exception as ia_error:
             print(f"❌ Erro na análise pela IA: {ia_error}")
             return jsonify({
@@ -494,6 +494,164 @@ def process_qualificacao():
         return jsonify({
             'success': True,
             'message': f'Análise de qualificação concluída! {len(documentos_analisados)} documentos processados.',
+            'documentos_analisados': documentos_analisados,
+            'campos': campos,
+            'model': model,
+            'total_text_length': len(texto_completo),
+            'secure_processing': Config.SECURE_PROCESSING
+        })
+        
+    except Exception as e:
+        # Garantir limpeza em caso de erro
+        for temp_file in temp_files:
+            if Config.SECURE_PROCESSING:
+                secure_manager.cleanup_file(temp_file, user_ip)
+        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
+
+@ai_bp.route('/api/validacao-juridica', methods=['POST'])
+def process_validacao_juridica():
+    """Endpoint para validação jurídica baseada no Checklist 2024-ABR"""
+    temp_files = []
+    user_ip = request.remote_addr
+    
+    try:
+        if 'files[]' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+        
+        files = request.files.getlist('files[]')
+        if not files or all(file.filename == '' for file in files):
+            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
+        
+        # Validar arquivos
+        valid_files = []
+        for file in files:
+            if file.filename and allowed_file(file.filename):
+                valid_files.append(file)
+            else:
+                return jsonify({'error': f'Arquivo inválido: {file.filename}. Apenas PDFs são permitidos.'}), 400
+        
+        if not valid_files:
+            return jsonify({'error': 'Nenhum arquivo válido encontrado'}), 400
+        
+        print(f"📁 Processando {len(valid_files)} arquivos para validação jurídica...")
+        
+        # Processar cada arquivo individualmente
+        documentos_analisados = []
+        textos_extraidos = []
+        
+        for i, file in enumerate(valid_files):
+            try:
+                original_filename = secure_filename(file.filename or f'arquivo_{i}.pdf')
+                print(f"📄 Processando arquivo {i+1}/{len(valid_files)}: {original_filename}")
+                
+                # Processar arquivo de forma segura
+                if Config.SECURE_PROCESSING:
+                    temp_file_path, file_id = secure_manager.process_file_securely(
+                        file, original_filename, user_ip
+                    )
+                else:
+                    file_id = str(uuid.uuid4())
+                    upload_filename = f"{file_id}_{original_filename}"
+                    temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
+                    file.save(temp_file_path)
+                
+                temp_files.append(temp_file_path)
+                
+                # Extrair texto do PDF
+                text_content = ""
+                try:
+                    # Descriptografar se necessário
+                    if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+                        temp_file_path = secure_manager.decrypt_file(temp_file_path)
+                    
+                    # Tentar extrair texto diretamente
+                    with open(temp_file_path, 'rb') as f:
+                        pdf_reader = pypdf.PdfReader(f)
+                        for page in pdf_reader.pages:
+                            text_content += page.extract_text() + "\n"
+                except Exception as e:
+                    print(f"❌ Erro ao extrair texto de {original_filename}: {str(e)}")
+                    text_content = ""
+                
+                # Limpar e normalizar texto
+                text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+                
+                # Se não houver texto suficiente, tentar OCR
+                if not text_content or len(text_content.strip()) < 50:
+                    print(f"📄 Tentando OCR para {original_filename}...")
+                    try:
+                        from ai.ocr_service import process_pdf_with_ocr, extract_text_from_pdf
+                        temp_ocr_path = temp_file_path + '_ocr.pdf'
+                        ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
+                        if ocr_result.get('success'):
+                            print(f"✅ OCR bem-sucedido para {original_filename}")
+                            text_content = extract_text_from_pdf(temp_ocr_path)
+                            text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+                        else:
+                            print(f"❌ OCR falhou para {original_filename}")
+                    except Exception as ocr_error:
+                        print(f"❌ Erro durante OCR de {original_filename}: {str(ocr_error)}")
+                
+                if text_content and len(text_content.strip()) > 10:
+                    documentos_analisados.append({
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'text_length': len(text_content),
+                        'text_preview': text_content[:200]
+                    })
+                    textos_extraidos.append(f"=== DOCUMENTO: {original_filename} ===\n{text_content}\n")
+                else:
+                    print(f"⚠️ Texto insuficiente em {original_filename}")
+                    documentos_analisados.append({
+                        'filename': original_filename,
+                        'file_id': file_id,
+                        'text_length': 0,
+                        'error': 'Texto insuficiente ou não legível'
+                    })
+                
+            except Exception as e:
+                print(f"❌ Erro ao processar {original_filename}: {str(e)}")
+                documentos_analisados.append({
+                    'filename': original_filename,
+                    'file_id': str(uuid.uuid4()),
+                    'error': str(e)
+                })
+        
+        # Se não há textos suficientes, retornar erro
+        if not textos_extraidos:
+            return jsonify({
+                'error': 'Não foi possível extrair texto suficiente dos documentos.',
+                'details': 'Todos os arquivos podem estar vazios, corrompidos ou não conter texto legível.',
+                'documentos_analisados': documentos_analisados
+            }), 400
+        
+        # Combinar todos os textos para análise
+        texto_completo = "\n\n".join(textos_extraidos)
+        print(f"📝 Texto combinado: {len(texto_completo)} caracteres")
+        
+        # Obter modelo selecionado
+        model = request.form.get('model', 'gpt-3.5-turbo')
+        
+        # Analisar com OpenAI
+        try:
+            from ai.openai_service import extract_fields_with_openai
+            campos = extract_fields_with_openai(texto_completo, model=model, service_type='validacao_juridica')
+        except Exception as ia_error:
+            print(f"❌ Erro na análise pela IA: {ia_error}")
+            return jsonify({
+                'error': 'Erro ao analisar documentos com IA.',
+                'details': str(ia_error),
+                'documentos_analisados': documentos_analisados
+            }), 500
+        
+        # Limpar arquivos temporários
+        for temp_file in temp_files:
+            if Config.SECURE_PROCESSING:
+                secure_manager.cleanup_file(temp_file, user_ip)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Validação jurídica concluída! {len(documentos_analisados)} documentos processados.',
             'documentos_analisados': documentos_analisados,
             'campos': campos,
             'model': model,
