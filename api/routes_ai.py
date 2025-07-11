@@ -332,6 +332,18 @@ def process_certidao():
             except Exception:
                 pass
 
+        # Debug: mostrar campos extraídos antes de gerar o PDF
+        print("Campos extraídos para o PDF:", campos)
+        # Mapeamento para garantir nomes corretos
+        campos['cnm'] = campos.get('cnm') or campos.get('matricula') or ''
+        campos['descricao_imovel'] = campos.get('descricao_imovel') or campos.get('descricao') or ''
+        campos['proprietarios'] = campos.get('proprietarios') or campos.get('proprietario') or ''
+        campos['inscricao_imobiliaria'] = campos.get('inscricao_imobiliaria') or campos.get('inscricao') or ''
+        campos['onus_certidao_negativa'] = campos.get('onus_certidao_negativa') or campos.get('onus') or ''
+        campos['senhorio_enfiteuta'] = campos.get('senhorio_enfiteuta') or campos.get('senhorio') or campos.get('enfiteuta') or ''
+        campos['rip'] = campos.get('rip') or ''
+        campos['nome_solicitante'] = campos.get('nome_solicitante') or campos.get('solicitante') or ''
+
         # Retornar PDF gerado e info do tipo/motivo
         return (buffer.getvalue(), 200, {
             'Content-Type': 'application/pdf',

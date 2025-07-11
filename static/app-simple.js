@@ -23,56 +23,6 @@ const services = {
             'valorTransacao', 'valorAvaliacao', 'dataAlienacao', 'formaAlienacao', 'valorDivida', 'valorAlienacaoContrato', 'tipoOnus'
         ]
     },
-    contratos: {
-        name: 'Contratos',
-        icon: 'fas fa-file-signature',
-        fields: [
-            // 1. Qualificação das Partes - Parte 1
-            'nomeParte1', 'nacionalidadeParte1', 'estadoCivilParte1', 'profissaoParte1', 'cpfParte1', 'rgParte1', 'enderecoParte1', 'conjugeParte1',
-            // 1. Qualificação das Partes - Parte 2
-            'nomeParte2', 'nacionalidadeParte2', 'estadoCivilParte2', 'profissaoParte2', 'cpfParte2', 'rgParte2', 'enderecoParte2', 'conjugeParte2',
-            // 1. Qualificação das Partes - Pessoas Jurídicas
-            'razaoSocial', 'cnpj', 'enderecoPJ', 'representanteLegal', 'instrumentoRepresentacao',
-            // 2. Identificação do Imóvel
-            'enderecoImovel', 'numeroMatriculaImovel', 'cartorioRegistro', 'tipoImovel', 'descricaoCompletaImovel', 'origemPropriedade',
-            // 3. Natureza do Negócio Jurídico
-            'tipoContrato', 'finalidadeTransacao', 'valorNegocio', 'formaPagamento', 'condicoesClausulas',
-            // 4. Informações Tributárias e Encargos
-            'valorITBI', 'itbiPago', 'baseCalculo', 'declaracaoIsencao', 'itrCcir', 'debitosFiscais', 'certidoesNegativas',
-            // 5. Ônus e Gravames
-            'hipoteca', 'alienacaoFiduciaria', 'usufruto', 'penhora', 'clausulasInalienabilidade', 'acoesJudiciais',
-            // 6. Documentos Complementares
-            'procuracoes', 'escriturasAnteriores', 'contratosPreliminares', 'certidoes',
-            // 7. Informações para a Minuta
-            'tituloMinuta', 'identificacaoOutorgantes', 'clausulasContratuais', 'declaracoesLegais', 'responsabilidadeTributos', 'reconhecimentoFirma'
-        ]
-    },
-    escrituras: {
-        name: 'Escrituras',
-        icon: 'fas fa-scroll',
-        fields: [
-            // 1. Identificação do Ato
-            'tipoEscritura', 'numeroLivro', 'numeroFolha', 'dataLavratura', 'nomeTabeliao', 'termoEletronico',
-            // 2. Qualificação das Partes - Parte 1
-            'nomeParte1Escritura', 'nacionalidadeParte1Escritura', 'estadoCivilParte1Escritura', 'profissaoParte1Escritura', 'cpfParte1Escritura', 'rgParte1Escritura', 'enderecoParte1Escritura', 'regimeBensParte1',
-            // 2. Qualificação das Partes - Parte 2
-            'nomeParte2Escritura', 'nacionalidadeParte2Escritura', 'estadoCivilParte2Escritura', 'profissaoParte2Escritura', 'cpfParte2Escritura', 'rgParte2Escritura', 'enderecoParte2Escritura', 'regimeBensParte2',
-            // 2. Qualificação das Partes - Pessoas Jurídicas
-            'razaoSocialEscritura', 'cnpjEscritura', 'enderecoPJEscritura', 'representanteLegalEscritura', 'instrumentoRepresentacaoEscritura',
-            // 3. Identificação do Imóvel
-            'enderecoImovelEscritura', 'matriculaEscritura', 'cartorioRegistroEscritura', 'areaTotalEscritura', 'confrontacoesEscritura', 'benfeitoriasEscritura', 'inscricaoCadastral', 'origemPropriedadeEscritura',
-            // 4. Informações do Negócio Jurídico
-            'valorImovelEscritura', 'formaPagamentoEscritura', 'condicoesSuspensivas', 'participacaoTerceiros', 'clausulasEspeciais',
-            // 5. Tributos e Documentos
-            'valorITBIEscritura', 'declaracaoIsencaoEscritura', 'numeroGuia', 'dataGuia', 'certidoesNegativas', 'certidaoEstadoCivil', 'certidaoMatricula', 'comprovantesResidencia',
-            // 6. Procurações
-            'outorganteProcura', 'outorgadoProcura', 'livroProcura', 'folhaProcura', 'dataLavraturaProcura', 'poderesConcedidos', 'validadeProcura', 'procuraEspecifica',
-            // 7. Ônus e Gravames
-            'existeOnus', 'tipoOnusEscritura', 'clausulasImpeditivas',
-            // 8. Cláusulas e Declarações Importantes
-            'declaracaoTributos', 'responsabilidadeRegistro', 'declaracaoQuitacao', 'imovelLivreDesembaracado', 'fePublicaTabeliao', 'assinaturas'
-        ]
-    },
     qualificacao: {
         name: 'Qualificação',
         icon: 'fas fa-user-check',
