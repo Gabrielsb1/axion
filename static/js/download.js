@@ -78,6 +78,71 @@ export function downloadWordFile(currentData, ui) {
     downloadBlobWithLocation(blob, fileName, 'word', ui);
 }
 
+// Função específica para gerar Word da certidão
+export function downloadCertidaoWord(certidaoData, ui) {
+    console.log('[downloadCertidaoWord] Chamado', certidaoData);
+    if (!certidaoData) {
+        ui.showAlert('Nenhum dado da certidão para baixar!', 'warning');
+        return;
+    }
+    
+    const content = formatCertidaoDataForWord(certidaoData);
+    const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const fileName = `certidao_${new Date().toISOString().slice(0, 10)}.docx`;
+    downloadBlobWithLocation(blob, fileName, 'word', ui);
+}
+
+// Função para formatar dados da certidão para Word
+function formatCertidaoDataForWord(data) {
+    let content = '';
+    
+    // Cabeçalho da certidão
+    content += 'CERTIDÃO DE SITUAÇÃO JURÍDICA\n';
+    content += '='.repeat(50) + '\n\n';
+    
+    // Dados da matrícula
+    content += 'DADOS DA MATRÍCULA:\n';
+    content += '-'.repeat(30) + '\n';
+    content += `CNM (Cadastro Nacional de Matrícula): ${data.cnm || ''}\n`;
+    content += `Inscrição Imobiliária: ${data.inscricao_imobiliaria || ''}\n`;
+    content += `RIP: ${data.rip || ''}\n\n`;
+    
+    // Descrição do imóvel
+    content += 'DESCRIÇÃO DO IMÓVEL:\n';
+    content += '-'.repeat(30) + '\n';
+    content += `${data.descricao_imovel || ''}\n\n`;
+    
+    // Proprietários
+    content += 'PROPRIETÁRIOS:\n';
+    content += '-'.repeat(30) + '\n';
+    content += `${data.proprietarios || ''}\n\n`;
+    
+    // Senhorio/Enfiteuta (se aplicável)
+    if (data.senhorio_enfiteuta) {
+        content += 'SENHORIO/ENFITEUTA:\n';
+        content += '-'.repeat(30) + '\n';
+        content += `${data.senhorio_enfiteuta}\n\n`;
+    }
+    
+    // Ônus e restrições
+    content += 'ÔNUS E RESTRIÇÕES:\n';
+    content += '-'.repeat(30) + '\n';
+    content += `${data.onus_certidao_negativa || 'Nenhum ônus encontrado.'}\n\n`;
+    
+    // Dados do solicitante
+    if (data.nome_solicitante) {
+        content += 'SOLICITANTE:\n';
+        content += '-'.repeat(30) + '\n';
+        content += `${data.nome_solicitante}\n\n`;
+    }
+    
+    // Data de emissão
+    content += `Data de emissão: ${new Date().toLocaleDateString('pt-BR')}\n`;
+    content += `Hora de emissão: ${new Date().toLocaleTimeString('pt-BR')}\n`;
+    
+    return content;
+}
+
 export function downloadPDFFile(currentData, ui) {
     console.log('[downloadPDFFile] Chamado', currentData);
     if (!currentData) {

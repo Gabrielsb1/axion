@@ -82,7 +82,7 @@ def process_file_chatgpt():
         
         # Obter modelo selecionado
         model = request.form.get('model', 'gpt-3.5-turbo')
-        print(f"🎯 Modelo recebido no backend: {model}")
+        print(f"🎯 Modelo recebido no endpoint /api/process-file: {model}")
         
         # Extrair campos com OpenAI
         campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
@@ -222,14 +222,15 @@ def process_certidao():
         # Extrair campos com OpenAI
         print("🤖 Iniciando extração com IA...")
         model = request.form.get('model', 'gpt-3.5-turbo')
+        print(f"🎯 Modelo recebido no endpoint /api/certidao (PDF): {model}")
         if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY.strip() == '':
             return jsonify({
                 'error': 'Chave da API OpenAI não configurada.',
                 'details': 'Configure a variável de ambiente OPENAI_API_KEY para usar a funcionalidade de IA.',
                 'suggestion': 'Adicione sua chave da OpenAI nas configurações do sistema.'
             }), 500
+        
         campos = None
-        temp_ocr_path = None
         try:
             campos = extract_fields_with_openai(text_content, model=model, service_type='certidao')
         except Exception as ia_error:
@@ -349,14 +350,20 @@ def process_certidao():
         campos['nome_solicitante'] = campos.get('nome_solicitante') or campos.get('solicitante') or ''
 
         # Retornar PDF gerado e info do tipo/motivo
+        import json
+        campos_json = json.dumps(campos)
+        
         return (buffer.getvalue(), 200, {
             'Content-Type': 'application/pdf',
             'Content-Disposition': f'attachment; filename=certidao_{tipo_certidao}_{file_id}.pdf',
             'X-Certidao-Tipo': tipo_certidao,
-            'X-Certidao-Motivo': motivo_certidao
+            'X-Certidao-Motivo': motivo_certidao,
+            'X-Certidao-Data': campos_json  # Incluir dados extraídos nos headers
         })
+        
     except Exception as e:
-        # Garantir limpeza em caso de erro
+        print(f"❌ Erro geral na geração da certidão: {str(e)}")
+        # Limpar arquivos temporários em caso de erro
         if Config.SECURE_PROCESSING and temp_file_path:
             secure_manager.cleanup_file(temp_file_path, user_ip)
         if 'temp_ocr_path' in locals() and temp_ocr_path and os.path.exists(temp_ocr_path):
@@ -364,7 +371,380 @@ def process_certidao():
                 os.remove(temp_ocr_path)
             except Exception:
                 pass
-        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
+        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500
+
+@ai_bp.route('/api/certidao/data', methods=['POST'])
+def get_certidao_data():
+    """Endpoint para extrair dados da certidão para download Word"""
+    from ai.ocr_service import extract_text_from_pdf, process_pdf_with_ocr
+    from ai.openai_service import extract_fields_with_openai
+    import io
+
+    temp_file_path = None
+    user_ip = request.remote_addr
+
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
+
+        original_filename = secure_filename(file.filename or 'unknown.pdf')
+        # Processar arquivo de forma segura
+        if Config.SECURE_PROCESSING:
+            temp_file_path, file_id = secure_manager.process_file_securely(
+                file, original_filename, user_ip
+            )
+        else:
+            file_id = str(uuid.uuid4())
+            upload_filename = f"{file_id}_{original_filename}"
+            temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
+            file.save(temp_file_path)
+
+        # Extrair texto do PDF (OCR se necessário)
+        text_content = ""
+        temp_ocr_path = None
+        
+        try:
+            # Descriptografar se necessário
+            if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+                temp_file_path = secure_manager.decrypt_file(temp_file_path)
+            
+            # Tentar extrair texto diretamente primeiro
+            with open(temp_file_path, 'rb') as f:
+                pdf_reader = pypdf.PdfReader(f)
+                for page in pdf_reader.pages:
+                    text_content += page.extract_text() + "\n"
+        except Exception as e:
+            print(f"❌ Erro ao extrair texto diretamente: {str(e)}")
+            text_content = ""
+        
+        # Limpar e normalizar texto
+        text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+        
+        # Se não houver texto suficiente, tentar OCR
+        if not text_content or len(text_content.strip()) < 50:
+            print("🔍 Texto insuficiente, tentando OCR...")
+            try:
+                if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+                    temp_file_path = secure_manager.decrypt_file(temp_file_path)
+                
+                text_content = process_pdf_with_ocr(temp_file_path, user_ip)
+                if not text_content:
+                    return jsonify({'error': 'Não foi possível extrair texto do PDF'}), 400
+            except Exception as ocr_error:
+                print(f"❌ Erro no OCR: {str(ocr_error)}")
+                return jsonify({'error': 'Erro no processamento OCR'}), 500
+
+        # Extrair campos usando OpenAI
+        print("🔍 Extraindo campos da certidão...")
+        model = request.form.get('model', 'gpt-3.5-turbo')
+        print(f"🎯 Modelo recebido no endpoint /api/certidao/data: {model}")
+        campos = extract_fields_with_openai(text_content, model=model, service_type="certidao")
+        
+        if not campos or 'error' in campos:
+            error_msg = campos.get('error', 'Erro desconhecido na extração') if campos else 'Nenhum dado extraído'
+            return jsonify({'error': f'Erro na extração de dados: {error_msg}'}), 500
+
+        # Limpar arquivos temporários
+        if Config.SECURE_PROCESSING and temp_file_path:
+            secure_manager.cleanup_file(temp_file_path, user_ip)
+        if 'temp_ocr_path' in locals() and temp_ocr_path and os.path.exists(temp_ocr_path):
+            try:
+                os.remove(temp_ocr_path)
+            except Exception:
+                pass
+
+        return jsonify({
+            'success': True,
+            'data': campos,
+            'message': 'Dados da certidão extraídos com sucesso'
+        })
+
+    except Exception as e:
+        print(f"❌ Erro geral na extração de dados da certidão: {str(e)}")
+        # Limpar arquivos temporários em caso de erro
+        if Config.SECURE_PROCESSING and temp_file_path:
+            secure_manager.cleanup_file(temp_file_path, user_ip)
+        if 'temp_ocr_path' in locals() and temp_ocr_path and os.path.exists(temp_ocr_path):
+            try:
+                os.remove(temp_ocr_path)
+            except Exception:
+                pass
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500 
+
+@ai_bp.route('/api/certidao/word', methods=['POST'])
+def generate_certidao_word():
+    """Endpoint para gerar arquivo Word da certidão com exatamente a mesma formatação do PDF"""
+    try:
+        from docx import Document
+        from docx.shared import Inches, Pt, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.oxml.shared import OxmlElement, qn
+        import io
+        from datetime import datetime
+        
+        # Obter dados da requisição
+        data = request.get_json()
+        if not data or 'data' not in data:
+            return jsonify({'error': 'Dados da certidão não fornecidos'}), 400
+        
+        certidao_data = data['data']
+        
+        # Criar documento Word
+        doc = Document()
+        
+        # Configurar margens (exatamente iguais ao PDF)
+        sections = doc.sections
+        for section in sections:
+            section.top_margin = Inches(1.2)      # 3cm
+            section.bottom_margin = Inches(0.8)   # 2cm
+            section.left_margin = Inches(1.2)     # 3cm
+            section.right_margin = Inches(1.2)    # 3cm
+        
+        # Data
+        data_certidao = datetime.now().strftime('%d/%m/%Y')
+        
+        # Cores (exatamente iguais ao PDF)
+        cor_vermelho = RGBColor(255, 0, 0)      # #FF0000
+        cor_azul = RGBColor(0, 112, 192)        # #0070C0
+        cor_azul_escuro = RGBColor(0, 32, 96)   # #002060
+        
+        # Adicionar título centralizado e sublinhado
+        title_paragraph = doc.add_paragraph()
+        title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title_run = title_paragraph.add_run("CERTIDÃO DE SITUAÇÃO JURÍDICA DO IMÓVEL")
+        title_run.bold = True
+        title_run.underline = True
+        title_run.font.size = Pt(13)
+        title_run.font.name = 'Times New Roman'
+        
+        # Adicionar espaço após título
+        doc.add_paragraph()
+        
+        # Adicionar parágrafo principal justificado
+        main_paragraph = doc.add_paragraph()
+        main_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        
+        # Adicionar texto com formatação exata do PDF
+        # Início do texto
+        run1 = main_paragraph.add_run("CERTIFICO, nos termos dos arts. 17 e 19, §9º, da Lei n.º 6.015/1973, e art. 123, caput, do Provimento n.º 149/2023, do Conselho Nacional de Justiça - CNJ, que, revendo os livros, arquivos e sistemas eletrônicos desta Serventia, inclusive cadastro interno de ações reais e pessoais reipersecutórias envolvendo imóveis desta circunscrição, encontrei o lançamento relativo ao registro de imóvel seguinte: ")
+        run1.font.size = Pt(12)
+        run1.font.name = 'Times New Roman'
+        
+        # CNM em vermelho
+        run2 = main_paragraph.add_run("CADASTRO NACIONAL DE MATRÍCULA - CNM: ")
+        run2.bold = True
+        run2.underline = True
+        run2.font.size = Pt(12)
+        run2.font.name = 'Times New Roman'
+        
+        run3 = main_paragraph.add_run(f"{certidao_data.get('cnm', '')}")
+        run3.font.color.rgb = cor_vermelho
+        run3.font.size = Pt(12)
+        run3.font.name = 'Times New Roman'
+        
+        run4 = main_paragraph.add_run(", ")
+        run4.font.size = Pt(12)
+        run4.font.name = 'Times New Roman'
+        
+        # Descrição do imóvel em azul
+        run5 = main_paragraph.add_run("DESCRIÇÃO DO IMÓVEL: ")
+        run5.bold = True
+        run5.underline = True
+        run5.font.size = Pt(12)
+        run5.font.name = 'Times New Roman'
+        
+        run6 = main_paragraph.add_run(f"{certidao_data.get('descricao_imovel', '')}")
+        run6.font.color.rgb = cor_azul
+        run6.font.size = Pt(12)
+        run6.font.name = 'Times New Roman'
+        
+        run7 = main_paragraph.add_run(", ")
+        run7.font.size = Pt(12)
+        run7.font.name = 'Times New Roman'
+        
+        # Senhorio direto (se existir)
+        if certidao_data.get('senhorio_direto'):
+            run8 = main_paragraph.add_run("SENHORIO DIRETO: ")
+            run8.bold = True
+            run8.underline = True
+            run8.font.size = Pt(12)
+            run8.font.name = 'Times New Roman'
+            
+            run9 = main_paragraph.add_run(f"{certidao_data.get('senhorio_direto')}")
+            run9.font.size = Pt(12)
+            run9.font.name = 'Times New Roman'
+            
+            run10 = main_paragraph.add_run(", ")
+            run10.font.size = Pt(12)
+            run10.font.name = 'Times New Roman'
+        
+        # Enfiteuta (se existir)
+        if certidao_data.get('enfiteuta'):
+            run11 = main_paragraph.add_run("ENFITEUTA: ")
+            run11.bold = True
+            run11.underline = True
+            run11.font.size = Pt(12)
+            run11.font.name = 'Times New Roman'
+            
+            run12 = main_paragraph.add_run(f"{certidao_data.get('enfiteuta')}")
+            run12.font.size = Pt(12)
+            run12.font.name = 'Times New Roman'
+            
+            run13 = main_paragraph.add_run(", ")
+            run13.font.size = Pt(12)
+            run13.font.name = 'Times New Roman'
+        
+        # Proprietários em azul escuro
+        run14 = main_paragraph.add_run("PROPRIETÁRIO(S): ")
+        run14.bold = True
+        run14.underline = True
+        run14.font.size = Pt(12)
+        run14.font.name = 'Times New Roman'
+        
+        run15 = main_paragraph.add_run(f"{certidao_data.get('proprietarios', '')}")
+        run15.font.color.rgb = cor_azul_escuro
+        run15.font.size = Pt(12)
+        run15.font.name = 'Times New Roman'
+        
+        run16 = main_paragraph.add_run(", ")
+        run16.font.size = Pt(12)
+        run16.font.name = 'Times New Roman'
+        
+        # Inscrição imobiliária em azul escuro
+        run17 = main_paragraph.add_run("INSCRIÇÃO IMOBILIÁRIA: ")
+        run17.bold = True
+        run17.underline = True
+        run17.font.size = Pt(12)
+        run17.font.name = 'Times New Roman'
+        
+        run18 = main_paragraph.add_run(f"{certidao_data.get('inscricao_imobiliaria', '')}")
+        run18.font.color.rgb = cor_azul_escuro
+        run18.font.size = Pt(12)
+        run18.font.name = 'Times New Roman'
+        
+        run19 = main_paragraph.add_run(", ")
+        run19.font.size = Pt(12)
+        run19.font.name = 'Times New Roman'
+        
+        # RIP (se existir)
+        if certidao_data.get('rip'):
+            run20 = main_paragraph.add_run("REGISTRO IMOBILIÁRIO PATRIMONIAL (RIP): ")
+            run20.bold = True
+            run20.underline = True
+            run20.font.size = Pt(12)
+            run20.font.name = 'Times New Roman'
+            
+            run21 = main_paragraph.add_run(f"{certidao_data.get('rip')}")
+            run21.font.size = Pt(12)
+            run21.font.name = 'Times New Roman'
+            
+            run22 = main_paragraph.add_run(", ")
+            run22.font.size = Pt(12)
+            run22.font.name = 'Times New Roman'
+        
+        # Ônus em negrito
+        run23 = main_paragraph.add_run("DIREITOS, ÔNUS REAIS E RESTRIÇÕES JUDICIAIS E ADMINISTRATIVAS: ")
+        run23.bold = True
+        run23.underline = True
+        run23.font.size = Pt(12)
+        run23.font.name = 'Times New Roman'
+        
+        run24 = main_paragraph.add_run(f"{certidao_data.get('onus_certidao_negativa', '')}")
+        run24.bold = True
+        run24.font.size = Pt(12)
+        run24.font.name = 'Times New Roman'
+        
+        run25 = main_paragraph.add_run(". ")
+        run25.font.size = Pt(12)
+        run25.font.name = 'Times New Roman'
+        
+        # Finalização
+        run26 = main_paragraph.add_run(f"O referido é verdade e dou fé. São Luís/MA, {data_certidao}. ")
+        run26.font.size = Pt(12)
+        run26.font.name = 'Times New Roman'
+        
+        # Emolumentos
+        run27 = main_paragraph.add_run("Emolumentos: ")
+        run27.bold = True
+        run27.font.size = Pt(12)
+        run27.font.name = 'Times New Roman'
+        
+        run28 = main_paragraph.add_run("Certidão: Ato 16.24.4 - ")
+        run28.font.size = Pt(12)
+        run28.font.name = 'Times New Roman'
+        
+        run29 = main_paragraph.add_run("R$ 87,31")
+        run29.font.color.rgb = cor_azul
+        run29.font.size = Pt(12)
+        run29.font.name = 'Times New Roman'
+        
+        run30 = main_paragraph.add_run("; FEMP: ")
+        run30.font.size = Pt(12)
+        run30.font.name = 'Times New Roman'
+        
+        run31 = main_paragraph.add_run("R$ 3,49")
+        run31.font.color.rgb = cor_azul
+        run31.font.size = Pt(12)
+        run31.font.name = 'Times New Roman'
+        
+        run32 = main_paragraph.add_run("; FADEP: ")
+        run32.font.size = Pt(12)
+        run32.font.name = 'Times New Roman'
+        
+        run33 = main_paragraph.add_run("R$ 3,49")
+        run33.font.color.rgb = cor_azul
+        run33.font.size = Pt(12)
+        run33.font.name = 'Times New Roman'
+        
+        run34 = main_paragraph.add_run("; FERC: ")
+        run34.font.size = Pt(12)
+        run34.font.name = 'Times New Roman'
+        
+        run35 = main_paragraph.add_run("R$ 2,61")
+        run35.font.color.rgb = cor_azul
+        run35.font.size = Pt(12)
+        run35.font.name = 'Times New Roman'
+        
+        run36 = main_paragraph.add_run(". ")
+        run36.font.size = Pt(12)
+        run36.font.name = 'Times New Roman'
+        
+        # Assinatura
+        run37 = main_paragraph.add_run("João Gabriel Santos Barros, Escrevente Autorizado.")
+        run37.bold = True
+        run37.font.size = Pt(12)
+        run37.font.name = 'Times New Roman'
+        
+        # Adicionar quebra de linha
+        main_paragraph.add_run("\n")
+        
+        # Validade em azul escuro
+        run38 = main_paragraph.add_run("Validade: 30 dias.")
+        run38.bold = True
+        run38.font.color.rgb = cor_azul_escuro
+        run38.font.size = Pt(12)
+        run38.font.name = 'Times New Roman'
+        
+        # Salvar documento em buffer
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f'certidao_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx',
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerar arquivo Word: {str(e)}")
+        return jsonify({'error': f'Erro ao gerar arquivo Word: {str(e)}'}), 500
 
 @ai_bp.route('/api/qualificacao', methods=['POST'])
 def process_qualificacao():
@@ -489,6 +869,7 @@ def process_qualificacao():
         
         # Obter modelo selecionado
         model = request.form.get('model', 'gpt-3.5-turbo')
+        print(f"🎯 Modelo recebido no endpoint /api/qualificacao: {model}")
         
         # Analisar com OpenAI usando nova lógica avançada
         try:

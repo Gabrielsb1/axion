@@ -64,8 +64,8 @@ def identify_document_type_from_filename(filename):
     print(f"⚠️ Nenhum padrão encontrado no nome: {filename}")
     return "DESCONHECIDO"
 
-def classify_document_type(text_content, filename="", model="gpt-4o"):
-    """Etapa 1: Classifica o tipo do documento usando GPT-4o com contexto rigoroso"""
+def classify_document_type(text_content, filename="", model="gpt-3.5-turbo"):
+    """Etapa 1: Classifica o tipo do documento usando modelo selecionado com contexto rigoroso"""
     try:
         print(f"🔍 Classificando tipo do documento com {model}")
         
@@ -369,7 +369,7 @@ def get_checklist_for_document_type(document_type):
 5. As informações do documento são compatíveis com outros documentos apresentados? (COMPARAÇÃO ENTRE DOCUMENTOS)
 """)
 
-def extract_document_specific_data(text_content, document_type, filename="", model="gpt-4o"):
+def extract_document_specific_data(text_content, document_type, filename="", model="gpt-3.5-turbo"):
     """Extrai TODOS os dados de cada documento, independentemente do tipo"""
     try:
         print(f"🔍 Extraindo TODOS os dados de {document_type} - {filename}")
@@ -637,7 +637,7 @@ Sua tarefa é extrair **TODOS OS DADOS RELEVANTES** do documento, independenteme
         print(f"❌ Erro na extração de dados do documento: {str(e)}")
         return {"error": f"Erro na extração: {str(e)}"}
 
-def analyze_checklist_with_document_data(all_results, model="gpt-4o"):
+def analyze_checklist_with_document_data(all_results, model="gpt-3.5-turbo"):
     """Analisa o checklist com base em TODOS os dados extraídos de TODOS os documentos"""
     try:
         print(f"🔍 Analisando checklist com TODOS os dados de {len(all_results)} documentos")
@@ -801,11 +801,11 @@ CHECKLIST A SER RESPONDIDO:
         print(f"❌ Erro na análise do checklist: {str(e)}")
         return {"error": f"Erro na análise do checklist: {str(e)}"}
 
-def analyze_document_with_checklist(text_content, document_type, filename="", model="gpt-4o", all_documents=None, all_filenames=None):
+def analyze_document_with_checklist(text_content, document_type, filename="", model="gpt-3.5-turbo", all_documents=None, all_filenames=None):
     """Função mantida para compatibilidade - agora usa a nova lógica"""
     return extract_document_specific_data(text_content, document_type, filename, model)
 
-def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-4o"):
+def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-3.5-turbo"):
     """Analisa múltiplos documentos para qualificação - cada documento individualmente"""
     try:
         print(f"🔍 Iniciando análise de qualificação com {model}")
@@ -951,6 +951,7 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
     try:
         print(f"🔍 Iniciando extração com OpenAI - Modelo: {model} - Serviço: {service_type}")
         print(f"📝 Tamanho do texto: {len(text)} caracteres")
+        print(f"🎯 Modelo que será usado na API OpenAI: {model}")
         
         if service_type == "matricula":
             prompt = (
@@ -1032,17 +1033,23 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "- cnm: Cadastro Nacional de Matrícula (número da matrícula)\n"
                 "- descricao_imovel: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
                 "- proprietarios: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. "
-                "Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. "
-                "Não inclua proprietários antigos ou substituídos. "
-                "Se houver mais de um proprietário atual (ex: coproprietários ou cônjuges), liste todos no mesmo campo.\n"
+                "⚠️ **CRÍTICO**: Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. "
+                "⚠️ **CRÍTICO**: Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). "
+                "⚠️ **CRÍTICO**: Se houver mais de um proprietário (coproprietários), liste TODOS com seus respectivos dados. "
+                "⚠️ **CRÍTICO**: Não inclua proprietários antigos ou substituídos. "
+                "⚠️ **CRÍTICO**: Para casais, use formato: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...'\n"
                 "- senhorio_enfiteuta: Nome do senhorio direto e enfiteuta (se aplicável)\n"
                 "- inscricao_imobiliaria: Inscrição imobiliária (número de inscrição no cartório)\n"
                 "- rip: RIP (Registro de Imóveis Públicos) se houver\n"
                 "- onus_certidao_negativa: Ônus reais, restrições judiciais e administrativas, ou certidão negativa (transcreva o texto completo referente a esses itens)\n"
                 "- nome_solicitante: Nome completo do solicitante da certidão\n\n"
+                "⚠️ **EXEMPLOS DE FORMATAÇÃO CORRETA**:\n"
+                "1. Proprietário solteiro: 'João da Silva, CPF: 123.456.789-00, solteiro, brasileiro, residente em...'\n"
+                "2. Casal: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...'\n"
+                "3. Múltiplos proprietários: 'João da Silva, CPF: 123.456.789-00, casado, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, residente em... E Pedro Santos, CPF: 111.222.333-00, solteiro, residente em...'\n\n"
                 "Exemplo de formato esperado:\n"
                 "{\"cnm\": \"123456\", \"descricao_imovel\": \"Casa residencial localizada na Rua X...\", "
-                "\"proprietarios\": \"João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em...\", "
+                "\"proprietarios\": \"João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...\", "
                 "... }\n\n"
                 "Texto da matrícula:\n" + text
             )

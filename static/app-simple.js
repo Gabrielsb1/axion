@@ -1679,19 +1679,23 @@ async function downloadOCRText() {
 // === ABA CERTIDÃO ===
 const fileInputCertidao = document.getElementById('fileInputCertidao');
 const processFileCertidao = document.getElementById('processFileCertidao');
+const downloadCertidaoWord = document.getElementById('downloadCertidaoWord');
 const downloadCertidaoPDF = document.getElementById('downloadCertidaoPDF');
 const certidaoStatus = document.getElementById('certidaoStatus');
 const certidaoPreview = document.getElementById('certidaoPreview');
 
 let certidaoPDFBlob = null;
+let certidaoData = null; // Dados extraídos da certidão para download Word
 
-if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
+if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF && downloadCertidaoWord) {
     fileInputCertidao.addEventListener('change', () => {
         processFileCertidao.disabled = !fileInputCertidao.files.length;
         certidaoStatus.innerHTML = '';
         certidaoPreview.innerHTML = '';
         downloadCertidaoPDF.disabled = true;
+        downloadCertidaoWord.disabled = true;
         certidaoPDFBlob = null;
+        certidaoData = null;
     });
 
     processFileCertidao.addEventListener('click', async () => {
@@ -1701,11 +1705,19 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
         certidaoPreview.innerHTML = '';
         processFileCertidao.disabled = true;
         downloadCertidaoPDF.disabled = true;
+        downloadCertidaoWord.disabled = true;
         certidaoPDFBlob = null;
+        certidaoData = null;
         try {
             const formData = new FormData();
             formData.append('file', file);
-            // Não enviar mais modelo ou tipo
+            
+            // Obter modelo das configurações globais
+            const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
+            const selectedModel = modelElement ? modelElement.value : 'gpt-3.5-turbo';
+            formData.append('model', selectedModel);
+            console.log('🎯 Modelo selecionado para certidão (configurações globais):', selectedModel);
+            
             const response = await fetch('/api/certidao', {
                 method: 'POST',
                 body: formData
@@ -1713,6 +1725,35 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
             if (response.ok) {
                 const blob = await response.blob();
                 certidaoPDFBlob = blob;
+                
+                // Extrair dados da certidão dos headers da resposta
+                try {
+                    const certidaoDataHeader = response.headers.get('X-Certidao-Data');
+                    if (certidaoDataHeader) {
+                        console.log('🎯 Dados extraídos dos headers da resposta');
+                        certidaoData = JSON.parse(certidaoDataHeader);
+                        downloadCertidaoWord.disabled = false;
+                    } else {
+                        console.log('⚠️ Dados não encontrados nos headers, fazendo chamada adicional');
+                        // Fallback: fazer chamada adicional se dados não estiverem nos headers
+                        const formDataWord = new FormData();
+                        formDataWord.append('file', file);
+                        formDataWord.append('model', selectedModel);
+                        
+                        const certidaoResponse = await fetch('/api/certidao/data', {
+                            method: 'POST',
+                            body: formDataWord
+                        });
+                        if (certidaoResponse.ok) {
+                            const certidaoDataResult = await certidaoResponse.json();
+                            certidaoData = certidaoDataResult.data;
+                            downloadCertidaoWord.disabled = false;
+                        }
+                    }
+                } catch (dataError) {
+                    console.log('Não foi possível extrair dados para Word:', dataError);
+                }
+                
                 // Capturar tipo e motivo dos headers
                 const tipo = response.headers.get('X-Certidao-Tipo');
                 const motivo = response.headers.get('X-Certidao-Motivo');
@@ -1727,7 +1768,7 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
                 }
                 certidaoStatus.innerHTML = info + '<div class="alert alert-success">Certidão gerada com sucesso! Clique para baixar.</div>';
                 downloadCertidaoPDF.disabled = false;
-                certidaoPreview.innerHTML = '<span class="text-success">PDF pronto para download.</span>';
+                certidaoPreview.innerHTML = '<span class="text-success">PDF e Word prontos para download.</span>';
             } else {
                 let errorMsg = 'Erro ao gerar certidão.';
                 try {
@@ -1759,6 +1800,52 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF) {
             URL.revokeObjectURL(url);
         }, 100);
     });
+
+    // Evento para download Word da certidão
+    if (downloadCertidaoWord) {
+        downloadCertidaoWord.addEventListener('click', async () => {
+            if (!certidaoData) {
+                showAlert('Nenhum dado da certidão disponível para download Word', 'warning');
+                return;
+            }
+            
+            try {
+                // Chamar API para gerar arquivo Word real
+                const response = await fetch('/api/certidao/word', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: certidaoData
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const fileName = `certidao_${new Date().toISOString().slice(0, 10)}.docx`;
+                    
+                    // Download do arquivo
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showAlert('Arquivo Word da certidão baixado com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    showAlert(`Erro ao gerar arquivo Word: ${error.error}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar Word:', error);
+                showAlert('Erro ao gerar arquivo Word', 'danger');
+            }
+        });
+    }
 }
 
 const certidaoTipoSelect = document.getElementById('certidaoTipoSelect');
