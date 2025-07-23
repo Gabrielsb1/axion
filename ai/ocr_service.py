@@ -21,6 +21,7 @@ from datetime import datetime
 from config import Config
 from security import secure_manager
 
+os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
 # Caminho do qpdf - ajuste conforme necessário
 import platform
 if platform.system() == "Windows":
