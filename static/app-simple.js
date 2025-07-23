@@ -507,12 +507,10 @@ async function processSingleFile(serviceId) {
         const processingMethod = processingMethodElement ? processingMethodElement.value : 'chatgpt';
         formData.append('method', processingMethod);
         
-        if (processingMethod === 'chatgpt') {
-            const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
-            const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
-            formData.append('model', model);
-            console.log('🔧 Modelo selecionado para envio:', model);
-        }
+        // Sempre usar gpt-4o como modelo
+        const DEFAULT_MODEL = 'gpt-4o';
+        formData.append('model', DEFAULT_MODEL);
+        console.log('�� Modelo selecionado para envio:', DEFAULT_MODEL);
         
         console.log('Enviando dados para processamento:');
         console.log('Arquivo:', currentFile.name);

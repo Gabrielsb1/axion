@@ -25,10 +25,10 @@ def allowed_file(filename):
 
 @ai_bp.route('/api/process-file', methods=['POST'])
 def process_file_chatgpt():
-    """Endpoint otimizado para processamento com ChatGPT - extrai texto diretamente do PDF"""
+    """Endpoint otimizado para processamento com ChatGPT - agora SEMPRE faz OCR antes da IA"""
+    from ai.ocr_service import extract_text_from_pdf, process_pdf_with_ocr
     temp_file_path = None
     user_ip = request.remote_addr
-    
     try:
         if 'file' not in request.files:
             return jsonify({'error': 'Nenhum arquivo enviado'}), 400
@@ -37,60 +37,70 @@ def process_file_chatgpt():
             return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
         if not allowed_file(file.filename):
             return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
-        
         # Obter tipo de serviço
         service_type = request.form.get('service', 'matricula')
         print(f"🎯 Serviço recebido: {service_type}")
-        
         original_filename = secure_filename(file.filename or 'unknown.pdf')
-        
         # Processar arquivo de forma segura
         if Config.SECURE_PROCESSING:
             temp_file_path, file_id = secure_manager.process_file_securely(
                 file, original_filename, user_ip
             )
         else:
-            # Fallback para processamento não seguro (apenas para compatibilidade)
             file_id = str(uuid.uuid4())
             upload_filename = f"{file_id}_{original_filename}"
             temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
             file.save(temp_file_path)
-        
-        # Extrair texto diretamente do PDF (sem OCR)
+        # DESCRIPTOGRAFAR ANTES DO OCR!
+        if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+            temp_file_path = secure_manager.decrypt_file(temp_file_path)
+        # Sempre rodar OCR antes da IA
         text_content = ""
+        temp_ocr_path = temp_file_path + '_ocr.pdf'
         try:
-            # Descriptografar se necessário
-            if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
-                temp_file_path = secure_manager.decrypt_file(temp_file_path)
-            
-            with open(temp_file_path, 'rb') as f:
-                pdf_reader = pypdf.PdfReader(f)
-                for page in pdf_reader.pages:
-                    text_content += page.extract_text() + "\n"
-        except Exception as e:
-            return jsonify({'error': f'Erro ao extrair texto do PDF: {str(e)}'}), 500
-        
-        # Limpar e normalizar texto
-        text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
-        
-        # Se o texto estiver vazio, retornar erro (ChatGPT não usa OCR)
-        if not text_content or len(text_content.strip()) < 50:
+            ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
+            if ocr_result.get('success'):
+                print("✅ OCR bem-sucedido, extraindo texto...")
+                text_content = extract_text_from_pdf(temp_ocr_path)
+                text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+            else:
+                print(f"❌ OCR falhou: {ocr_result.get('error', 'Erro desconhecido')}")
+                return jsonify({
+                    'error': 'Não foi possível extrair texto suficiente do PDF.',
+                    'details': 'O arquivo pode estar corrompido, protegido por senha, ou ser uma imagem escaneada de baixa qualidade.',
+                    'suggestion': 'Tente com um arquivo PDF diferente ou verifique se o arquivo não está protegido.',
+                    'ocr_error': ocr_result.get('error', 'Erro desconhecido')
+                }), 400
+        except Exception as ocr_error:
+            print(f"❌ Erro durante OCR: {str(ocr_error)}")
             return jsonify({
-                'error': 'PDF não contém texto pesquisável. Use OCR Tesseract para PDFs escaneados.',
-                'message': 'O ChatGPT funciona apenas com PDFs que já contêm texto.'
+                'error': 'Erro durante processamento OCR.',
+                'details': str(ocr_error),
+                'suggestion': 'Verifique se o arquivo é um PDF válido e não está corrompido.'
             }), 400
-        
-        # Obter modelo selecionado
-        model = request.form.get('model', 'gpt-3.5-turbo')
-        print(f"🎯 Modelo recebido no endpoint /api/process-file: {model}")
-        
+        # Verificar se temos texto suficiente para processar
+        if not text_content or len(text_content.strip()) < 10:
+            return jsonify({
+                'error': 'Texto insuficiente para processamento.',
+                'details': f'Extraído apenas {len(text_content)} caracteres.',
+                'suggestion': 'O arquivo pode estar vazio ou não conter texto legível.',
+                'text_preview': text_content[:200] if text_content else ''
+            }), 400
+        print(f"✅ Texto extraído com sucesso: {len(text_content)} caracteres")
+        print(f"📄 Preview do texto (primeiros 500 chars): {text_content[:500]}")
         # Extrair campos com OpenAI
+        print("🤖 Iniciando extração com IA...")
+        model = request.form.get('model', 'gpt-4o')
+        print(f"🎯 Modelo recebido no endpoint /api/process-file: {model}")
         campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
-        
         # Limpar arquivo temporário após processamento
         if Config.SECURE_PROCESSING and temp_file_path:
             secure_manager.cleanup_file(temp_file_path, user_ip)
-        
+        if 'temp_ocr_path' in locals() and temp_ocr_path and os.path.exists(temp_ocr_path):
+            try:
+                os.remove(temp_ocr_path)
+            except Exception:
+                pass
         return jsonify({
             'success': True,
             'message': f'PDF processado e campos extraídos com ChatGPT ({service_type})!',
@@ -100,15 +110,14 @@ def process_file_chatgpt():
             'model': model,
             'service_type': service_type,
             'text_length': len(text_content),
-            'used_ocr_fallback': len(text_content.strip()) < 50,
+            'used_ocr_fallback': True,
             'secure_processing': Config.SECURE_PROCESSING
         })
-        
     except Exception as e:
         # Garantir limpeza em caso de erro
         if Config.SECURE_PROCESSING and temp_file_path:
             secure_manager.cleanup_file(temp_file_path, user_ip)
-        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
+        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500
 
 @ai_bp.route('/api/certidao', methods=['POST'])
 def process_certidao():
@@ -134,9 +143,6 @@ def process_certidao():
         tipo_certidao = 'STNegativa'
         motivo_certidao = 'Não há ônus real identificado.'
 
-        # O restante do código permanece igual, mas usar tipo_certidao para o título
-        # e retornar tipo_certidao e motivo_certidao no response.
-
         original_filename = secure_filename(file.filename or 'unknown.pdf')
         # Processar arquivo de forma segura
         if Config.SECURE_PROCESSING:
@@ -149,62 +155,35 @@ def process_certidao():
             temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
             file.save(temp_file_path)
 
-        # Extrair texto do PDF (OCR se necessário)
+        # DESCRIPTOGRAFAR ANTES DO OCR!
+        if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+            temp_file_path = secure_manager.decrypt_file(temp_file_path)
+
+        # Sempre rodar OCR antes da IA
         text_content = ""
-        temp_ocr_path = None
-        
+        temp_ocr_path = temp_file_path + '_ocr.pdf'
         try:
-            # Descriptografar se necessário
-            if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
-                temp_file_path = secure_manager.decrypt_file(temp_file_path)
-            
-            # Tentar extrair texto diretamente primeiro
-            with open(temp_file_path, 'rb') as f:
-                pdf_reader = pypdf.PdfReader(f)
-                for page in pdf_reader.pages:
-                    text_content += page.extract_text() + "\n"
-        except Exception as e:
-            print(f"❌ Erro ao extrair texto diretamente: {str(e)}")
-            text_content = ""
-        
-        # Limpar e normalizar texto
-        text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
-        
-        # Se não houver texto suficiente, tentar OCR
-        if not text_content or len(text_content.strip()) < 50:
-            print("📄 Tentando OCR para extrair texto...")
-            try:
-                temp_ocr_path = temp_file_path + '_ocr.pdf'
-                ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
-                if ocr_result.get('success'):
-                    print("✅ OCR bem-sucedido, extraindo texto...")
-                    text_content = extract_text_from_pdf(temp_ocr_path)
-                    # Limpar novamente
-                    text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
-                else:
-                    print(f"❌ OCR falhou: {ocr_result.get('error', 'Erro desconhecido')}")
-                    # Tentar processar mesmo com pouco texto
-                    if len(text_content.strip()) > 10:
-                        print("⚠️ Continuando com texto mínimo extraído...")
-                    else:
-                        return jsonify({
-                            'error': 'Não foi possível extrair texto suficiente do PDF.',
-                            'details': 'O arquivo pode estar corrompido, protegido por senha, ou ser uma imagem escaneada de baixa qualidade.',
-                            'suggestion': 'Tente com um arquivo PDF diferente ou verifique se o arquivo não está protegido.',
-                            'ocr_error': ocr_result.get('error', 'Erro desconhecido')
-                        }), 400
-            except Exception as ocr_error:
-                print(f"❌ Erro durante OCR: {str(ocr_error)}")
-                # Se temos pelo menos algum texto, continuar
-                if len(text_content.strip()) > 10:
-                    print("⚠️ Continuando com texto mínimo extraído...")
-                else:
-                    return jsonify({
-                        'error': 'Erro durante processamento OCR.',
-                        'details': str(ocr_error),
-                        'suggestion': 'Verifique se o arquivo é um PDF válido e não está corrompido.'
-                    }), 400
-        
+            ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
+            if ocr_result.get('success'):
+                print("✅ OCR bem-sucedido, extraindo texto...")
+                text_content = extract_text_from_pdf(temp_ocr_path)
+                text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+            else:
+                print(f"❌ OCR falhou: {ocr_result.get('error', 'Erro desconhecido')}")
+                return jsonify({
+                    'error': 'Não foi possível extrair texto suficiente do PDF.',
+                    'details': 'O arquivo pode estar corrompido, protegido por senha, ou ser uma imagem escaneada de baixa qualidade.',
+                    'suggestion': 'Tente com um arquivo PDF diferente ou verifique se o arquivo não está protegido.',
+                    'ocr_error': ocr_result.get('error', 'Erro desconhecido')
+                }), 400
+        except Exception as ocr_error:
+            print(f"❌ Erro durante OCR: {str(ocr_error)}")
+            return jsonify({
+                'error': 'Erro durante processamento OCR.',
+                'details': str(ocr_error),
+                'suggestion': 'Verifique se o arquivo é um PDF válido e não está corrompido.'
+            }), 400
+
         # Verificar se temos texto suficiente para processar
         if not text_content or len(text_content.strip()) < 10:
             return jsonify({
@@ -213,15 +192,13 @@ def process_certidao():
                 'suggestion': 'O arquivo pode estar vazio ou não conter texto legível.',
                 'text_preview': text_content[:200] if text_content else ''
             }), 400
-        
+
         print(f"✅ Texto extraído com sucesso: {len(text_content)} caracteres")
-        
-        # Debug: mostrar preview do texto extraído
         print(f"📄 Preview do texto (primeiros 500 chars): {text_content[:500]}")
-        
+
         # Extrair campos com OpenAI
         print("🤖 Iniciando extração com IA...")
-        model = request.form.get('model', 'gpt-3.5-turbo')
+        model = request.form.get('model', 'gpt-4o')
         print(f"🎯 Modelo recebido no endpoint /api/certidao (PDF): {model}")
         if not Config.OPENAI_API_KEY or Config.OPENAI_API_KEY.strip() == '':
             return jsonify({
@@ -229,7 +206,7 @@ def process_certidao():
                 'details': 'Configure a variável de ambiente OPENAI_API_KEY para usar a funcionalidade de IA.',
                 'suggestion': 'Adicione sua chave da OpenAI nas configurações do sistema.'
             }), 500
-        
+
         campos = None
         try:
             campos = extract_fields_with_openai(text_content, model=model, service_type='certidao')
@@ -441,7 +418,7 @@ def get_certidao_data():
 
         # Extrair campos usando OpenAI
         print("🔍 Extraindo campos da certidão...")
-        model = request.form.get('model', 'gpt-3.5-turbo')
+        model = request.form.get('model', 'gpt-4o')
         print(f"🎯 Modelo recebido no endpoint /api/certidao/data: {model}")
         campos = extract_fields_with_openai(text_content, model=model, service_type="certidao")
         
@@ -868,7 +845,7 @@ def process_qualificacao():
         print(f"📝 Texto combinado: {len(texto_completo)} caracteres")
         
         # Obter modelo selecionado
-        model = request.form.get('model', 'gpt-3.5-turbo')
+        model = request.form.get('model', 'gpt-4o')
         print(f"🎯 Modelo recebido no endpoint /api/qualificacao: {model}")
         
         # Analisar com OpenAI usando nova lógica avançada

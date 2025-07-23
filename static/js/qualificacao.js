@@ -45,9 +45,8 @@ async function processQualificacao(files) {
             formData.append('files[]', file);
         }
         
-        // Obter modelo selecionado
-        const model = document.querySelector('input[name="chatgptModel"]:checked')?.value || 'gpt-3.5-turbo';
-        formData.append('model', model);
+        // Sempre usar gpt-4o como modelo
+        formData.append('model', 'gpt-4o');
         
         qualificacaoUI.updateProgress(30);
         qualificacaoUI.showAlert('Enviando documentos para análise individual...', 'info');

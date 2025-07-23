@@ -54,10 +54,8 @@ export async function processFile(files, ui, setCurrentData) {
             const formData = new FormData();
             formData.append('file', file);
             
-            // Obter modelo selecionado
-            const modelInput = document.querySelector('input[name="chatgptModel"]:checked');
-            const model = modelInput ? modelInput.value : 'gpt-3.5-turbo';
-            formData.append('model', model);
+            // Sempre usar gpt-4o como modelo
+            formData.append('model', 'gpt-4o');
             formData.append('service', 'matricula');
 
             const response = await fetch('/api/process-file', {
