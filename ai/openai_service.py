@@ -64,7 +64,7 @@ def identify_document_type_from_filename(filename):
     print(f"⚠️ Nenhum padrão encontrado no nome: {filename}")
     return "DESCONHECIDO"
 
-def classify_document_type(text_content, filename="", model="gpt-3.5-turbo"):
+def classify_document_type(text_content, filename="", model="gpt-4o"):
     """Etapa 1: Classifica o tipo do documento usando modelo selecionado com contexto rigoroso"""
     try:
         print(f"🔍 Classificando tipo do documento com {model}")
@@ -369,7 +369,7 @@ def get_checklist_for_document_type(document_type):
 5. As informações do documento são compatíveis com outros documentos apresentados? (COMPARAÇÃO ENTRE DOCUMENTOS)
 """)
 
-def extract_document_specific_data(text_content, document_type, filename="", model="gpt-3.5-turbo"):
+def extract_document_specific_data(text_content, document_type, filename="", model="gpt-4o"):
     """Extrai TODOS os dados de cada documento, independentemente do tipo"""
     try:
         print(f"🔍 Extraindo TODOS os dados de {document_type} - {filename}")
@@ -637,7 +637,7 @@ Sua tarefa é extrair **TODOS OS DADOS RELEVANTES** do documento, independenteme
         print(f"❌ Erro na extração de dados do documento: {str(e)}")
         return {"error": f"Erro na extração: {str(e)}"}
 
-def analyze_checklist_with_document_data(all_results, model="gpt-3.5-turbo"):
+def analyze_checklist_with_document_data(all_results, model="gpt-4o"):
     """Analisa o checklist com base em TODOS os dados extraídos de TODOS os documentos"""
     try:
         print(f"🔍 Analisando checklist com TODOS os dados de {len(all_results)} documentos")
@@ -801,11 +801,11 @@ CHECKLIST A SER RESPONDIDO:
         print(f"❌ Erro na análise do checklist: {str(e)}")
         return {"error": f"Erro na análise do checklist: {str(e)}"}
 
-def analyze_document_with_checklist(text_content, document_type, filename="", model="gpt-3.5-turbo", all_documents=None, all_filenames=None):
+def analyze_document_with_checklist(text_content, document_type, filename="", model="gpt-4o", all_documents=None, all_filenames=None):
     """Função mantida para compatibilidade - agora usa a nova lógica"""
     return extract_document_specific_data(text_content, document_type, filename, model)
 
-def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-3.5-turbo"):
+def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-4o"):
     """Analisa múltiplos documentos para qualificação - cada documento individualmente"""
     try:
         print(f"🔍 Iniciando análise de qualificação com {model}")
@@ -946,7 +946,7 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
     
     return cleaned_fields
 
-def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matricula"):
+def extract_fields_with_openai(text, model="gpt-4o", service_type="matricula"):
     """Envia o texto para a OpenAI API e retorna os campos extraídos em JSON"""
     try:
         print(f"🔍 Iniciando extração com OpenAI - Modelo: {model} - Serviço: {service_type}")
@@ -1015,8 +1015,8 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
                 "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
                 "Campos a extrair:\n"
-                "- descricao_imovel_completa: Texto completo referente à descrição do imóvel (procure por 'IMOVEL:' ou similar)\n"
-                "- proprietario_atual: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. **IMPORTANTE:** Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). \n"
+                "- descricao_imovel_completa: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
+                "- proprietario_atual: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. **IMPORTANTE:** Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. Se houver mais de um proprietário (coproprietários), liste TODOS com seus respectivos dados. ex: Para casais, use formato: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...\n"
                 "- tipo_onus_ativo:  Ônus reais, restrições judiciais e administrativas, ou certidão negativa (transcreva o texto completo referente a esses itens). Tipos de ÔNUS: Hipoteca, Alienação, Promessa de Compra e Venda, Penhora, Indisponibilidade, Usufruto, Clásula Restritiva, Averbação Premonitória, Bloqueio, Arresto, Execução, Cédula de Crédito Comercial, Cédula de Crédito Imobiliário E OUTROS. **IMPORTANTE:** NÃO inclua ônus, restrições ou gravames que já tenham sido cancelados, extintos ou baixados no documento. Considere apenas ônus ATIVOS. Se houver menção de cancelamento, desconsidere esse ônus.\n"
                 "- descricao_onus_completa: Descrição completa do ônus ativo (texto completo extraído referente ao ônus)\n"
                 "- numero_matricula: Número da matrícula\n"
@@ -1032,9 +1032,7 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
                 "Campos a extrair:\n"
                 "- cnm: Cadastro Nacional de Matrícula (número da matrícula)\n"
                 "- descricao_imovel: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
-                "- proprietarios: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. **IMPORTANTE:** Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). "
-                "**CRÍTICO**: Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. Se houver mais de um proprietário (coproprietários), liste TODOS com seus respectivos dados. "
-                "**CRÍTICO**: Para casais, use formato: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...'\n"
+                "- proprietarios: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. **IMPORTANTE:** Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. Se houver mais de um proprietário (coproprietários), liste TODOS com seus respectivos dados. ex: Para casais, use formato: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em..."
                 "- senhorio_enfiteuta: Nome do senhorio direto e enfiteuta (se aplicável)\n"
                 "- inscricao_imobiliaria: Inscrição imobiliária (número de inscrição no cartório)\n"
                 "- rip: RIP (Registro de Imóveis Públicos) se houver\n"
@@ -1113,53 +1111,339 @@ def extract_fields_with_openai(text, model="gpt-3.5-turbo", service_type="matric
             except Exception as e:
                 print(f"❌ Erro na análise avançada: {str(e)}")
                 return {"error": f"Erro na análise avançada: {str(e)}"}
-        else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
+            
+    except Exception as e:
+        print(f"❌ Erro geral na extração OpenAI: {str(e)}")
+        return {"error": f"Erro na comunicação com OpenAI: {str(e)}", "raw": None}
+
+
+def extract_relevant_sections(document_text, doc_type):
+    """Extrai apenas seções relevantes do documento para economizar tokens"""
+    if not document_text or not doc_type:
+        return document_text
+    
+    # Mapear palavras-chave por tipo de documento
+    keywords_by_type = {
+        'contrato': ['contrato', 'compra', 'venda', 'comprador', 'vendedor', 'preço', 'valor', 'pagamento'],
+        'matricula': ['matrícula', 'registro', 'imóvel', 'proprietário', 'área', 'confrontações'],
+        'certidao': ['certidão', 'débitos', 'ônus', 'gravames', 'hipoteca', 'penhora'],
+        'procuracao': ['procuração', 'outorgante', 'outorgado', 'poderes', 'representação'],
+        'rg': ['identidade', 'rg', 'nome', 'filiação', 'nascimento'],
+        'cpf': ['cpf', 'receita federal', 'situação cadastral'],
+        'comprovante_residencia': ['endereço', 'residência', 'domicílio', 'correspondência'],
+        'estado_civil': ['estado civil', 'casamento', 'solteiro', 'casado', 'divorciado', 'viúvo'],
+        'itbi': ['itbi', 'imposto', 'transmissão', 'bens imóveis'],
+        'iptu': ['iptu', 'predial', 'territorial', 'urbano']
+    }
+    
+    # Obter palavras-chave para o tipo de documento
+    keywords = keywords_by_type.get(doc_type, [])
+    
+    if not keywords:
+        return document_text  # Se não há palavras-chave específicas, retorna o texto completo
+    
+    # Dividir o texto em parágrafos
+    paragraphs = document_text.split('\n')
+    relevant_paragraphs = []
+    
+    for paragraph in paragraphs:
+        paragraph_lower = paragraph.lower()
+        # Verificar se o parágrafo contém alguma palavra-chave relevante
+        if any(keyword in paragraph_lower for keyword in keywords):
+            relevant_paragraphs.append(paragraph)
+    
+    # Se encontrou parágrafos relevantes, retorna apenas eles
+    if relevant_paragraphs:
+        return '\n'.join(relevant_paragraphs)
+    
+    # Se não encontrou nada relevante, retorna o texto completo (fallback)
+    return document_text
+
+
+def analyze_qualification_documents(documents, filenames, model="gpt-4o"):
+    """Análise avançada de qualificação usando OpenAI com verificação rigorosa de documentos"""
+    try:
+        print(f"🔍 Iniciando análise de qualificação avançada com {len(documents)} documentos")
+        print(f"📁 Arquivos: {filenames}")
+        
+        # Classificar documentos por tipo baseado no nome do arquivo
+        document_types = classify_documents_by_filename(filenames)
+        
+        # Criar prompt específico para análise de qualificação
+        prompt = create_qualification_analysis_prompt(documents, document_types, filenames)
         
         if not Config.OPENAI_API_KEY:
-            raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida! Por favor, configure antes de usar a API da OpenAI.")
-        api_key_preview = Config.OPENAI_API_KEY[:20]
-        print(f"🔑 Usando chave API: {api_key_preview}...")
-
-        print("📡 Enviando requisição para OpenAI...")
+            raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida!")
+        
+        print("📡 Enviando requisição para OpenAI (Análise de Qualificação)...")
         client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
-            max_tokens=4000  # Limite adequado para o modelo
+            max_tokens=4000
         )
+        
         content = response.choices[0].message.content
         print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")
         
         if content is None:
-            print("❌ Resposta vazia da OpenAI")
-            return {"error": "Resposta vazia da OpenAI", "raw": None}
+            return {"error": "Resposta vazia da OpenAI"}
         
+        # Processar resposta JSON
         try:
-            # Limpeza do conteúdo para remover blocos markdown
-            def clean_json_response(response_text):
-                response_text = re.sub(r'^```json\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
-                response_text = re.sub(r'^```\s*|```$', '', response_text.strip(), flags=re.MULTILINE)
-                return response_text.strip()
-
-            cleaned_content = clean_json_response(content)
+            cleaned_content = re.sub(r'^```json\s*|```$', '', content.strip(), flags=re.MULTILINE)
+            cleaned_content = re.sub(r'^```\s*|```$', '', cleaned_content.strip(), flags=re.MULTILINE)
+            
             match = re.search(r'\{[\s\S]+\}', cleaned_content)
             if match:
                 result = json.loads(match.group(0))
-                print("✅ JSON extraído com sucesso")
-                print(f"📊 Campos extraídos: {list(result.keys())}")
-                return clean_and_validate_fields(result, service_type)
-            result = json.loads(cleaned_content)
-            print("✅ JSON direto processado com sucesso")
-            print(f"📊 Campos extraídos: {list(result.keys())}")
-            return clean_and_validate_fields(result, service_type)
+            else:
+                result = json.loads(cleaned_content)
+            
+            print("✅ Análise de qualificação processada com sucesso")
+            print(f"📊 Itens analisados: {len([k for k in result.keys() if k.startswith('item')])}")
+            
+            # Adicionar metadados da análise
+            result['documents_analyzed'] = [
+                {'filename': fname, 'type': doc_type} 
+                for fname, doc_type in zip(filenames, document_types)
+            ]
+            result['analysis_method'] = 'advanced_qualification'
+            result['total_documents'] = len(documents)
+            
+            return result
             
         except Exception as e:
-            print(f"❌ Erro ao processar JSON: {str(e)}")
-            print(f"📄 Conteúdo recebido: {content[:500]}...")
-            return {"error": f"Erro ao interpretar resposta da OpenAI: {str(e)}", "raw": content}
+            print(f"❌ Erro ao processar JSON da qualificação: {str(e)}")
+            return {"error": f"Erro ao interpretar resposta: {str(e)}", "raw": content}
             
     except Exception as e:
-        print(f"❌ Erro geral na extração OpenAI: {str(e)}")
-        return {"error": f"Erro na comunicação com OpenAI: {str(e)}", "raw": None} 
+        print(f"❌ Erro na análise de qualificação: {str(e)}")
+        return {"error": f"Erro na análise: {str(e)}"}
+
+
+def classify_documents_by_filename(filenames):
+    """Classifica documentos por tipo baseado no nome real do arquivo (sugestão do usuário)"""
+    document_types = []
+    
+    # Mapeamento direto baseado no nome do arquivo (mais confiável)
+    type_mapping = {
+        # Documentos principais
+        'contrato': ['contrato', 'compra', 'venda', 'escritura'],
+        'matricula': ['matricula', 'matrícula', '3ri', 'registro', 'imovel', 'imóvel'],
+        
+        # Certidões específicas
+        'certidao_inteiro_teor': ['inteiro_teor', 'inteiro', 'teor', 'certidao_inteiro'],
+        'certidao_situacao_juridica': ['situacao_juridica', 'situação_jurídica', 'situacao', 'juridica'],
+        'certidao_onus_reais': ['onus_reais', 'ônus_reais', 'onus', 'ônus'],
+        'certidao_acoes_reipersecutorias': ['acoes_reipersecutorias', 'ações_reipersecutoria', 'acoes', 'ações', 'reipersecutoria'],
+        'certidao_itbi': ['itbi', 'certidao_itbi'],
+        'certidao_rip': ['rip', 'certidao_rip'],
+        'certidao_junta_comercial': ['junta_comercial', 'junta', 'comercial'],
+        
+        # Documentos de apoio
+        'procuracao': ['procuracao', 'procuração'],
+        'cnd': ['cnd', 'negativa', 'debitos', 'débitos'],
+        'termo_quitacao': ['quitacao', 'quitação', 'termo_quitacao'],
+        'termo_autorizacao': ['autorizacao', 'autorização', 'termo_autorizacao'],
+        'atos_constitutivos': ['atos_constitutivos', 'social', 'ata', 'constitutivo'],
+        'declaracao_primeira_aquisicao': ['declaracao', 'declaração', 'primeira_aquisicao', 'aquisicao', 'aquisição'],
+        'pacto_antenupcial': ['pacto_antenupcial', 'pacto', 'antenupcial'],
+        
+        # Documentos especiais
+        'cat_spu': ['cat_spu', 'spu', 'cat'],
+        'termo_aforamento': ['aforamento', 'termo_aforamento'],
+        'boletim_cadastro_imobiliario': ['boletim', 'cadastro', 'imobiliario', 'imobiliário'],
+        'leilao': ['leilao', 'leilão'],
+        'escritura': ['escritura'],
+        'documento_identidade': ['rg', 'cpf', 'identidade', 'documento']
+    }
+    
+    for filename in filenames:
+        filename_lower = filename.lower().replace('_', ' ').replace('-', ' ')
+        doc_type = 'documento_generico'  # Padrão
+        
+        # Procurar correspondência mais específica primeiro
+        for type_name, keywords in type_mapping.items():
+            if any(keyword in filename_lower for keyword in keywords):
+                doc_type = type_name
+                break
+        
+        document_types.append(doc_type)
+        print(f"📝 Arquivo '{filename}' classificado como: {doc_type}")
+    
+    return document_types
+
+
+def create_qualification_analysis_prompt(documents, document_types, filenames):
+    """Cria prompt específico para análise de qualificação com mapeamento de arquivos"""
+    
+    prompt = """
+Você é um especialista em análise de documentos imobiliários para qualificação registral.
+Analise os documentos fornecidos e responda ao checklist de qualificação, considerando que cada item deve ser analisado com base nos arquivos específicos relacionados.
+
+RESPONDA APENAS EM JSON VÁLIDO, sem explicações adicionais.
+
+MAPEAMENTO DE ITENS DO CHECKLIST POR ARQUIVO:
+
+🔹 BLOCO 1 – MATRÍCULA E CERTIDÕES (Itens 1 a 9):
+- item1: Certidões (inteiro teor, situação jurídica, ônus reais, ações reipersecutórias) + Contrato
+- item2: Nova Matrícula (requisitos Art. 176, § 1º, II da Lei 6.015/1973)
+- item3: Matrícula + Certidões SPU/Município (dominialidade)
+- item4: Certidão RIP + Matrícula (terrenos foreiros à União)
+- item5: Matrícula + Certidão de Ônus Reais (ônus sobre imóvel)
+- item6: Contrato + Termo de Autorização (cancelamento de ônus)
+- item7: Contrato + Matrícula (qualificação proprietários)
+- item8: Matrícula (inscrição imobiliária/RIP)
+- item9: Matrícula + Certidão ITBI (inscrição imobiliária)
+
+🔹 BLOCO 2 – TÍTULO E DOCUMENTAÇÃO (Itens T1 a T23):
+- itemT1: Contrato (vias iguais)
+- itemT2: Contrato (assinaturas, data, local)
+- itemT3: Contrato + Matrícula (descrição e matrícula)
+- itemT4: Certidão ITBI + Contrato + Matrícula (descrição)
+- itemT5: Certidão ITBI + Contrato (valores)
+- itemT6: Certidão ITBI + Contrato (partes)
+- itemT7: Termo quitação + Contrato + Procuração (assinaturas)
+- itemT8: Contrato + Matrícula (qualificação transmitentes)
+- itemT9: Declaração 1ª Aquisição (firma reconhecida)
+- itemT10: Pacto antenupcial + Matrícula (regime casamento)
+- itemT11: Procuração + Contrato (representação)
+- itemT12: Atos Constitutivos + Contrato (PJ representação)
+- itemT13: CND + Contrato (PJ débitos)
+- itemT14: CND específica + Contrato (devedor CCB/mútuo)
+- itemT15: Certidão Junta + Contrato (PJ simplificada)
+- itemT16: RG + CPF + Contrato (firma individual)
+- itemT17: CAT SPU + Contrato (terreno foreiro União)
+- itemT18: Termo aforamento + Escritura (foreiro município)
+- itemT19: Contrato + Matrícula + Boletim (descrição atualizada)
+- itemT20: Procuração (credor fiduciário)
+- itemT21: Contrato (requerimento genérico)
+- itemT22: Matrícula + Certidões (averbações necessárias)
+- itemT23: Matrícula + Leilão + Quitação (consolidação propriedade)
+
+🚨 REGRAS CRÍTICAS DE ANÁLISE:
+
+1. **VERIFICAÇÃO OBRIGATÓRIA DE DOCUMENTOS:**
+   - ANTES de analisar qualquer item, verifique se TODOS os documentos mapeados para aquele item estão disponíveis
+   - Se faltar QUALQUER documento obrigatório, responda "N/A" com justificativa explicando a ausência
+   - NUNCA responda "Sim" se não tiver todos os documentos necessários
+
+2. **CRITÉRIOS DE RESPOSTA:**
+   - "Sim": APENAS se o requisito está atendido E todos os documentos necessários estão presentes
+   - "Não": Se todos os documentos estão presentes mas o requisito não está atendido
+   - "N/A": Se falta algum documento obrigatório OU não se aplica
+
+3. **JUSTIFICATIVAS OBRIGATÓRIAS:**
+   - Mencione TODOS os documentos que deveriam estar presentes para o item
+   - Se faltar documento, liste especificamente quais estão faltando
+   - Se responder "Sim", confirme que todos os documentos necessários foram analisados
+
+**EXEMPLO DE ANÁLISE CORRETA:**
+- Item que requer "Contrato + Matrícula" mas só tem "Matrícula":
+  → Resposta: "N/A"
+  → Justificativa: "Documento 'Contrato' não fornecido. Para análise completa deste item são necessários: Contrato + Matrícula. Disponível apenas: Matrícula."
+
+FORMATO DE RESPOSTA OBRIGATÓRIO:
+{
+  "item1": "Sim/Não/N/A",
+  "justificativa_item1": "Justificativa detalhada mencionando arquivos analisados",
+  "item2": "Sim/Não/N/A",
+  "justificativa_item2": "Justificativa detalhada mencionando arquivos analisados",
+  ...
+  "itemT1": "Sim/Não/N/A",
+  "justificativa_itemT1": "Justificativa detalhada mencionando arquivos analisados",
+  ...
+  "itemT23": "Sim/Não/N/A",
+  "justificativa_itemT23": "Justificativa detalhada mencionando arquivos analisados",
+  "status_qualificacao": "aprovado/pendente/reprovado",
+  "pontuacao_qualificacao": "0-100",
+  "observacoes_gerais": "Observações sobre a análise",
+  "documentos_faltantes": "Lista de documentos que faltam",
+  "problemas_identificados": "Principais problemas encontrados",
+  "recomendacoes_especificas": "Recomendações específicas"
+}
+
+DOCUMENTOS PARA ANÁLISE:
+"""
+    
+    # OTIMIZAÇÃO DE TOKENS: Adicionar apenas seções relevantes de cada documento
+    for i, (doc, doc_type, filename) in enumerate(zip(documents, document_types, filenames)):
+        prompt += f"\n=== DOCUMENTO {i+1}: {filename} (TIPO: {doc_type.upper()}) ===\n"
+        
+        # Extrair apenas seções relevantes baseadas no tipo do documento (ECONOMIA DE TOKENS)
+        relevant_content = extract_relevant_sections(doc, doc_type)
+        prompt += relevant_content
+        prompt += "\n"
+    
+    # Adicionar verificação prévia de documentos disponíveis
+    available_doc_types = set(document_types)
+    prompt += f"\n\n🔍 DOCUMENTOS DISPONÍVEIS PARA ANÁLISE: {', '.join(available_doc_types)}\n"
+    
+    # Adicionar mapeamento específico de quais itens podem ser analisados
+    prompt += "\n🚨 ITENS QUE PODEM SER ANALISADOS (baseado nos documentos disponíveis):\n"
+    
+    # Mapeamento CORRIGIDO de documentos necessários por item (baseado na descrição real de cada item)
+    item_requirements = {
+        # BLOCO 1 - MATRÍCULA E CERTIDÕES (Itens 1-9)
+        'item1': ['certidao_inteiro_teor', 'certidao_situacao_juridica', 'certidao_onus_reais', 'certidao_acoes_reipersecutorias', 'contrato'],
+        'item2': ['matricula'],  # Nova matrícula
+        'item3': ['contrato', 'matricula'],  # CORRIGIDO: "O contrato contém a descrição completa do imóvel e o número da matrícula?"
+        'item4': ['certidao_rip', 'matricula'],
+        'item5': ['matricula', 'certidao_onus_reais'],
+        'item6': ['contrato', 'termo_autorizacao'],
+        'item7': ['contrato', 'matricula'],
+        'item8': ['matricula'],  # Matrícula - inscrição imobiliária
+        'item9': ['matricula', 'certidao_itbi'],
+        
+        # BLOCO 2 - TÍTULO E DOCUMENTAÇÃO (Itens T1-T23)
+        'itemT1': ['contrato'],  # Contrato em vias iguais
+        'itemT2': ['contrato'],  # Assinaturas, data, local no contrato
+        'itemT3': ['contrato', 'matricula'],  # CORRIGIDO: "O contrato contém a descrição completa..."
+        'itemT4': ['certidao_itbi', 'contrato', 'matricula'],
+        'itemT5': ['certidao_itbi', 'contrato'],
+        'itemT6': ['certidao_itbi', 'contrato'],
+        'itemT7': ['termo_quitacao', 'contrato', 'procuracao'],
+        'itemT8': ['contrato', 'matricula'],  # CORRIGIDO: "Os transmitentes estão qualificados no título..."
+        'itemT9': ['declaracao_primeira_aquisicao'],
+        'itemT10': ['pacto_antenupcial', 'matricula'],
+        'itemT11': ['procuracao', 'contrato'],
+        'itemT12': ['atos_constitutivos', 'contrato'],
+        'itemT13': ['cnd', 'contrato'],
+        'itemT14': ['cnd', 'contrato'],
+        'itemT15': ['certidao_junta_comercial', 'contrato'],
+        'itemT16': ['documento_identidade', 'contrato'],
+        'itemT17': ['cat_spu', 'contrato'],
+        'itemT18': ['termo_aforamento', 'escritura'],
+        'itemT19': ['contrato', 'matricula', 'boletim_cadastro_imobiliario'],  # CORRIGIDO: "O contrato indica a matrícula..."
+        'itemT20': ['procuracao'],
+        'itemT21': ['contrato'],
+        'itemT22': ['matricula'],  # CORRIGIDO: Averbações na matrícula
+        'itemT23': ['matricula', 'leilao', 'termo_quitacao']
+    }
+    
+    # Verificar quais itens podem ser analisados
+    analyzable_items = []
+    non_analyzable_items = []
+    
+    for item, required_docs in item_requirements.items():
+        # Verificar se todos os documentos necessários estão disponíveis
+        has_all_docs = all(any(req_doc in doc_type for doc_type in available_doc_types) for req_doc in required_docs)
+        
+        if has_all_docs:
+            analyzable_items.append(item)
+        else:
+            missing_docs = [doc for doc in required_docs if not any(doc in dt for dt in available_doc_types)]
+            non_analyzable_items.append(f"{item} (faltam: {', '.join(missing_docs)})")
+    
+    prompt += f"\n✅ ITENS ANALISÁVEIS: {', '.join(analyzable_items) if analyzable_items else 'NENHUM'}\n"
+    prompt += f"\n❌ ITENS NÃO ANALISÁVEIS: {', '.join(non_analyzable_items) if non_analyzable_items else 'NENHUM'}\n"
+    
+    prompt += "\n🚨 INSTRUÇÃO FINAL OBRIGATÓRIA:\n"
+    prompt += "- Para itens NÃO ANALISÁVEIS: responda OBRIGATORIAMENTE 'N/A' com justificativa explicando quais documentos faltam\n"
+    prompt += "- Para itens ANALISÁVEIS: analise normalmente e responda Sim/Não conforme o caso\n"
+    prompt += "\nAnalise cada item do checklist considerando APENAS os arquivos relacionados conforme o mapeamento acima."
+    
+    return prompt 

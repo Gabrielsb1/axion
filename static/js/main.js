@@ -234,10 +234,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         setupMatriculaEventListeners();
         
-        // Inicializar qualificação se disponível
-        if (typeof setupQualificacaoEventListeners === 'function') {
-            console.log('🚀 Axion - Configurando qualificação...');
-            setupQualificacaoEventListeners();
-        }
+        // QUALIFICAÇÃO REMOVIDA - Event listeners configurados apenas em index.html
+        // setupQualificacaoEventListeners() já é chamada em index.html
+        // Remover daqui para evitar event listeners duplicados
+        console.log('🚀 Axion - Qualificação gerenciada por index.html (evitando duplicação)');
     }, 100);
 }); 

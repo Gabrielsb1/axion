@@ -726,6 +726,12 @@ def generate_certidao_word():
 @ai_bp.route('/api/qualificacao', methods=['POST'])
 def process_qualificacao():
     """Endpoint para processar múltiplos arquivos para análise de qualificação"""
+    import uuid
+    request_id = str(uuid.uuid4())[:8]
+    print(f"🆔 NOVA REQUISIÇÃO /api/qualificacao - ID: {request_id}")
+    print(f"📊 Headers: {dict(request.headers)}")
+    print(f"🌐 User-Agent: {request.headers.get('User-Agent', 'N/A')}")
+    
     temp_files = []
     user_ip = request.remote_addr
     
@@ -774,38 +780,55 @@ def process_qualificacao():
                 
                 # Extrair texto do PDF
                 text_content = ""
+                print(f"🔍 Iniciando extração de texto para {original_filename}...")
                 try:
                     # Descriptografar se necessário
                     if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
                         temp_file_path = secure_manager.decrypt_file(temp_file_path)
                     
+                    print(f"📄 Arquivo temporário: {temp_file_path}")
+                    print(f"📁 Arquivo existe: {os.path.exists(temp_file_path)}")
+                    
                     # Tentar extrair texto diretamente
                     with open(temp_file_path, 'rb') as f:
                         pdf_reader = pypdf.PdfReader(f)
-                        for page in pdf_reader.pages:
-                            text_content += page.extract_text() + "\n"
+                        print(f"📊 Número de páginas: {len(pdf_reader.pages)}")
+                        for i, page in enumerate(pdf_reader.pages):
+                            page_text = page.extract_text()
+                            text_content += page_text + "\n"
+                            print(f"📝 Página {i+1}: {len(page_text)} caracteres")
+                    
+                    print(f"✅ Extração direta: {len(text_content)} caracteres totais")
                 except Exception as e:
                     print(f"❌ Erro ao extrair texto de {original_filename}: {str(e)}")
                     text_content = ""
                 
                 # Limpar e normalizar texto
                 text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+                print(f"🧹 Texto após limpeza: {len(text_content)} caracteres")
                 
-                # Se não houver texto suficiente, tentar OCR
-                if not text_content or len(text_content.strip()) < 50:
-                    print(f"📄 Tentando OCR para {original_filename}...")
-                    try:
-                        from ai.ocr_service import process_pdf_with_ocr, extract_text_from_pdf
-                        temp_ocr_path = temp_file_path + '_ocr.pdf'
-                        ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
-                        if ocr_result.get('success'):
-                            print(f"✅ OCR bem-sucedido para {original_filename}")
-                            text_content = extract_text_from_pdf(temp_ocr_path)
-                            text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+                # SEMPRE tentar OCR primeiro para garantir melhor extração de texto
+                print(f"📄 Executando OCR para {original_filename} (SEMPRE para qualificação)...")
+                try:
+                    from ai.ocr_service import process_pdf_with_ocr, extract_text_from_pdf
+                    temp_ocr_path = temp_file_path + '_ocr.pdf'
+                    ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
+                    if ocr_result.get('success'):
+                        print(f"✅ OCR bem-sucedido para {original_filename}")
+                        ocr_text = extract_text_from_pdf(temp_ocr_path)
+                        ocr_text = re.sub(r'\s+', ' ', ocr_text.replace('\n', ' ')).strip()
+                        
+                        # Usar o melhor texto (OCR ou extração direta)
+                        if len(ocr_text) > len(text_content):
+                            text_content = ocr_text
+                            print(f"✅ Usando texto do OCR ({len(ocr_text)} chars)")
                         else:
-                            print(f"❌ OCR falhou para {original_filename}")
-                    except Exception as ocr_error:
-                        print(f"❌ Erro durante OCR de {original_filename}: {str(ocr_error)}")
+                            print(f"✅ Usando texto direto ({len(text_content)} chars)")
+                    else:
+                        print(f"⚠️ OCR falhou, usando extração direta")
+                except Exception as ocr_error:
+                    print(f"⚠️ Erro durante OCR de {original_filename}: {str(ocr_error)}")
+                    print(f"✅ Continuando com extração direta")
                 
                 if text_content and len(text_content.strip()) > 10:
                     documentos_analisados.append({
@@ -850,10 +873,11 @@ def process_qualificacao():
         
         # Analisar com OpenAI usando nova lógica avançada
         try:
-            from ai.openai_service import extract_fields_with_openai
+            from ai.openai_service import analyze_qualification_documents
             # Extrair nomes dos arquivos para análise
             filenames = [doc['filename'] for doc in documentos_analisados if 'filename' in doc]
-            campos = extract_fields_with_openai(texto_completo, model=model, service_type='qualificacao_avancada')
+            # Usar a função especializada de qualificação
+            campos = analyze_qualification_documents(textos_extraidos, filenames, model=model)
         except Exception as ia_error:
             print(f"❌ Erro na análise pela IA: {ia_error}")
             return jsonify({
@@ -867,6 +891,7 @@ def process_qualificacao():
             if Config.SECURE_PROCESSING:
                 secure_manager.cleanup_file(temp_file, user_ip)
         
+        print(f"✅ REQUISIÇÃO FINALIZADA - ID: {request_id} - Sucesso!")
         return jsonify({
             'success': True,
             'message': f'Análise técnica rigorosa de qualificação concluída! {len(documentos_analisados)} documentos processados.',
@@ -876,15 +901,17 @@ def process_qualificacao():
             'total_text_length': len(texto_completo),
             'secure_processing': Config.SECURE_PROCESSING,
             'analise_avancada': True,
-            'contexto_tecnico': 'Análise realizada por IA com contexto de registrador imobiliário'
+            'contexto_tecnico': 'Análise realizada por IA com contexto de registrador imobiliário',
+            'request_id': request_id
         })
         
     except Exception as e:
+        print(f"❌ REQUISIÇÃO FALHOU - ID: {request_id} - Erro: {str(e)}")
         # Garantir limpeza em caso de erro
         for temp_file in temp_files:
             if Config.SECURE_PROCESSING:
                 secure_manager.cleanup_file(temp_file, user_ip)
-        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500 
+        return jsonify({'error': f'Erro interno do servidor: {str(e)}', 'request_id': request_id}), 500 
 
  
 
@@ -1106,4 +1133,114 @@ def download_memorial_excel(filename):
         
     except Exception as e:
         print(f"❌ Erro ao fazer download do arquivo {filename}: {str(e)}")
-        return jsonify({'error': f'Erro ao fazer download: {str(e)}'}), 500 
+        return jsonify({'error': f'Erro ao fazer download: {str(e)}'}), 500
+
+@ai_bp.route('/api/memorial/download-custom', methods=['POST'])
+def download_memorial_custom():
+    """Endpoint para download personalizado do Excel com colunas configuradas pelo usuário"""
+    try:
+        data = request.get_json()
+        if not data or 'columns' not in data or 'data' not in data:
+            return jsonify({'error': 'Dados inválidos'}), 400
+        
+        columns_config = data['columns']
+        memorial_data = data['data']
+        
+        if not columns_config or not memorial_data:
+            return jsonify({'error': 'Configuração de colunas ou dados não fornecidos'}), 400
+        
+        # Importar pandas e openpyxl para criar o Excel personalizado
+        import pandas as pd
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
+        import tempfile
+        from datetime import datetime
+        
+        # Mapear IDs das colunas para campos dos dados
+        column_mapping = {
+            'apartamento': 'Apartamento',
+            'tipo': 'Tipo', 
+            'torre_bloco': 'Torre/Bloco',
+            'area_privativa': 'Área Privativa (m²)',
+            'area_comum': 'Área Comum (m²)',
+            'area_total': 'Área Total (m²)',
+            'fracao_ideal': 'Fração Ideal (%)',
+            'descricao': 'Descrição'
+        }
+        
+        # Criar DataFrame personalizado
+        custom_data = []
+        
+        for row in memorial_data:
+            custom_row = {}
+            
+            for col_config in columns_config:
+                col_id = col_config['id']
+                col_name = col_config['name']
+                
+                if col_config['type'] == 'custom':
+                    # Coluna personalizada - usar valor padrão
+                    custom_row[col_name] = col_config.get('defaultValue', '')
+                else:
+                    # Coluna padrão - mapear do dado original
+                    original_field = column_mapping.get(col_id, col_id)
+                    custom_row[col_name] = row.get(original_field, '')
+            
+            custom_data.append(custom_row)
+        
+        # Criar DataFrame
+        df = pd.DataFrame(custom_data)
+        
+        # Criar arquivo Excel com formatação
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Memorial Personalizado"
+        
+        # Estilos
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Adicionar cabeçalhos
+        for col_idx, column in enumerate(df.columns, 1):
+            cell = ws.cell(row=1, column=col_idx, value=column)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        # Adicionar dados
+        for row_idx, row in enumerate(df.values, 2):
+            for col_idx, value in enumerate(row, 1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+        
+        # Ajustar largura das colunas
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Salvar em arquivo temporário
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            wb.save(tmp_file.name)
+            tmp_file_path = tmp_file.name
+        
+        # Retornar arquivo
+        return send_file(
+            tmp_file_path,
+            as_attachment=True,
+            download_name=f'memorial_personalizado_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerar Excel personalizado: {str(e)}")
+        return jsonify({'error': f'Erro ao gerar arquivo personalizado: {str(e)}'}), 500 

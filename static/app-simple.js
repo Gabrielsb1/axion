@@ -72,12 +72,13 @@ function setupEventListeners() {
     });
     
     // File inputs para cada serviço
+    // NOTA: fileInputQualificacao REMOVIDO - gerenciado exclusivamente por qualificacao.js
     const fileInputs = [
         'fileInputMatricula',
         'fileInputMinuta',
         'fileInputContratos',
         'fileInputEscrituras',
-        'fileInputQualificacao',
+        // 'fileInputQualificacao', // REMOVIDO: evitar event listeners duplicados
         'fileInputMemorial',
         'fileInputOCR'
     ];
@@ -94,12 +95,13 @@ function setupEventListeners() {
     });
     
     // Process button listeners
+    // NOTA: processFileQualificacao REMOVIDO - gerenciado exclusivamente por qualificacao.js
     const processButtons = [
         'processFileMatricula',
         'processFileMinuta',
         'processFileContratos',
         'processFileEscrituras',
-        'processFileQualificacao',
+        // 'processFileQualificacao', // REMOVIDO: evitar event listeners duplicados
         'processFileMemorial',
         'processFileOCR'
     ];
@@ -518,13 +520,21 @@ async function processSingleFile(serviceId) {
         console.log('Método:', processingMethod);
         if (processingMethod === 'chatgpt') {
             const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
-            const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
+            const model = modelElement ? modelElement.value : 'gpt-4o';
             console.log('Modelo:', model);
         }
         
-        // Usar apenas endpoint do ChatGPT (OCR foi removido)
+        // QUALIFICAÇÃO DESABILITADA - Usar apenas qualificacao.js
+        if (serviceId === 'qualificacao') {
+            console.log('🚫 QUALIFICAÇÃO BLOQUEADA em processSingleFile - usar qualificacao.js');
+            console.log('⚠️ Esta função NÃO deve processar qualificação para evitar duplicação');
+            console.log('✅ Redirecionando para qualificacao.js...');
+            return; // BLOQUEAR processamento aqui
+        }
+        
+        // Para outros serviços, usar endpoint padrão
         let endpoint = '/api/process-file';
-        console.log('Usando endpoint ChatGPT');
+        console.log('🎯 Usando endpoint padrão: /api/process-file');
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -830,7 +840,7 @@ async function processMultipleFiles(serviceId) {
             
             if (processingMethod === 'chatgpt') {
                 const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
-                const model = modelElement ? modelElement.value : 'gpt-3.5-turbo';
+                const model = modelElement ? modelElement.value : 'gpt-4o';
                 useAdvancedModel = (model === 'gpt-4o').toString();
                 console.log('Modelo selecionado:', model, 'useAdvancedModel:', useAdvancedModel);
             }
@@ -1712,7 +1722,7 @@ if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF && downloadC
             
             // Obter modelo das configurações globais
             const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
-            const selectedModel = modelElement ? modelElement.value : 'gpt-3.5-turbo';
+            const selectedModel = modelElement ? modelElement.value : 'gpt-4o';
             formData.append('model', selectedModel);
             console.log('🎯 Modelo selecionado para certidão (configurações globais):', selectedModel);
             
@@ -1859,30 +1869,16 @@ const documentosEnviados = document.getElementById('documentosEnviados');
 let qualificacaoData = null;
 let documentosSelecionados = [];
 
+// EVENT LISTENERS DA QUALIFICAÇÃO REMOVIDOS - Usar apenas os de qualificacao.js
+// Os event listeners da aba Qualificação agora são gerenciados exclusivamente por qualificacao.js
+// para evitar conflitos e processamento duplicado
 if (fileInputQualificacao && processFileQualificacao) {
-    fileInputQualificacao.addEventListener('change', (event) => {
-        const files = Array.from(event.target.files);
-        documentosSelecionados = files;
-        
-        // Habilitar botão se há arquivos
-        processFileQualificacao.disabled = files.length === 0;
-        
-        // Limpar status anterior
-        qualificacaoStatus.innerHTML = '';
-        qualificacaoProgress.style.display = 'none';
-        
-        // Mostrar documentos selecionados
-        displayDocumentosSelecionados(files);
-        
-        // Limpar checklist
-        clearQualificacaoChecklist();
-    });
-
-    processFileQualificacao.addEventListener('click', async () => {
-        if (documentosSelecionados.length === 0) return;
-        
-        await processQualificacao();
-    });
+    console.log('⚠️ Event listeners da Qualificação REMOVIDOS do app-simple.js');
+    console.log('✅ Qualificação agora gerenciada exclusivamente por qualificacao.js');
+    console.log('🚫 Event listeners duplicados eliminados para evitar processamento duplo');
+    
+    // NÃO adicionar event listeners aqui - eles são gerenciados por qualificacao.js
+    // Isso elimina o processamento duplicado que estava acontecendo
 }
 
 function displayDocumentosSelecionados(files) {
@@ -1945,99 +1941,18 @@ function clearQualificacaoChecklist() {
     if (pontuacao) pontuacao.value = '';
 }
 
+// FUNÇÃO DESABILITADA - Usar apenas a função processQualificacao do qualificacao.js
 async function processQualificacao() {
-    if (documentosSelecionados.length === 0) {
-        showAlert('Nenhum documento selecionado', 'warning');
-        return;
+    console.log('⚠️ AVISO: Função processQualificacao do app-simple.js está DESABILITADA');
+    console.log('✅ Use apenas a função processQualificacao do qualificacao.js para evitar duplicação');
+    console.log('🚫 Esta função foi desabilitada para eliminar processamento duplicado');
+    
+    // Mostrar alerta para debug
+    if (typeof showAlert === 'function') {
+        showAlert('Função duplicada desabilitada. Use a aba Qualificação corretamente.', 'warning');
     }
     
-    // Preparar interface
-    processFileQualificacao.disabled = true;
-    processFileQualificacao.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analisando...';
-    
-    // Mostrar progresso
-    qualificacaoProgress.style.display = 'block';
-    const progressBar = qualificacaoProgress.querySelector('.progress-bar');
-    progressBar.style.width = '0%';
-    
-    // Status inicial
-    qualificacaoStatus.innerHTML = `
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Iniciando análise de qualificação...</strong><br>
-            Documentos selecionados: ${documentosSelecionados.length}<br>
-            Processando cada documento individualmente...
-        </div>
-    `;
-    
-    try {
-        // Preparar FormData com múltiplos arquivos
-        const formData = new FormData();
-        documentosSelecionados.forEach((file, index) => {
-            formData.append('files[]', file);
-        });
-        
-        // Adicionar modelo selecionado
-        const modelRadios = document.querySelectorAll('input[name="chatgptModel"]');
-        let selectedModel = 'gpt-3.5-turbo';
-        modelRadios.forEach(radio => {
-            if (radio.checked) {
-                selectedModel = radio.value;
-            }
-        });
-        formData.append('model', selectedModel);
-        
-        // Simular progresso
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 90) progress = 90;
-            progressBar.style.width = `${progress}%`;
-        }, 500);
-        
-        console.log('Iniciando análise de qualificação...');
-        const response = await fetch('/api/qualificacao', {
-            method: 'POST',
-            body: formData
-        });
-        
-        clearInterval(progressInterval);
-        progressBar.style.width = '100%';
-        
-        let result;
-        try {
-            result = await response.json();
-        } catch (jsonError) {
-            console.error('Erro ao parsear JSON:', jsonError);
-            throw new Error('Resposta inválida do servidor');
-        }
-        
-        if (result.success) {
-            // Armazenar dados
-            qualificacaoData = result;
-            
-            // Atualizar interface com resultados
-            updateQualificacaoInterface(result);
-            showAlert('Análise de qualificação concluída!', 'success');
-        } else {
-            throw new Error(result.error || 'Erro desconhecido na análise de qualificação');
-        }
-        
-    } catch (error) {
-        console.error('Erro na análise de qualificação:', error);
-        qualificacaoStatus.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Erro na análise de qualificação:</strong><br>
-                ${error.message}
-            </div>
-        `;
-        showAlert('Erro na análise de qualificação', 'danger');
-    } finally {
-        processFileQualificacao.disabled = false;
-        processFileQualificacao.innerHTML = '<i class="fas fa-play me-1"></i>Analisar Kit Completo';
-        qualificacaoProgress.style.display = 'none';
-    }
+    return; // Sair imediatamente sem fazer nada
 }
 
 function updateQualificacaoInterface(result) {
@@ -2240,9 +2155,277 @@ async function processMemorialFiles() {
     }
 }
 
+// Gerenciamento dinâmico de colunas para Memorial
+let memorialColumns = [
+    { id: 'apartamento', name: 'Apartamento', type: 'default', visible: true },
+    { id: 'tipo', name: 'Tipo', type: 'default', visible: true },
+    { id: 'torre_bloco', name: 'Torre/Bloco', type: 'default', visible: true },
+    { id: 'area_privativa', name: 'Área Privativa (m²)', type: 'default', visible: true },
+    { id: 'area_comum', name: 'Área Comum (m²)', type: 'default', visible: true },
+    { id: 'area_total', name: 'Área Total (m²)', type: 'default', visible: true },
+    { id: 'fracao_ideal', name: 'Fração Ideal (%)', type: 'default', visible: true },
+    { id: 'descricao', name: 'Descrição', type: 'default', visible: true }
+];
+
+function initializeColumnManagement() {
+    // Mostrar seção de configuração de colunas quando há dados
+    document.getElementById('memorialColumnConfig').style.display = 'block';
+    
+    // Renderizar lista de colunas
+    renderColumnsList();
+    
+    // Configurar event listeners
+    document.getElementById('addCustomColumn').addEventListener('click', addCustomColumn);
+    document.getElementById('resetColumns').addEventListener('click', resetColumns);
+    document.getElementById('downloadExcelCustom').addEventListener('click', downloadCustomExcel);
+    
+    // Inicializar drag and drop
+    initializeSortable();
+}
+
+function renderColumnsList() {
+    const columnsList = document.getElementById('columnsList');
+    columnsList.innerHTML = '';
+    
+    memorialColumns.forEach((column, index) => {
+        const columnItem = document.createElement('div');
+        columnItem.className = `list-group-item column-item ${column.type}-column`;
+        columnItem.dataset.columnId = column.id;
+        
+        columnItem.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-grip-vertical drag-handle me-3"></i>
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" ${column.visible ? 'checked' : ''} 
+                           onchange="toggleColumnVisibility('${column.id}')">
+                </div>
+                <div class="flex-grow-1">
+                    <strong>${column.name}</strong>
+                    ${column.type === 'custom' ? 
+                        `<input type="text" class="form-control form-control-sm mt-1" 
+                                placeholder="Valor padrão" value="${column.defaultValue || ''}" 
+                                onchange="updateColumnDefaultValue('${column.id}', this.value)">` : 
+                        `<small class="text-muted d-block">Coluna padrão</small>`
+                    }
+                </div>
+                ${column.type === 'custom' ? 
+                    `<button class="btn btn-sm btn-outline-danger" onclick="removeCustomColumn('${column.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>` : ''
+                }
+            </div>
+        `;
+        
+        columnsList.appendChild(columnItem);
+    });
+    
+    updateColumnPreview();
+}
+
+function initializeSortable() {
+    const columnsList = document.getElementById('columnsList');
+    
+    // Implementação simples de drag and drop
+    let draggedElement = null;
+    
+    columnsList.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('column-item')) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+        }
+    });
+    
+    columnsList.addEventListener('dragend', (e) => {
+        if (e.target.classList.contains('column-item')) {
+            e.target.classList.remove('dragging');
+        }
+    });
+    
+    columnsList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(columnsList, e.clientY);
+        if (afterElement == null) {
+            columnsList.appendChild(draggedElement);
+        } else {
+            columnsList.insertBefore(draggedElement, afterElement);
+        }
+    });
+    
+    columnsList.addEventListener('drop', (e) => {
+        e.preventDefault();
+        reorderColumns();
+    });
+    
+    // Tornar itens arrastáveis
+    columnsList.querySelectorAll('.column-item').forEach(item => {
+        item.draggable = true;
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.column-item:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function reorderColumns() {
+    const columnsList = document.getElementById('columnsList');
+    const newOrder = [];
+    
+    columnsList.querySelectorAll('.column-item').forEach(item => {
+        const columnId = item.dataset.columnId;
+        const column = memorialColumns.find(col => col.id === columnId);
+        if (column) {
+            newOrder.push(column);
+        }
+    });
+    
+    memorialColumns = newOrder;
+    updateColumnPreview();
+}
+
+function toggleColumnVisibility(columnId) {
+    const column = memorialColumns.find(col => col.id === columnId);
+    if (column) {
+        column.visible = !column.visible;
+        updateColumnPreview();
+    }
+}
+
+function addCustomColumn() {
+    const columnName = prompt('Nome da nova coluna:');
+    if (columnName && columnName.trim()) {
+        const columnId = 'custom_' + Date.now();
+        const newColumn = {
+            id: columnId,
+            name: columnName.trim(),
+            type: 'custom',
+            visible: true,
+            defaultValue: ''
+        };
+        
+        memorialColumns.push(newColumn);
+        renderColumnsList();
+        initializeSortable();
+    }
+}
+
+function removeCustomColumn(columnId) {
+    if (confirm('Deseja remover esta coluna personalizada?')) {
+        memorialColumns = memorialColumns.filter(col => col.id !== columnId);
+        renderColumnsList();
+        initializeSortable();
+    }
+}
+
+function updateColumnDefaultValue(columnId, value) {
+    const column = memorialColumns.find(col => col.id === columnId);
+    if (column) {
+        column.defaultValue = value;
+    }
+}
+
+function resetColumns() {
+    if (confirm('Deseja restaurar as colunas padrão? Todas as personalizações serão perdidas.')) {
+        memorialColumns = [
+            { id: 'apartamento', name: 'Apartamento', type: 'default', visible: true },
+            { id: 'tipo', name: 'Tipo', type: 'default', visible: true },
+            { id: 'torre_bloco', name: 'Torre/Bloco', type: 'default', visible: true },
+            { id: 'area_privativa', name: 'Área Privativa (m²)', type: 'default', visible: true },
+            { id: 'area_comum', name: 'Área Comum (m²)', type: 'default', visible: true },
+            { id: 'area_total', name: 'Área Total (m²)', type: 'default', visible: true },
+            { id: 'fracao_ideal', name: 'Fração Ideal (%)', type: 'default', visible: true },
+            { id: 'descricao', name: 'Descrição', type: 'default', visible: true }
+        ];
+        renderColumnsList();
+        initializeSortable();
+    }
+}
+
+function updateColumnPreview() {
+    const preview = document.getElementById('columnPreview');
+    const visibleColumns = memorialColumns.filter(col => col.visible);
+    
+    if (visibleColumns.length === 0) {
+        preview.innerHTML = '<small class="text-muted">Nenhuma coluna selecionada</small>';
+        return;
+    }
+    
+    const previewHtml = visibleColumns.map((col, index) => 
+        `<div class="column-preview-item">
+            ${index + 1}. ${col.name}
+            ${col.type === 'custom' && col.defaultValue ? 
+                `<small class="text-muted d-block">Valor: "${col.defaultValue}"</small>` : ''}
+        </div>`
+    ).join('');
+    
+    preview.innerHTML = previewHtml;
+}
+
+function downloadCustomExcel() {
+    if (!memorialData || !memorialData.data) {
+        alert('Nenhum dado disponível para download');
+        return;
+    }
+    
+    // Preparar configuração de colunas para enviar ao backend
+    const columnConfig = {
+        columns: memorialColumns.filter(col => col.visible).map(col => ({
+            id: col.id,
+            name: col.name,
+            type: col.type,
+            defaultValue: col.defaultValue || ''
+        })),
+        data: memorialData.data
+    };
+    
+    // Enviar para o backend
+    fetch('/api/memorial/download-custom', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(columnConfig)
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Erro ao gerar arquivo personalizado');
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `memorial_personalizado_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showAlert('Download personalizado iniciado!', 'success');
+    })
+    .catch(error => {
+        console.error('Erro no download personalizado:', error);
+        showAlert('Erro ao gerar arquivo personalizado', 'danger');
+    });
+}
+
 function updateMemorialInterface(result) {
     // Armazenar dados para download
     memorialData = result;
+    
+    // Inicializar gerenciamento de colunas
+    initializeColumnManagement();
     
     console.log('🔍 Resultado completo recebido:', result);
     console.log('🔍 Dados disponíveis:', result.data ? result.data.length : 'N/A');

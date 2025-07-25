@@ -103,9 +103,11 @@ function displayQualificacaoResults(data) {
     if (data.analise_avancada && campos.documents_analyzed) {
         console.log('🔍 Processando análise avançada...');
         processAdvancedAnalysisResults(campos);
+        // SEMPRE atualizar o checklist com os 32 itens
+        updateChecklistValidacao(campos);
     } else {
         // Processamento tradicional
-    updateChecklistValidacao(campos);
+        updateChecklistValidacao(campos);
     }
     
     // Exibir documentos analisados
@@ -649,8 +651,26 @@ function updateChecklistValidacaoInternalDelayed(campos) {
     let itemsProcessados = 0;
     let itemsNaoEncontrados = 0;
     
+    console.log('📊 INICIANDO PROCESSAMENTO DO CHECKLIST:');
+    console.log('📁 Campos recebidos da IA:', Object.keys(campos));
+    console.log('📁 Itens do checklist esperados:', checklistItems);
+    
+    // Verificar quais campos da IA correspondem aos itens do checklist
+    const camposEncontrados = checklistItems.filter(item => campos.hasOwnProperty(item));
+    const camposNaoEncontrados = checklistItems.filter(item => !campos.hasOwnProperty(item));
+    
+    console.log('✅ Campos encontrados na resposta da IA:', camposEncontrados);
+    console.log('❌ Campos NÃO encontrados na resposta da IA:', camposNaoEncontrados);
+    
     checklistItems.forEach((item) => {
         const value = campos[item] || 'N/A';
+        console.log(`🔍 Processando ${item}: valor = "${value}"`);
+        
+        // Debug adicional para campos não encontrados
+        if (!campos.hasOwnProperty(item)) {
+            console.log(`⚠️ Campo ${item} não encontrado nos dados da IA`);
+            console.log('📄 Campos disponíveis:', Object.keys(campos).filter(k => k.startsWith('item')));
+        }
         
         // Buscar elementos diretamente pelo ID
         const radioSim = document.getElementById(`${item}_sim`);
@@ -688,16 +708,42 @@ function updateChecklistValidacaoInternalDelayed(campos) {
                 matchingRadios.map(r => r.id));
         }
         
-        // Atualizar justificativa
+        // Atualizar justificativa com sistema "Ver Mais"
         const justificativaField = `justificativa_${item}`;
         const justificativa = campos[justificativaField] || 'Justificativa não disponível';
+        const justificativaDetalhada = campos[`justificativa_detalhada_${item}`] || justificativa;
+        
         const justificativaElement = document.getElementById(`justificativa_${item}`);
         if (justificativaElement) {
-            // Renderizar HTML se a justificativa contiver tags HTML (badges de documentos)
-            if (justificativa.includes('<span') || justificativa.includes('badge')) {
-                justificativaElement.innerHTML = justificativa;
+            // Criar justificativa com "Ver Mais" se houver versão detalhada
+            const hasDetailed = justificativaDetalhada && justificativaDetalhada !== justificativa && justificativaDetalhada.length > justificativa.length;
+            
+            if (hasDetailed) {
+                // Justificativa resumida + botão "Ver Mais"
+                const shortVersion = justificativa.length > 150 ? justificativa.substring(0, 150) + '...' : justificativa;
+                justificativaElement.innerHTML = `
+                    <div class="justificativa-container">
+                        <div class="justificativa-resumida" id="resumida_${item}">
+                            ${shortVersion}
+                            <button class="btn btn-link btn-sm p-0 ms-2 ver-mais-btn" onclick="toggleJustificativa('${item}')">
+                                <i class="fas fa-chevron-down"></i> Ver mais
+                            </button>
+                        </div>
+                        <div class="justificativa-detalhada d-none" id="detalhada_${item}">
+                            ${justificativaDetalhada}
+                            <button class="btn btn-link btn-sm p-0 ms-2 ver-menos-btn" onclick="toggleJustificativa('${item}')">
+                                <i class="fas fa-chevron-up"></i> Ver menos
+                            </button>
+                        </div>
+                    </div>
+                `;
             } else {
-            justificativaElement.textContent = justificativa;
+                // Justificativa normal (sem "Ver Mais")
+                if (justificativa.includes('<span') || justificativa.includes('badge')) {
+                    justificativaElement.innerHTML = justificativa;
+                } else {
+                    justificativaElement.textContent = justificativa;
+                }
             }
             console.log(`📝 Justificativa ${item}: ${justificativa.substring(0, 50)}...`);
         }
@@ -735,12 +781,37 @@ function displayDocumentosAnalisados(documentos) {
     
     console.log('📄 Exibindo documentos analisados:', documentos);
     
+    // Função para mapear tipo de documento baseado no filename
+    function getDocumentType(filename) {
+        if (!filename) return 'DESCONHECIDO';
+        
+        const name = filename.toLowerCase();
+        if (name.includes('matricula') || name.includes('3ri') || name.includes('registro')) return 'MATRÍCULA';
+        if (name.includes('contrato') || name.includes('compra') || name.includes('venda')) return 'CONTRATO';
+        if (name.includes('itbi')) return 'ITBI';
+        if (name.includes('certidao') || name.includes('certidão')) return 'CERTIDÃO';
+        if (name.includes('procuracao') || name.includes('procuração')) return 'PROCURAÇÃO';
+        return 'DOCUMENTO';
+    }
+    
+    // Função para obter classe do badge baseada no tipo
+    function getBadgeClass(docType) {
+        switch (docType) {
+            case 'MATRÍCULA': return 'bg-primary';
+            case 'CONTRATO': return 'bg-success';
+            case 'ITBI': return 'bg-info';
+            case 'CERTIDÃO': return 'bg-warning';
+            case 'PROCURAÇÃO': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+    
     let html = `
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-file-pdf me-2"></i>
-                    Documentos Analisados (${documentos.length})
+                    Documentos Enviados
                 </h5>
             </div>
             <div class="card-body">
@@ -748,6 +819,8 @@ function displayDocumentosAnalisados(documentos) {
     `;
     
     documentos.forEach((doc, index) => {
+        const docType = getDocumentType(doc.filename);
+        const badgeClass = getBadgeClass(docType);
         const statusClass = doc.error ? 'border-danger' : 'border-success';
         const statusIcon = doc.error ? 'fas fa-exclamation-triangle text-danger' : 'fas fa-check-circle text-success';
         const statusText = doc.error ? 'Erro' : 'Processado';
@@ -755,37 +828,68 @@ function displayDocumentosAnalisados(documentos) {
         html += `
             <div class="col-md-6 mb-3">
                 <div class="card ${statusClass}">
-                    <div class="card-header bg-light">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <strong>Documento ${index + 1}</strong>
-                            <span class="badge ${doc.error ? 'bg-danger' : 'bg-success'}">
-                                <i class="${statusIcon} me-1"></i>${statusText}
-                            </span>
-                        </div>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            ${doc.filename || `Documento ${index + 1}`}
+                        </h6>
+                        <span class="badge ${badgeClass}">${docType}</span>
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
-                            <strong>Arquivo:</strong> ${doc.filename || 'N/A'}
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Documento ${index + 1} de ${documentos.length}
+                            </small>
                         </div>
                         <div class="mb-2">
-                            <strong>ID:</strong> ${doc.file_id || 'N/A'}
+                            <small class="text-muted">
+                                <i class="fas fa-file-text me-1"></i>
+                                ${doc.text_length || 0} caracteres extraídos
+                            </small>
                         </div>
-                        <div class="mb-2">
-                            <strong>Tamanho do texto:</strong> ${doc.text_length || 0} caracteres
+                        <div class="alert alert-info small">
+                            <i class="fas fa-robot me-1"></i>
+                            <strong>Classificação IA:</strong> ${docType}
                         </div>
+                        
                         ${doc.text_preview ? `
                         <div class="mb-2">
-                            <strong>Preview:</strong>
+                            <strong>Preview do Texto:</strong>
                             <div class="alert alert-light p-2">
                                 <small>${doc.text_preview.substring(0, 150)}${doc.text_preview.length > 150 ? '...' : ''}</small>
                             </div>
                         </div>
                         ` : ''}
+                        
                         ${doc.error ? `
                         <div class="alert alert-danger p-2">
                             <small><strong>Erro:</strong> ${doc.error}</small>
                         </div>
                         ` : ''}
+                        
+                        <div class="mt-3">
+                            <label class="form-label small fw-bold">
+                                <i class="fas fa-edit me-1"></i>Corrigir Classificação:
+                            </label>
+                            <select class="form-select form-select-sm" id="correction_${index}">
+                                <option value="MATRÍCULA" ${docType === 'MATRÍCULA' ? 'selected' : ''}>Matrícula</option>
+                                <option value="CONTRATO" ${docType === 'CONTRATO' ? 'selected' : ''}>Contrato</option>
+                                <option value="ITBI" ${docType === 'ITBI' ? 'selected' : ''}>ITBI</option>
+                                <option value="CERTIDÃO" ${docType === 'CERTIDÃO' ? 'selected' : ''}>Certidão</option>
+                                <option value="PROCURAÇÃO" ${docType === 'PROCURAÇÃO' ? 'selected' : ''}>Procuração</option>
+                                <option value="DESCONHECIDO" ${docType === 'DESCONHECIDO' ? 'selected' : ''}>Desconhecido</option>
+                            </select>
+                        </div>
+                        
+                        ${docType !== 'DESCONHECIDO' ? '' : `
+                        <div class="alert alert-warning mt-2 p-2">
+                            <small>
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <strong>Atenção:</strong> Se a classificação automática estiver incorreta, você pode corrigi-la acima e reprocessar a análise.
+                            </small>
+                        </div>
+                        `}
                     </div>
                 </div>
             </div>
