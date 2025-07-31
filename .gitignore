@@ -133,6 +133,12 @@ uploads/
 processed/
 *.pdf
 *.log
+audit.log
+temp/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # IDE
 .vscode/

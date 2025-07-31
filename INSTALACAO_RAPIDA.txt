@@ -1,0 +1,31 @@
+========================================
+    NIC SAN - INSTALAÇÃO RÁPIDA
+========================================
+
+📋 PRÉ-REQUISITOS:
+1. Python 3.8+ instalado
+2. Tesseract OCR (opcional)
+3. Chave da API OpenAI
+
+🚀 INSTALAÇÃO AUTOMÁTICA:
+1. Execute: install_windows.bat
+2. Configure Tesseract: setup_tesseract.bat
+3. Execute: run_nicsan.bat
+
+🔧 CONFIGURAÇÃO:
+1. Copie env_example.txt para .env
+2. Configure sua chave OpenAI no .env
+3. Execute: test_installation.bat
+
+🌐 ACESSO:
+- URL: http://localhost:5000
+- Porta: 5000
+
+📚 DOCUMENTAÇÃO COMPLETA:
+- GUIA_INSTALACAO_WINDOWS.md
+
+⚠️ SOLUÇÃO DE PROBLEMAS:
+- Execute test_installation.bat para diagnóstico
+- Consulte GUIA_INSTALACAO_WINDOWS.md
+
+======================================== 

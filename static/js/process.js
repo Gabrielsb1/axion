@@ -24,7 +24,7 @@ const UTILS = {
     }
 };
 
-export async function processFile(files, ui, setCurrentData) {
+export async function processFile(files, ui, setCurrentData, serviceType = 'matricula') {
     if (!files || files.length === 0) {
         ui.showAlert('Nenhum arquivo selecionado!', 'warning');
         return;
@@ -46,6 +46,7 @@ export async function processFile(files, ui, setCurrentData) {
         // Processar todos os arquivos e combinar os resultados
         let combinedData = {};
         let processedCount = 0;
+        let lastProcessedData = null;
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -56,7 +57,7 @@ export async function processFile(files, ui, setCurrentData) {
             
             // Sempre usar gpt-4o como modelo
             formData.append('model', 'gpt-4o');
-            formData.append('service', 'matricula');
+            formData.append('service', serviceType);
 
             const response = await fetch('/api/process-file', {
                 method: 'POST',
@@ -76,6 +77,9 @@ export async function processFile(files, ui, setCurrentData) {
                     ui.showAlert(`Erro no processamento do arquivo ${file.name}: Resposta inválida do servidor`, 'danger');
                     return;
                 }
+                
+                // Armazenar último resultado processado
+                lastProcessedData = data;
                 
                 // Combinar os dados extraídos
                 if (data.campos) {
@@ -105,8 +109,15 @@ export async function processFile(files, ui, setCurrentData) {
         // Definir os dados combinados
         setCurrentData({ campos: combinedData });
         
-        // Preencher os campos da interface com os dados extraídos
-        fillMatriculaFields(combinedData);
+        // Tratar diferentes tipos de serviço
+        if (serviceType === 'ocr') {
+            // Para OCR, mostrar informações específicas
+            // Usar o último resultado processado
+            displayOCRResults(lastProcessedData, ui);
+        } else {
+            // Para outros serviços, preencher campos da matrícula
+            fillMatriculaFields(combinedData);
+        }
         
         ui.updateStatus(`${processedCount} arquivo(s) processado(s) com sucesso!`, 'success');
         ui.showAlert('Processamento concluído!', 'success');
@@ -118,6 +129,163 @@ export async function processFile(files, ui, setCurrentData) {
         ui.showProgress(false);
     }
 }
+
+// Função para exibir resultados do OCR
+function displayOCRResults(data, ui) {
+    console.log('📄 Exibindo resultados do OCR:', data);
+    
+    const ocrStatus = document.getElementById('ocrStatus');
+    const ocrResults = document.getElementById('ocrResults');
+    
+    if (!ocrStatus || !ocrResults) {
+        console.error('❌ Elementos OCR não encontrados');
+        return;
+    }
+    
+    // Obter informações do backend
+    const processingTime = data.processing_time || 'N/A';
+    const textLength = data.text_length || (data.text_content ? data.text_content.length : 0);
+    const quality = data.ocr_quality || (textLength > 1000 ? 'Alta' : textLength > 500 ? 'Média' : 'Baixa');
+    
+    console.log('⏱️ Tempo de processamento recebido:', processingTime);
+    
+    // Criar HTML para status
+    const statusHTML = `
+        <div class="alert alert-success">
+            <h6><i class="fas fa-check-circle me-2"></i>OCR Concluído com Sucesso!</h6>
+            <p class="mb-2"><small class="text-muted"><i class="fas fa-info-circle me-1"></i>Apenas OCR executado - sem análise de IA</small></p>
+            <div class="processing-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Tempo de Processamento:</span>
+                    <span class="processing-time">${processingTime}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Caracteres Extraídos:</span>
+                    <span class="badge bg-primary">${textLength.toLocaleString()}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Qualidade Estimada:</span>
+                    <span class="badge bg-success">${quality}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Criar HTML para resultados
+    const resultsHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-text me-2"></i>
+                    Texto Extraído
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-preview">
+                    ${(data.text_content || (data.campos && data.campos.text_content)) ? 
+                        (data.text_content || data.campos.text_content).substring(0, 1000) + 
+                        ((data.text_content || data.campos.text_content).length > 1000 ? '...' : '') : 
+                        'Nenhum texto extraído'}
+                </div>
+                ${(data.text_content || (data.campos && data.campos.text_content)) && 
+                  (data.text_content || data.campos.text_content).length > 1000 ? `
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-primary btn-sm" onclick="showFullOCRText()">
+                        <i class="fas fa-expand me-1"></i>Ver Texto Completo
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Exibir resultados
+    ocrStatus.innerHTML = statusHTML;
+    ocrResults.innerHTML = resultsHTML;
+    
+    // Armazenar texto completo para visualização
+    if (data.text_content) {
+        window.fullOCRText = data.text_content;
+    } else if (data.campos && data.campos.text_content) {
+        window.fullOCRText = data.campos.text_content;
+    }
+    
+    // Armazenar resultado completo para download
+    window.ocrResult = {
+        file_id: data.file_id,
+        original_filename: data.original_filename,
+        text_content: data.text_content || (data.campos && data.campos.text_content),
+        text_length: data.text_length
+    };
+    
+    // Habilitar botão de download PDF
+    const downloadPDFBtn = document.getElementById('downloadOCRPDF');
+    if (downloadPDFBtn) {
+        downloadPDFBtn.disabled = false;
+        console.log('✅ Botão de download PDF habilitado');
+    } else {
+        console.error('❌ Botão de download PDF não encontrado');
+    }
+    
+    console.log('✅ Resultados do OCR exibidos com sucesso');
+}
+
+// Função para mostrar texto completo do OCR
+window.showFullOCRText = function() {
+    if (window.fullOCRText) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-file-text me-2"></i>
+                            Texto Completo Extraído
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-preview" style="max-height: 400px; overflow-y: auto;">
+                            ${window.fullOCRText}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" onclick="downloadOCRText()">
+                            <i class="fas fa-download me-1"></i>Baixar como TXT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Inicializar modal Bootstrap
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+        
+        // Remover modal do DOM após fechar
+        modal.addEventListener('hidden.bs.modal', () => {
+            document.body.removeChild(modal);
+        });
+    }
+};
+
+// Função para baixar texto do OCR
+window.downloadOCRText = function() {
+    if (window.fullOCRText) {
+        const blob = new Blob([window.fullOCRText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ocr_texto_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+};
 
 // Função para preencher os campos da matrícula
 function fillMatriculaFields(campos) {

@@ -27,6 +27,9 @@ def allowed_file(filename):
 def process_file_chatgpt():
     """Endpoint otimizado para processamento com ChatGPT - agora SEMPRE faz OCR antes da IA"""
     from ai.ocr_service import extract_text_from_pdf, process_pdf_with_ocr
+    import time
+    
+    start_time = time.time()
     temp_file_path = None
     user_ip = request.remote_addr
     try:
@@ -38,7 +41,7 @@ def process_file_chatgpt():
         if not allowed_file(file.filename):
             return jsonify({'error': 'Apenas arquivos PDF são permitidos'}), 400
         # Obter tipo de serviço
-        service_type = request.form.get('service', 'matricula')
+        service_type = request.form.get('service', 'certidao')
         print(f"🎯 Serviço recebido: {service_type}")
         original_filename = secure_filename(file.filename or 'unknown.pdf')
         # Processar arquivo de forma segura
@@ -88,11 +91,26 @@ def process_file_chatgpt():
             }), 400
         print(f"✅ Texto extraído com sucesso: {len(text_content)} caracteres")
         print(f"📄 Preview do texto (primeiros 500 chars): {text_content[:500]}")
-        # Extrair campos com OpenAI
-        print("🤖 Iniciando extração com IA...")
-        model = request.form.get('model', 'gpt-4o')
-        print(f"🎯 Modelo recebido no endpoint /api/process-file: {model}")
-        campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
+        # Verificar tipo de serviço antes de fazer logs
+        if service_type == 'ocr':
+            print("📄 Serviço OCR - retornando apenas texto extraído, sem IA")
+            campos = {'text_content': text_content}
+        else:
+            print("🤖 Iniciando extração com IA...")
+            model = request.form.get('model', 'gpt-4o')
+            print(f"🎯 Modelo recebido no endpoint /api/process-file: {model}")
+            print("🤖 Serviço com IA - extraindo campos com OpenAI")
+            campos = extract_fields_with_openai(text_content, model=model, service_type=service_type)
+        # Para OCR, salvar o arquivo processado para download
+        if service_type == 'ocr' and 'temp_ocr_path' in locals() and temp_ocr_path and os.path.exists(temp_ocr_path):
+            try:
+                # Salvar arquivo OCR para download
+                ocr_download_path = os.path.join(Config.TEMP_DIRECTORY, f"ocr_{file_id}_{original_filename}")
+                shutil.copy2(temp_ocr_path, ocr_download_path)
+                print(f"✅ Arquivo OCR salvo para download: {ocr_download_path}")
+            except Exception as e:
+                print(f"❌ Erro ao salvar arquivo OCR: {str(e)}")
+        
         # Limpar arquivo temporário após processamento
         if Config.SECURE_PROCESSING and temp_file_path:
             secure_manager.cleanup_file(temp_file_path, user_ip)
@@ -101,18 +119,40 @@ def process_file_chatgpt():
                 os.remove(temp_ocr_path)
             except Exception:
                 pass
-        return jsonify({
+        # Preparar resposta baseada no tipo de serviço
+        response_data = {
             'success': True,
-            'message': f'PDF processado e campos extraídos com ChatGPT ({service_type})!',
             'original_filename': original_filename,
             'file_id': file_id,
             'campos': campos,
-            'model': model,
             'service_type': service_type,
             'text_length': len(text_content),
             'used_ocr_fallback': True,
             'secure_processing': Config.SECURE_PROCESSING
-        })
+        }
+        
+        # Adicionar model apenas se não for OCR
+        if service_type != 'ocr':
+            model = request.form.get('model', 'gpt-4o')
+            response_data['model'] = model
+        
+        # Calcular tempo de processamento
+        processing_time = time.time() - start_time
+        
+        # Adicionar informações específicas para OCR
+        if service_type == 'ocr':
+            response_data.update({
+                'message': 'OCR executado com sucesso!',
+                'text_content': text_content,
+                'processing_time': f'{processing_time:.2f}s',
+                'ocr_quality': 'Alta' if len(text_content) > 1000 else 'Média' if len(text_content) > 500 else 'Baixa',
+                'ocr_only': True  # Marcar que foi apenas OCR, sem IA
+            })
+        else:
+            response_data['message'] = f'PDF processado e campos extraídos com ChatGPT ({service_type})!'
+            response_data['processing_time'] = f'{processing_time:.2f}s'
+        
+        return jsonify(response_data)
     except Exception as e:
         # Garantir limpeza em caso de erro
         if Config.SECURE_PROCESSING and temp_file_path:
@@ -317,7 +357,7 @@ def process_certidao():
         # Debug: mostrar campos extraídos antes de gerar o PDF
         print("Campos extraídos para o PDF:", campos)
         # Mapeamento para garantir nomes corretos
-        campos['cnm'] = campos.get('cnm') or campos.get('matricula') or ''
+        campos['cnm'] = campos.get('cnm') or ''
         campos['descricao_imovel'] = campos.get('descricao_imovel') or campos.get('descricao') or ''
         campos['proprietarios'] = campos.get('proprietarios') or campos.get('proprietario') or ''
         campos['inscricao_imobiliaria'] = campos.get('inscricao_imobiliaria') or campos.get('inscricao') or ''
@@ -381,43 +421,55 @@ def get_certidao_data():
             temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
             file.save(temp_file_path)
 
-        # Extrair texto do PDF (OCR se necessário)
+        # SEMPRE fazer OCR primeiro para extrair texto do PDF
         text_content = ""
-        temp_ocr_path = None
+        temp_ocr_path = temp_file_path + '_ocr.pdf'
         
         try:
             # Descriptografar se necessário
             if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
                 temp_file_path = secure_manager.decrypt_file(temp_file_path)
             
-            # Tentar extrair texto diretamente primeiro
-            with open(temp_file_path, 'rb') as f:
-                pdf_reader = pypdf.PdfReader(f)
-                for page in pdf_reader.pages:
-                    text_content += page.extract_text() + "\n"
-        except Exception as e:
-            print(f"❌ Erro ao extrair texto diretamente: {str(e)}")
-            text_content = ""
-        
-        # Limpar e normalizar texto
-        text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
-        
-        # Se não houver texto suficiente, tentar OCR
-        if not text_content or len(text_content.strip()) < 50:
-            print("🔍 Texto insuficiente, tentando OCR...")
-            try:
-                if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
-                    temp_file_path = secure_manager.decrypt_file(temp_file_path)
+            print("🔍 Iniciando OCR para extração de texto...")
+            from ai.ocr_service import process_pdf_with_ocr
+            
+            ocr_result = process_pdf_with_ocr(temp_file_path, temp_ocr_path)
+            if ocr_result.get('success'):
+                print("✅ OCR bem-sucedido, extraindo texto...")
+                from ai.ocr_service import extract_text_from_pdf
+                text_content = extract_text_from_pdf(temp_ocr_path)
+                text_content = re.sub(r'\s+', ' ', text_content.replace('\n', ' ')).strip()
+            else:
+                print(f"❌ OCR falhou: {ocr_result.get('error', 'Erro desconhecido')}")
+                return jsonify({
+                    'error': 'Não foi possível extrair texto suficiente do PDF.',
+                    'details': 'O arquivo pode estar corrompido, protegido por senha, ou ser uma imagem escaneada de baixa qualidade.',
+                    'suggestion': 'Tente com um arquivo PDF diferente ou verifique se o arquivo não está protegido.',
+                    'ocr_error': ocr_result.get('error', 'Erro desconhecido')
+                }), 400
                 
-                text_content = process_pdf_with_ocr(temp_file_path, user_ip)
-                if not text_content:
-                    return jsonify({'error': 'Não foi possível extrair texto do PDF'}), 400
-            except Exception as ocr_error:
-                print(f"❌ Erro no OCR: {str(ocr_error)}")
-                return jsonify({'error': 'Erro no processamento OCR'}), 500
+        except Exception as ocr_error:
+            print(f"❌ Erro durante OCR: {str(ocr_error)}")
+            return jsonify({
+                'error': 'Erro durante processamento OCR.',
+                'details': str(ocr_error),
+                'suggestion': 'Verifique se o arquivo é um PDF válido e não está corrompido.'
+            }), 400
+        
+        # Verificar se temos texto suficiente para processar
+        if not text_content or len(text_content.strip()) < 10:
+            return jsonify({
+                'error': 'Texto insuficiente para processamento.',
+                'details': f'Extraído apenas {len(text_content)} caracteres.',
+                'suggestion': 'O arquivo pode estar vazio ou não conter texto legível.',
+                'text_preview': text_content[:200] if text_content else ''
+            }), 400
+        
+        print(f"✅ Texto extraído com sucesso via OCR: {len(text_content)} caracteres")
+        print(f"📄 Preview do texto (primeiros 500 chars): {text_content[:500]}")
 
-        # Extrair campos usando OpenAI
-        print("🔍 Extraindo campos da certidão...")
+        # Extrair campos usando OpenAI (após OCR)
+        print("🤖 Extraindo campos da certidão com IA...")
         model = request.form.get('model', 'gpt-4o')
         print(f"🎯 Modelo recebido no endpoint /api/certidao/data: {model}")
         campos = extract_fields_with_openai(text_content, model=model, service_type="certidao")
@@ -435,9 +487,73 @@ def get_certidao_data():
             except Exception:
                 pass
 
+        # Gerar HTML formatado para o preview
+        def generate_formatted_html(certidao_data):
+            from datetime import datetime
+            data_certidao = datetime.now().strftime('%d/%m/%Y')
+            
+            html = f"""<div class="certidao-preview">
+                <div class="certidao-title">CERTIDÃO DE SITUAÇÃO JURÍDICA DO IMÓVEL</div>
+                <div class="certidao-separator"></div>
+                <div class="certidao-content">
+                    <p class="certidao-intro">CERTIFICO, nos termos dos arts. 17 e 19, §9º, da Lei n.º 6.015/1973, e art. 123, caput, do Provimento n.º 149/2023, do Conselho Nacional de Justiça - CNJ, que, revendo os livros, arquivos e sistemas eletrônicos desta Serventia, inclusive cadastro interno de ações reais e pessoais reipersecutórias envolvendo imóveis desta circunscrição, encontrei o lançamento relativo ao registro de imóvel seguinte:</p>
+                    <div class="certidao-section">
+                        <div class="section-title">CADASTRO NACIONAL DE MATRÍCULA - CNM</div>
+                        <div class="section-content">{certidao_data.get('cnm', '')}</div>
+                    </div>
+                    <div class="certidao-section">
+                        <div class="section-title">DESCRIÇÃO DO IMÓVEL</div>
+                        <div class="section-content">{certidao_data.get('descricao_imovel', '')}</div>
+                    </div>"""
+            
+            if certidao_data.get('senhorio_direto'):
+                html += f"""<div class="certidao-section">
+                        <div class="section-title">SENHORIO DIRETO</div>
+                        <div class="section-content">{certidao_data.get('senhorio_direto')}</div>
+                    </div>"""
+            if certidao_data.get('enfiteuta'):
+                html += f"""<div class="certidao-section">
+                        <div class="section-title">ENFITEUTA</div>
+                        <div class="section-content">{certidao_data.get('enfiteuta')}</div>
+                    </div>"""
+            html += f"""<div class="certidao-section">
+                        <div class="section-title">PROPRIETÁRIO(S)</div>
+                        <div class="section-content">{certidao_data.get('proprietarios', '')}</div>
+                    </div>
+                    <div class="certidao-section">
+                        <div class="section-title">INSCRIÇÃO IMOBILIÁRIA</div>
+                        <div class="section-content">{certidao_data.get('inscricao_imobiliaria', '')}</div>
+                    </div>"""
+            
+            if certidao_data.get('rip'):
+                html += f"""<div class="certidao-section">
+                        <div class="section-title">REGISTRO IMOBILIÁRIO PATRIMONIAL (RIP)</div>
+                        <div class="section-content">{certidao_data.get('rip')}</div>
+                    </div>"""
+            html += f"""<div class="certidao-section">
+                        <div class="section-title">DIREITOS, ÔNUS REAIS E RESTRIÇÕES JUDICIAIS E ADMINISTRATIVAS</div>
+                        <div class="section-content">O referido é verdade e dou fé. São Luís/MA, {data_certidao}.</div>
+                    </div>
+                    <div class="certidao-section">
+                        <div class="section-title">Emolumentos</div>
+                        <div class="section-content">{certidao_data.get('emolumentos', '')}</div>
+                    </div>
+                    <div class="certidao-signature">
+                        <div class="signature-left">João Gabriel Santos Barros,<br>Escrevente</div>
+                        <div class="signature-right">Autorizado.</div>
+                    </div>
+                    <div class="certidao-validity">Validade: 30 dias.</div>
+                </div>
+            </div>"""
+            return html
+        
+        formatted_html = generate_formatted_html(campos)
+        
         return jsonify({
             'success': True,
             'data': campos,
+            'text_content': text_content,
+            'formatted_html': formatted_html,
             'message': 'Dados da certidão extraídos com sucesso'
         })
 
@@ -723,9 +839,10 @@ def generate_certidao_word():
         print(f"❌ Erro ao gerar arquivo Word: {str(e)}")
         return jsonify({'error': f'Erro ao gerar arquivo Word: {str(e)}'}), 500
 
-@ai_bp.route('/api/qualificacao', methods=['POST'])
-def process_qualificacao():
-    """Endpoint para processar múltiplos arquivos para análise de qualificação"""
+# @ai_bp.route('/api/qualificacao', methods=['POST'])
+# def process_qualificacao():
+    """Endpoint para processar múltiplos arquivos para análise de qualificação - REMOVIDO"""
+    pass
     import uuid
     request_id = str(uuid.uuid4())[:8]
     print(f"🆔 NOVA REQUISIÇÃO /api/qualificacao - ID: {request_id}")
@@ -931,18 +1048,22 @@ def process_memorial():
         if not files or all(file.filename == '' for file in files):
             return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
         
-        # Validar arquivos - apenas DOCX
+        # Validar arquivos - DOCX e PDF
         valid_files = []
         for file in files:
-            if file.filename and file.filename.lower().endswith('.docx'):
+            if file.filename and file.filename.lower().endswith(('.docx', '.pdf')):
                 valid_files.append(file)
             else:
-                return jsonify({'error': f'Arquivo inválido: {file.filename}. Apenas arquivos DOCX são permitidos.'}), 400
+                return jsonify({'error': f'Arquivo inválido: {file.filename}. Apenas arquivos DOCX e PDF são permitidos.'}), 400
         
         if not valid_files:
-            return jsonify({'error': 'Nenhum arquivo DOCX válido encontrado'}), 400
+            return jsonify({'error': 'Nenhum arquivo DOCX ou PDF válido encontrado'}), 400
         
-        print(f"📁 Processando {len(valid_files)} arquivos DOCX para memorial...")
+        # Validar que apenas um arquivo foi enviado para memorial
+        if len(valid_files) > 1:
+            return jsonify({'error': 'Apenas um arquivo por vez é permitido para processamento de memorial'}), 400
+        
+        print(f"📁 Processando arquivo DOCX/PDF para memorial: {valid_files[0].filename}")
         
         # Importar funções do extrator otimizado
         import sys
@@ -951,167 +1072,96 @@ def process_memorial():
         
         from extrator_memorial_otimizado import processar_arquivo_otimizado as processar_arquivo
         
-        # Processar arquivos em paralelo para melhor performance
-        todos_dfs = []
-        documentos_processados = []
+        # Processar arquivo único
+        file = valid_files[0]
+        original_filename = secure_filename(file.filename or 'arquivo.docx')
         
-        # Usar ThreadPoolExecutor para processamento paralelo
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        
-        def processar_arquivo_single(file_info):
-            i, file = file_info
+        try:
+            # Processar arquivo de forma segura
+            if Config.SECURE_PROCESSING:
+                temp_file_path, file_id = secure_manager.process_file_securely(
+                    file, original_filename, user_ip
+                )
+            else:
+                file_id = str(uuid.uuid4())
+                upload_filename = f"{file_id}_{original_filename}"
+                temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
+                file.save(temp_file_path)
+            
+            # Descriptografar arquivo se necessário
+            if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
+                temp_file_path = secure_manager.decrypt_file(temp_file_path)
+            
+            # Verificar se arquivo existe
+            if not os.path.exists(temp_file_path):
+                return jsonify({
+                    'success': False,
+                    'error': 'Arquivo não encontrado após descriptografia'
+                }), 400
+            
+            # Processar arquivo DOCX/PDF usando o extrator
             try:
-                original_filename = secure_filename(file.filename or f'arquivo_{i}.docx')
+                df = processar_arquivo(temp_file_path)
+            except Exception as process_error:
+                return jsonify({
+                    'success': False,
+                    'error': f'Erro no processamento: {str(process_error)}'
+                }), 400
+            
+            if df is not None and not df.empty:
+                # Converter para formato JSON
+                dados_json = df.to_dict('records')
                 
-                # Processar arquivo de forma segura
-                if Config.SECURE_PROCESSING:
-                    temp_file_path, file_id = secure_manager.process_file_securely(
-                        file, original_filename, user_ip
-                    )
-                else:
-                    file_id = str(uuid.uuid4())
-                    upload_filename = f"{file_id}_{original_filename}"
-                    temp_file_path = os.path.join(Config.UPLOAD_FOLDER, upload_filename)
-                    file.save(temp_file_path)
+                # Criar arquivo Excel temporário
+                excel_filename = f"memorial_{uuid.uuid4()}.xlsx"
+                excel_path = os.path.join(Config.PROCESSED_FOLDER, excel_filename)
+                df.to_excel(excel_path, index=False)
                 
-                # Descriptografar arquivo se necessário
-                if Config.SECURE_PROCESSING and Config.ENCRYPT_TEMP_FILES:
-                    temp_file_path = secure_manager.decrypt_file(temp_file_path)
+                # Armazenar referência do arquivo para download posterior
+                memorial_files[excel_filename] = excel_path
                 
-                # Verificar se arquivo existe
-                if not os.path.exists(temp_file_path):
-                    return {
-                        'filename': original_filename,
-                        'file_id': file_id,
-                        'rows_extracted': 0,
-                        'error': 'Arquivo não encontrado após descriptografia',
-                        'df': None,
-                        'temp_file': None
-                    }
+                # Calcular tempo de processamento
+                end_time = time.time()
+                processing_time = end_time - start_time
                 
-                # Processar arquivo DOCX usando o extrator
-                try:
-                    df = processar_arquivo(temp_file_path)
-                except Exception as process_error:
-                    return {
-                        'filename': original_filename,
-                        'file_id': file_id,
-                        'rows_extracted': 0,
-                        'error': f'Erro no processamento: {str(process_error)}',
-                        'df': None,
-                        'temp_file': temp_file_path
-                    }
-                
-                if df is not None and not df.empty:
-                    return {
+                response_data = {
+                    'success': True,
+                    'message': f'Processamento concluído! Arquivo processado com sucesso',
+                    'data': dados_json,
+                    'columns': df.columns.tolist(),
+                    'excel_file': excel_filename,
+                    'total_rows': len(df),
+                    'documentos_processados': [{
                         'filename': original_filename,
                         'file_id': file_id,
                         'rows_extracted': len(df),
-                        'tipo_documento': df['Tipo Documento'].iloc[0] if 'Tipo Documento' in df.columns else 'desconhecido',
-                        'df': df,
-                        'temp_file': temp_file_path
+                        'tipo_documento': df['Formato'].iloc[0] if 'Formato' in df.columns else 'desconhecido'
+                    }],
+                    'processing_time': round(processing_time, 2),
+                    'resumo': {
+                        'arquivos_processados': 1,
+                        'dados_extraidos': len(df),
+                        'tipos_encontrados': df['Formato'].value_counts().to_dict() if 'Formato' in df.columns else {}
                     }
-                else:
-                    return {
-                        'filename': original_filename,
-                        'file_id': file_id,
-                        'rows_extracted': 0,
-                        'error': 'Nenhum dado extraído',
-                        'df': None,
-                        'temp_file': temp_file_path
-                    }
-                    
-            except Exception as e:
-                return {
-                    'filename': original_filename if 'original_filename' in locals() else f'arquivo_{i}.docx',
-                    'file_id': file_id if 'file_id' in locals() else 'unknown',
-                    'rows_extracted': 0,
-                    'error': str(e),
-                    'df': None,
-                    'temp_file': temp_file_path if 'temp_file_path' in locals() else None
                 }
-        
-        # Processar arquivos em paralelo
-        with ThreadPoolExecutor(max_workers=min(4, len(valid_files))) as executor:
-            future_to_file = {
-                executor.submit(processar_arquivo_single, (i, file)): i 
-                for i, file in enumerate(valid_files)
-            }
-            
-            for future in as_completed(future_to_file):
-                result = future.result()
-                documentos_processados.append({
-                    'filename': result['filename'],
-                    'file_id': result['file_id'],
-                    'rows_extracted': result['rows_extracted'],
-                    'tipo_documento': result.get('tipo_documento', 'desconhecido'),
-                    'error': result.get('error', None)
-                })
                 
-                if result['df'] is not None:
-                    todos_dfs.append(result['df'])
+                print(f"✅ Processamento concluído: {len(df)} registros extraídos")
+                return jsonify(response_data)
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Nenhum dado foi extraído do arquivo fornecido'
+                }), 400
                 
-                if result['temp_file']:
-                    temp_files.append(result['temp_file'])
-        
-        # Combinar todos os dados
-        if todos_dfs:
-            resultado = pd.concat(todos_dfs, ignore_index=True)
-            
-            # Converter para formato JSON
-            dados_json = resultado.to_dict('records')
-            
-            # Criar arquivo Excel temporário
-            excel_filename = f"memorial_{uuid.uuid4()}.xlsx"
-            excel_path = os.path.join(Config.PROCESSED_FOLDER, excel_filename)
-            resultado.to_excel(excel_path, index=False)
-            
-            # Armazenar referência do arquivo para download posterior
-            memorial_files[excel_filename] = excel_path
-            
-            # Calcular tempo de processamento
-            end_time = time.time()
-            processing_time = end_time - start_time
-            
-            response_data = {
-                'success': True,
-                'message': f'Processamento concluído! {len(todos_dfs)} arquivo(s) processado(s)',
-                'data': dados_json,
-                'columns': resultado.columns.tolist(),
-                'excel_file': excel_filename,
-                'total_rows': len(resultado),
-                'documentos_processados': documentos_processados,
-                'processing_time': round(processing_time, 2),
-                'resumo': {
-                    'arquivos_processados': len(valid_files),
-                    'dados_extraidos': len(resultado),
-                    'tipos_encontrados': resultado['Formato'].value_counts().to_dict() if 'Formato' in resultado.columns else {}
-                }
-            }
-            
-            print(f"✅ Processamento concluído: {len(resultado)} registros extraídos")
-            print(f"📊 Dados JSON criados: {len(dados_json)} registros")
-            print(f"📊 Primeiro registro: {dados_json[0] if dados_json else 'N/A'}")
-            return jsonify(response_data)
-        else:
+        except Exception as e:
             return jsonify({
                 'success': False,
-                'error': 'Nenhum dado foi extraído dos arquivos fornecidos',
-                'documentos_processados': documentos_processados
-            }), 400
-            
+                'error': f'Erro ao processar arquivo: {str(e)}'
+            }), 500
+        
     except Exception as e:
         print(f"❌ Erro geral no processamento de memorial: {str(e)}")
-        return jsonify({'error': f'Erro no processamento: {str(e)}'}), 500
-    
-    finally:
-        # Limpeza de arquivos temporários
-        for temp_file in temp_files:
-            try:
-                if os.path.exists(temp_file):
-                    os.remove(temp_file)
-            except Exception as e:
-                print(f"⚠️ Erro ao limpar arquivo temporário {temp_file}: {e}") 
+        return jsonify({'error': f'Erro no processamento: {str(e)}'}), 500 
 
 @ai_bp.route('/api/memorial/download/<filename>', methods=['GET'])
 def download_memorial_excel(filename):

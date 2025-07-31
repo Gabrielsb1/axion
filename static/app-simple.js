@@ -96,13 +96,16 @@ function setupEventListeners() {
     
     // Process button listeners
     // NOTA: processFileQualificacao REMOVIDO - gerenciado exclusivamente por qualificacao.js
+    // NOTA: processFileMemorial REMOVIDO - gerenciado exclusivamente por main.js
+    // NOTA: processFileCertidao REMOVIDO - gerenciado exclusivamente por main.js
     const processButtons = [
         'processFileMatricula',
         'processFileMinuta',
         'processFileContratos',
         'processFileEscrituras',
         // 'processFileQualificacao', // REMOVIDO: evitar event listeners duplicados
-        'processFileMemorial',
+        // 'processFileMemorial', // REMOVIDO: gerenciado pelo main.js
+        // 'processFileCertidao', // REMOVIDO: gerenciado pelo main.js
         'processFileOCR'
     ];
     
@@ -468,12 +471,20 @@ async function processFile(serviceId) {
         await processOCRFile();
     } else if (serviceId === 'memorial') {
         // Processamento de memorial - múltiplos arquivos DOCX
-        if (!currentFiles || currentFiles.length === 0) {
+        console.log('🔍 Verificando arquivos para memorial...');
+        console.log('🔍 window.currentFiles:', window.currentFiles);
+        console.log('🔍 Tipo:', typeof window.currentFiles);
+        console.log('🔍 É array?', Array.isArray(window.currentFiles));
+        console.log('🔍 Length:', window.currentFiles ? window.currentFiles.length : 'N/A');
+        
+        if (!window.currentFiles || window.currentFiles.length === 0) {
+            console.error('❌ Nenhum arquivo encontrado para memorial');
             showAlert('Nenhum arquivo DOCX selecionado', 'warning');
             return;
         }
         
-        await processMemorialFiles();
+        console.log('✅ Arquivos encontrados, iniciando processamento...');
+        await window.processMemorialFiles();
     } else {
         // Processamento normal - arquivo único
         if (!currentFile) {
@@ -1659,6 +1670,9 @@ function updateOCRInterface(result) {
 }
 
 async function downloadOCRPDF() {
+    console.log('🔍 Tentando download PDF do OCR...');
+    console.log('📄 window.ocrResult:', window.ocrResult);
+    
     if (!window.ocrResult) {
         showAlert('Nenhum resultado OCR disponível para download', 'warning');
         return;
@@ -1667,6 +1681,9 @@ async function downloadOCRPDF() {
     // Usar apenas o nome original do arquivo, não o output_filename que contém file_id duplicado
     const downloadUrl = `/api/ocr/download/${window.ocrResult.file_id}?filename=${window.ocrResult.original_filename}`;
     const filename = `ocr_pesquisavel_${window.ocrResult.original_filename}`;
+    
+    console.log('🔗 URL de download:', downloadUrl);
+    console.log('📁 Nome do arquivo:', filename);
     
     await downloadOCRFile(downloadUrl, filename);
 }
@@ -1685,176 +1702,12 @@ async function downloadOCRText() {
 }
 
 // === ABA CERTIDÃO ===
-const fileInputCertidao = document.getElementById('fileInputCertidao');
-const processFileCertidao = document.getElementById('processFileCertidao');
-const downloadCertidaoWord = document.getElementById('downloadCertidaoWord');
-const downloadCertidaoPDF = document.getElementById('downloadCertidaoPDF');
-const certidaoStatus = document.getElementById('certidaoStatus');
-const certidaoPreview = document.getElementById('certidaoPreview');
-
-let certidaoPDFBlob = null;
-let certidaoData = null; // Dados extraídos da certidão para download Word
-
-if (fileInputCertidao && processFileCertidao && downloadCertidaoPDF && downloadCertidaoWord) {
-    fileInputCertidao.addEventListener('change', () => {
-        processFileCertidao.disabled = !fileInputCertidao.files.length;
-        certidaoStatus.innerHTML = '';
-        certidaoPreview.innerHTML = '';
-        downloadCertidaoPDF.disabled = true;
-        downloadCertidaoWord.disabled = true;
-        certidaoPDFBlob = null;
-        certidaoData = null;
-    });
-
-    processFileCertidao.addEventListener('click', async () => {
-        if (!fileInputCertidao.files.length) return;
-        const file = fileInputCertidao.files[0];
-        certidaoStatus.innerHTML = '<div class="alert alert-info">Processando certidão, aguarde...</div>';
-        certidaoPreview.innerHTML = '';
-        processFileCertidao.disabled = true;
-        downloadCertidaoPDF.disabled = true;
-        downloadCertidaoWord.disabled = true;
-        certidaoPDFBlob = null;
-        certidaoData = null;
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            // Obter modelo das configurações globais
-            const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
-            const selectedModel = modelElement ? modelElement.value : 'gpt-4o';
-            formData.append('model', selectedModel);
-            console.log('🎯 Modelo selecionado para certidão (configurações globais):', selectedModel);
-            
-            const response = await fetch('/api/certidao', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                const blob = await response.blob();
-                certidaoPDFBlob = blob;
-                
-                // Extrair dados da certidão dos headers da resposta
-                try {
-                    const certidaoDataHeader = response.headers.get('X-Certidao-Data');
-                    if (certidaoDataHeader) {
-                        console.log('🎯 Dados extraídos dos headers da resposta');
-                        certidaoData = JSON.parse(certidaoDataHeader);
-                        downloadCertidaoWord.disabled = false;
-                    } else {
-                        console.log('⚠️ Dados não encontrados nos headers, fazendo chamada adicional');
-                        // Fallback: fazer chamada adicional se dados não estiverem nos headers
-                        const formDataWord = new FormData();
-                        formDataWord.append('file', file);
-                        formDataWord.append('model', selectedModel);
-                        
-                        const certidaoResponse = await fetch('/api/certidao/data', {
-                            method: 'POST',
-                            body: formDataWord
-                        });
-                        if (certidaoResponse.ok) {
-                            const certidaoDataResult = await certidaoResponse.json();
-                            certidaoData = certidaoDataResult.data;
-                            downloadCertidaoWord.disabled = false;
-                        }
-                    }
-                } catch (dataError) {
-                    console.log('Não foi possível extrair dados para Word:', dataError);
-                }
-                
-                // Capturar tipo e motivo dos headers
-                const tipo = response.headers.get('X-Certidao-Tipo');
-                const motivo = response.headers.get('X-Certidao-Motivo');
-                let info = '';
-                if (tipo && motivo) {
-                    let tipoLabel = '';
-                    if (tipo === 'STForeiro') tipoLabel = 'Foreira';
-                    else if (tipo === 'STPositiva') tipoLabel = 'Positiva';
-                    else if (tipo === 'STNegativa') tipoLabel = 'Negativa';
-                    else tipoLabel = tipo;
-                    info = `<div class='alert alert-secondary mb-2'><b>Tipo de Certidão:</b> ${tipoLabel}<br/><b>Motivo:</b> ${motivo}</div>`;
-                }
-                certidaoStatus.innerHTML = info + '<div class="alert alert-success">Certidão gerada com sucesso! Clique para baixar.</div>';
-                downloadCertidaoPDF.disabled = false;
-                certidaoPreview.innerHTML = '<span class="text-success">PDF e Word prontos para download.</span>';
-            } else {
-                let errorMsg = 'Erro ao gerar certidão.';
-                try {
-                    const err = await response.json();
-                    errorMsg = err.error || errorMsg;
-                } catch (jsonError) {
-                    console.error('Erro ao fazer parse do JSON de erro:', jsonError);
-                    // Se não conseguir fazer parse, manter a mensagem padrão
-                }
-                certidaoStatus.innerHTML = `<div class="alert alert-danger">${errorMsg}</div>`;
-            }
-        } catch (e) {
-            certidaoStatus.innerHTML = `<div class="alert alert-danger">Erro inesperado: ${e}</div>`;
-        } finally {
-            processFileCertidao.disabled = false;
-        }
-    });
-
-    downloadCertidaoPDF.addEventListener('click', () => {
-        if (!certidaoPDFBlob) return;
-        const url = URL.createObjectURL(certidaoPDFBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'certidao_gerada.pdf';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 100);
-    });
-
-    // Evento para download Word da certidão
-    if (downloadCertidaoWord) {
-        downloadCertidaoWord.addEventListener('click', async () => {
-            if (!certidaoData) {
-                showAlert('Nenhum dado da certidão disponível para download Word', 'warning');
-                return;
-            }
-            
-            try {
-                // Chamar API para gerar arquivo Word real
-                const response = await fetch('/api/certidao/word', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        data: certidaoData
-                    })
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const fileName = `certidao_${new Date().toISOString().slice(0, 10)}.docx`;
-                    
-                    // Download do arquivo
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    showAlert('Arquivo Word da certidão baixado com sucesso!', 'success');
-                } else {
-                    const error = await response.json();
-                    showAlert(`Erro ao gerar arquivo Word: ${error.error}`, 'danger');
-                }
-            } catch (error) {
-                console.error('Erro ao gerar Word:', error);
-                showAlert('Erro ao gerar arquivo Word', 'danger');
-            }
-        });
-    }
-}
+// EVENT LISTENERS DA CERTIDÃO REMOVIDOS - Usar apenas os de main.js
+// Os event listeners da aba Certidão agora são gerenciados exclusivamente por main.js
+// para evitar conflitos e processamento duplicado
+console.log('⚠️ Event listeners da Certidão REMOVIDOS do app-simple.js');
+console.log('✅ Certidão agora gerenciada exclusivamente por main.js');
+console.log('🚫 Event listeners duplicados eliminados para evitar processamento duplo');
 
 const certidaoTipoSelect = document.getElementById('certidaoTipoSelect');
 
@@ -2082,11 +1935,18 @@ downloadButtonsQualificacao.forEach(button => {
 });
 
 // Processamento de arquivos DOCX de memorial
-async function processMemorialFiles() {
+window.processMemorialFiles = async function() {
+    console.log('🚀 processMemorialFiles iniciado');
+    console.log('📁 currentFiles:', window.currentFiles);
+    console.log('📁 Tipo de currentFiles:', typeof window.currentFiles);
+    console.log('📁 É array?', Array.isArray(window.currentFiles));
+    
+    // Declarar timerInterval fora do try para estar disponível no catch
+    let timerInterval = null;
+    
     try {
         // Iniciar cronômetro
         const startTime = Date.now();
-        let timerInterval;
         
         // Função para atualizar o cronômetro
         const updateTimer = () => {
@@ -2118,10 +1978,17 @@ async function processMemorialFiles() {
         // Iniciar atualização do cronômetro
         timerInterval = setInterval(updateTimer, 100);
         
-        console.log(`Iniciando processamento de ${currentFiles.length} arquivo(s) DOCX...`);
+        // Verificar se currentFiles existe
+        if (!window.currentFiles || !Array.isArray(window.currentFiles)) {
+            console.error('❌ currentFiles não está definido ou não é um array');
+            document.getElementById('memorialStatus').innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro: Nenhum arquivo selecionado</div>`;
+            return;
+        }
+        
+        console.log(`Iniciando processamento de ${window.currentFiles.length} arquivo(s) DOCX...`);
         
         const formData = new FormData();
-        currentFiles.forEach(file => {
+        window.currentFiles.forEach(file => {
             formData.append('files[]', file);
         });
         
@@ -2132,6 +1999,10 @@ async function processMemorialFiles() {
         
         const result = await response.json();
         
+        console.log('🔍 Resposta recebida:', result);
+        console.log('🔍 Status da resposta:', response.ok);
+        console.log('🔍 Success:', result.success);
+        
         // Parar o cronômetro
         if (timerInterval) {
             clearInterval(timerInterval);
@@ -2139,6 +2010,7 @@ async function processMemorialFiles() {
         
         if (response.ok && result.success) {
             console.log('✅ Processamento de memorial concluído:', result);
+            console.log('🔍 Chamando updateMemorialInterface...');
             updateMemorialInterface(result);
         } else {
             console.error('❌ Erro no processamento de memorial:', result);
@@ -2157,27 +2029,42 @@ async function processMemorialFiles() {
 
 // Gerenciamento dinâmico de colunas para Memorial
 let memorialColumns = [
+    { id: 'formato', name: 'Formato', type: 'default', visible: true },
     { id: 'apartamento', name: 'Apartamento', type: 'default', visible: true },
     { id: 'tipo', name: 'Tipo', type: 'default', visible: true },
     { id: 'torre_bloco', name: 'Torre/Bloco', type: 'default', visible: true },
+    { id: 'pavimento', name: 'Pavimento', type: 'default', visible: true },
     { id: 'area_privativa', name: 'Área Privativa (m²)', type: 'default', visible: true },
+    { id: 'area_privativa_total', name: 'Área Privativa Total (m²)', type: 'default', visible: true },
     { id: 'area_comum', name: 'Área Comum (m²)', type: 'default', visible: true },
     { id: 'area_total', name: 'Área Total (m²)', type: 'default', visible: true },
     { id: 'fracao_ideal', name: 'Fração Ideal (%)', type: 'default', visible: true },
+    { id: 'area_terreno', name: 'Área Terreno (m²)', type: 'default', visible: true },
     { id: 'descricao', name: 'Descrição', type: 'default', visible: true }
 ];
 
 function initializeColumnManagement() {
-    // Mostrar seção de configuração de colunas quando há dados
-    document.getElementById('memorialColumnConfig').style.display = 'block';
+    // Verificar se o elemento existe antes de tentar acessá-lo
+    const columnConfigElement = document.getElementById('memorialColumnConfig');
+    if (!columnConfigElement) {
+        console.log('⚠️ Elemento memorialColumnConfig não encontrado');
+        return;
+    }
+    
+    // Mostrar a configuração de colunas no topo
+    columnConfigElement.style.display = 'block';
     
     // Renderizar lista de colunas
     renderColumnsList();
     
     // Configurar event listeners
-    document.getElementById('addCustomColumn').addEventListener('click', addCustomColumn);
-    document.getElementById('resetColumns').addEventListener('click', resetColumns);
-    document.getElementById('downloadExcelCustom').addEventListener('click', downloadCustomExcel);
+    const addCustomColumnBtn = document.getElementById('addCustomColumn');
+    const resetColumnsBtn = document.getElementById('resetColumns');
+    const downloadExcelCustomBtn = document.getElementById('downloadExcelCustom');
+    
+    if (addCustomColumnBtn) addCustomColumnBtn.addEventListener('click', addCustomColumn);
+    if (resetColumnsBtn) resetColumnsBtn.addEventListener('click', resetColumns);
+    if (downloadExcelCustomBtn) downloadExcelCustomBtn.addEventListener('click', downloadCustomExcel);
     
     // Inicializar drag and drop
     initializeSortable();
@@ -2189,29 +2076,38 @@ function renderColumnsList() {
     
     memorialColumns.forEach((column, index) => {
         const columnItem = document.createElement('div');
-        columnItem.className = `list-group-item column-item ${column.type}-column`;
+        columnItem.className = `column-item ${column.type}-column`;
         columnItem.dataset.columnId = column.id;
+        columnItem.draggable = true;
         
         columnItem.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas fa-grip-vertical drag-handle me-3"></i>
-                <div class="form-check me-3">
-                    <input class="form-check-input" type="checkbox" ${column.visible ? 'checked' : ''} 
-                           onchange="toggleColumnVisibility('${column.id}')">
+            <div class="column-item-content">
+                <div class="drag-handle">
+                    <i class="fas fa-grip-vertical"></i>
                 </div>
-                <div class="flex-grow-1">
-                    <strong>${column.name}</strong>
+                <div class="column-checkbox">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" ${column.visible ? 'checked' : ''} 
+                               onchange="toggleColumnVisibility('${column.id}')">
+                    </div>
+                </div>
+                <div class="column-info">
+                    <div class="column-name">${column.name}</div>
                     ${column.type === 'custom' ? 
-                        `<input type="text" class="form-control form-control-sm mt-1" 
-                                placeholder="Valor padrão" value="${column.defaultValue || ''}" 
-                                onchange="updateColumnDefaultValue('${column.id}', this.value)">` : 
-                        `<small class="text-muted d-block">Coluna padrão</small>`
+                        `<div class="column-input">
+                            <input type="text" class="form-control form-control-sm" 
+                                    placeholder="Valor padrão" value="${column.defaultValue || ''}" 
+                                    onchange="updateColumnDefaultValue('${column.id}', this.value)">
+                        </div>` : 
+                        `<div class="column-type">Coluna padrão</div>`
                     }
                 </div>
                 ${column.type === 'custom' ? 
-                    `<button class="btn btn-sm btn-outline-danger" onclick="removeCustomColumn('${column.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>` : ''
+                    `<div class="column-actions">
+                        <button class="btn btn-sm btn-outline-danger remove-btn" onclick="removeCustomColumn('${column.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>` : ''
                 }
             </div>
         `;
@@ -2225,40 +2121,91 @@ function renderColumnsList() {
 function initializeSortable() {
     const columnsList = document.getElementById('columnsList');
     
-    // Implementação simples de drag and drop
     let draggedElement = null;
+    let dragOverElement = null;
     
     columnsList.addEventListener('dragstart', (e) => {
         if (e.target.classList.contains('column-item')) {
             draggedElement = e.target;
             e.target.classList.add('dragging');
+            
+            // Adicionar efeito de elevação
+            e.target.style.transform = 'rotate(2deg) scale(1.02)';
+            e.target.style.zIndex = '1000';
+            
+            // Criar efeito de ghost
+            setTimeout(() => {
+                e.target.style.opacity = '0.8';
+            }, 0);
         }
     });
     
     columnsList.addEventListener('dragend', (e) => {
         if (e.target.classList.contains('column-item')) {
             e.target.classList.remove('dragging');
+            e.target.style.transform = '';
+            e.target.style.zIndex = '';
+            e.target.style.opacity = '';
+            
+            // Remover indicadores de drop
+            columnsList.querySelectorAll('.column-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
         }
     });
     
     columnsList.addEventListener('dragover', (e) => {
         e.preventDefault();
+        
+        if (!draggedElement) return;
+        
         const afterElement = getDragAfterElement(columnsList, e.clientY);
-        if (afterElement == null) {
-            columnsList.appendChild(draggedElement);
-        } else {
-            columnsList.insertBefore(draggedElement, afterElement);
+        
+        // Remover indicadores anteriores
+        columnsList.querySelectorAll('.column-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+        
+        // Adicionar indicador visual apenas
+        if (afterElement) {
+            afterElement.classList.add('drag-over');
+        }
+    });
+    
+    columnsList.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        if (e.target.classList.contains('column-item') && e.target !== draggedElement) {
+            dragOverElement = e.target;
+        }
+    });
+    
+    columnsList.addEventListener('dragleave', (e) => {
+        if (e.target.classList.contains('column-item')) {
+            e.target.classList.remove('drag-over');
         }
     });
     
     columnsList.addEventListener('drop', (e) => {
         e.preventDefault();
+        
+        if (!draggedElement) return;
+        
+        const afterElement = getDragAfterElement(columnsList, e.clientY);
+        
+        // Remover todos os indicadores
+        columnsList.querySelectorAll('.column-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+        
+        // Mover elemento para a posição correta
+        if (afterElement == null) {
+            columnsList.appendChild(draggedElement);
+        } else {
+            columnsList.insertBefore(draggedElement, afterElement);
+        }
+        
+        // Reordenar colunas
         reorderColumns();
-    });
-    
-    // Tornar itens arrastáveis
-    columnsList.querySelectorAll('.column-item').forEach(item => {
-        item.draggable = true;
     });
 }
 
@@ -2337,13 +2284,17 @@ function updateColumnDefaultValue(columnId, value) {
 function resetColumns() {
     if (confirm('Deseja restaurar as colunas padrão? Todas as personalizações serão perdidas.')) {
         memorialColumns = [
+            { id: 'formato', name: 'Formato', type: 'default', visible: true },
             { id: 'apartamento', name: 'Apartamento', type: 'default', visible: true },
             { id: 'tipo', name: 'Tipo', type: 'default', visible: true },
             { id: 'torre_bloco', name: 'Torre/Bloco', type: 'default', visible: true },
+            { id: 'pavimento', name: 'Pavimento', type: 'default', visible: true },
             { id: 'area_privativa', name: 'Área Privativa (m²)', type: 'default', visible: true },
+            { id: 'area_privativa_total', name: 'Área Privativa Total (m²)', type: 'default', visible: true },
             { id: 'area_comum', name: 'Área Comum (m²)', type: 'default', visible: true },
             { id: 'area_total', name: 'Área Total (m²)', type: 'default', visible: true },
             { id: 'fracao_ideal', name: 'Fração Ideal (%)', type: 'default', visible: true },
+            { id: 'area_terreno', name: 'Área Terreno (m²)', type: 'default', visible: true },
             { id: 'descricao', name: 'Descrição', type: 'default', visible: true }
         ];
         renderColumnsList();
@@ -2351,8 +2302,69 @@ function resetColumns() {
     }
 }
 
+function updateColumnsBasedOnDocumentType(data, columnsFromBackend) {
+    if (!data || data.length === 0) return;
+    
+    const firstRecord = data[0];
+    const formato = firstRecord['Formato'] || '';
+    
+    // Mapear colunas do backend para as colunas da interface
+    const columnMapping = {
+        'Formato': 'formato',
+        'Apartamento': 'apartamento',
+        'Tipo': 'tipo',
+        'Torre/Bloco': 'torre_bloco',
+        'Pavimento': 'pavimento',
+        'Área Privativa (m²)': 'area_privativa',
+        'Área Privativa Total (m²)': 'area_privativa_total',
+        'Área Comum (m²)': 'area_comum',
+        'Área Total (m²)': 'area_total',
+        'Fração Ideal (%)': 'fracao_ideal',
+        'Área Terreno (m²)': 'area_terreno',
+        'Descrição': 'descricao',
+        'Número da Casa': 'numero_casa',
+        'Área do Terreno (m²)': 'area_terreno',
+        'Área Construída (m²)': 'area_construida',
+        'Área Comum Real (m²)': 'area_comum_real',
+        'Área Total Real (m²)': 'area_total_real'
+    };
+    
+    // Criar novas colunas baseadas nos dados reais
+    const newColumns = [];
+    
+    if (columnsFromBackend) {
+        columnsFromBackend.forEach(columnName => {
+            const columnId = columnMapping[columnName];
+            if (columnId) {
+                newColumns.push({
+                    id: columnId,
+                    name: columnName,
+                    type: 'default',
+                    visible: true
+                });
+            }
+        });
+    }
+    
+    // Se não conseguiu mapear, usar colunas padrão
+    if (newColumns.length === 0) {
+        newColumns.push(...memorialColumns);
+    }
+    
+    // Atualizar colunas
+    memorialColumns = newColumns;
+    console.log('🔄 Colunas atualizadas baseado no tipo de documento:', formato, newColumns);
+}
+
 function updateColumnPreview() {
     const preview = document.getElementById('columnPreview');
+    
+    // Verificar se o elemento existe
+    if (!preview) {
+        console.log('⚠️ Elemento columnPreview não encontrado, pulando atualização');
+        return;
+    }
+    
     const visibleColumns = memorialColumns.filter(col => col.visible);
     
     if (visibleColumns.length === 0) {
@@ -2361,10 +2373,10 @@ function updateColumnPreview() {
     }
     
     const previewHtml = visibleColumns.map((col, index) => 
-        `<div class="column-preview-item">
-            ${index + 1}. ${col.name}
+        `<div class="column-preview-item" style="color: inherit;">
+            <strong style="color: inherit;">${index + 1}. ${col.name}</strong>
             ${col.type === 'custom' && col.defaultValue ? 
-                `<small class="text-muted d-block">Valor: "${col.defaultValue}"</small>` : ''}
+                `<small class="text-muted d-block" style="color: inherit;">Valor: "${col.defaultValue}"</small>` : ''}
         </div>`
     ).join('');
     
@@ -2420,16 +2432,40 @@ function downloadCustomExcel() {
     });
 }
 
-function updateMemorialInterface(result) {
+window.updateMemorialInterface = function(result) {
+    console.log('🚀 updateMemorialInterface iniciada');
+    console.log('🔍 Resultado recebido:', result);
+    
     // Armazenar dados para download
     memorialData = result;
     
-    // Inicializar gerenciamento de colunas
-    initializeColumnManagement();
-    
     console.log('🔍 Resultado completo recebido:', result);
+    console.log('🔍 Tipo do resultado:', typeof result);
+    console.log('🔍 Chaves disponíveis:', Object.keys(result));
     console.log('🔍 Dados disponíveis:', result.data ? result.data.length : 'N/A');
     console.log('🔍 Resumo:', result.resumo);
+    console.log('🔍 Success:', result.success);
+    
+    // Verificar se o resultado é válido
+    if (!result || !result.success) {
+        console.error('❌ Resultado inválido ou sem sucesso');
+        document.getElementById('memorialStatus').innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro: ${result.error || 'Erro desconhecido'}</div>`;
+        return;
+    }
+    
+    console.log('✅ Resultado válido, continuando...');
+    
+    // Atualizar colunas baseado no tipo de documento
+    updateColumnsBasedOnDocumentType(result.data, result.columns);
+    
+    // Primeiro exibir os dados, depois inicializar gerenciamento de colunas (opcional)
+    try {
+        initializeColumnManagement();
+        console.log('✅ Gerenciamento de colunas inicializado');
+    } catch (error) {
+        console.error('❌ Erro ao inicializar gerenciamento de colunas:', error);
+        console.log('⚠️ Continuando sem gerenciamento de colunas...');
+    }
     
     // Atualizar status com animação e tempo de processamento
     const processingTime = result.processing_time || 0;
@@ -2450,55 +2486,59 @@ function updateMemorialInterface(result) {
         </div>
     `;
     
-    // Exibir resumo com design moderno
+    // Exibir resumo com design moderno usando a paleta do projeto
     const resumo = result.resumo;
+    const totalRecords = result.data ? result.data.length : 0;
+    
+    // Contar tipos de documento
+    const documentTypes = {};
+    if (result.data) {
+        result.data.forEach(item => {
+            const tipo = item.Formato || 'Desconhecido';
+            documentTypes[tipo] = (documentTypes[tipo] || 0) + 1;
+        });
+    }
+    
     let resumoHTML = `
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-gradient-primary text-white">
+        <div class="card mb-4">
+            <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Resumo do Processamento</h5>
             </div>
             <div class="card-body">
-                <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="display-6 text-primary fw-bold">${resumo.arquivos_processados}</div>
-                            <div class="text-muted small">Arquivos Processados</div>
-                        </div>
+                <div class="processing-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">${resumo.arquivos_processados || 1}</span>
+                        <span class="stat-label">Arquivos Processados</span>
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="display-6 text-success fw-bold">${resumo.dados_extraidos}</div>
-                            <div class="text-muted small">Registros Extraídos</div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${totalRecords}</span>
+                        <span class="stat-label">Registros Extraídos</span>
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="display-6 text-info fw-bold">${processingTime}s</div>
-                            <div class="text-muted small">Tempo de Processamento</div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${processingTime.toFixed(2)}s</span>
+                        <span class="stat-label">Tempo de Processamento</span>
                     </div>
-                    <div class="col-md-3">
-                        <div class="p-3 bg-light rounded">
-                            <h6 class="mb-3"><i class="fas fa-tags me-2"></i>Tipos de Documento Encontrados:</h6>
-                            <div class="row">
-    `;
-    
-    for (const [tipo, quantidade] of Object.entries(resumo.tipos_encontrados)) {
-        const badgeClass = tipo === 'torre' ? 'bg-primary' : tipo === 'bloco' ? 'bg-info' : 'bg-secondary';
-        resumoHTML += `
-            <div class="col-md-6 mb-2">
-                <span class="badge ${badgeClass} fs-6 px-3 py-2">
-                    <i class="fas fa-building me-1"></i>${tipo.toUpperCase()}: ${quantidade}
-                </span>
-            </div>
-        `;
-    }
-    
-    resumoHTML += `
-                            </div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${Object.keys(documentTypes).length}</span>
+                        <span class="stat-label">Tipos de Documento</span>
                     </div>
                 </div>
+                
+                ${Object.keys(documentTypes).length > 0 ? `
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2"><i class="fas fa-tags me-2"></i>Tipos de Documento Encontrados:</h6>
+                        ${Object.entries(documentTypes).map(([tipo, count]) => 
+                            `<span class="badge badge-info me-2" style="background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%); color: white;">${tipo.toUpperCase()}: ${count}</span>`
+                        ).join('')}
+                    </div>
+                ` : ''}
+                
+                ${resumo && resumo.descricao ? `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Descrição:</strong> ${resumo.descricao}
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -2506,31 +2546,51 @@ function updateMemorialInterface(result) {
     document.getElementById('memorialResults').innerHTML = resumoHTML;
     
     // Exibir tabela de dados com design melhorado
+    console.log('🔍 Verificando dados para tabela...');
+    console.log('🔍 result.data:', result.data);
+    console.log('🔍 É array?', Array.isArray(result.data));
+    console.log('🔍 Length:', result.data ? result.data.length : 'N/A');
+    
     if (result.data && Array.isArray(result.data) && result.data.length > 0) {
         console.log('📊 Dados recebidos para tabela:', result.data.length, 'registros');
         console.log('📊 Primeiro registro:', result.data[0]);
         console.log('📊 Colunas disponíveis:', Object.keys(result.data[0]));
-        const tableHTML = createMemorialTable(result.data, processingTime, result.columns);
-        document.getElementById('memorialTable').innerHTML = tableHTML;
+        
+        try {
+            const tableHTML = createMemorialTable(result.data, processingTime, result.columns);
+            const tableElement = document.getElementById('memorialTable');
+            if (tableElement) {
+                tableElement.innerHTML = tableHTML;
+                console.log('✅ Tabela criada com sucesso');
+            } else {
+                console.error('❌ Elemento memorialTable não encontrado');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao criar tabela:', error);
+        }
     } else {
         console.log('⚠️ Nenhum dado para exibir na tabela');
         console.log('⚠️ Tipo de dados:', typeof result.data);
         console.log('⚠️ É array?', Array.isArray(result.data));
-        document.getElementById('memorialTable').innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Nenhum dado encontrado para exibir na tabela</div>';
+        const tableElement = document.getElementById('memorialTable');
+        if (tableElement) {
+            tableElement.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Nenhum dado encontrado para exibir na tabela</div>';
+        }
     }
 }
 
 function createMemorialTable(data, processingTime = 0, columnsFromBackend = null) {
-    if (!data || data.length === 0) return '<div class="alert alert-warning">Nenhum dado para exibir</div>';
+    if (!data || data.length === 0) return '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Nenhum dado para exibir</div>';
+    
     // Use a ordem das colunas do backend se fornecida
     let columns = columnsFromBackend && Array.isArray(columnsFromBackend) ? columnsFromBackend : Object.keys(data[0]).filter(col => col !== 'Arquivo');
     
     let tableHTML = `
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+        <div class="table-container">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0"><i class="fas fa-table me-2"></i>Dados Extraídos (${data.length} registros)</h5>
-                    ${processingTime > 0 ? `<small class="text-light"><i class="fas fa-clock me-1"></i>Processado em ${processingTime}s</small>` : ''}
+                    ${processingTime > 0 ? `<span class="processing-time ms-2">Processado em ${processingTime.toFixed(2)}s</span>` : ''}
                 </div>
                 <div>
                     <button class="btn btn-light btn-sm" onclick="downloadMemorialExcel()" title="Baixar Excel">
@@ -2538,11 +2598,10 @@ function createMemorialTable(data, processingTime = 0, columnsFromBackend = null
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="table-primary">
-                            <tr>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
     `;
     
     // Cabeçalho com ícones
@@ -2578,8 +2637,8 @@ function createMemorialTable(data, processingTime = 0, columnsFromBackend = null
     
     // Dados com formatação
     data.forEach((row, index) => {
-        const rowClass = index % 2 === 0 ? '' : 'table-light';
-        tableHTML += `<tr class="${rowClass}">`;
+        const isHidden = index >= 10;
+        tableHTML += `<tr class="${isHidden ? 'hidden-row' : ''}" style="${isHidden ? 'display: none;' : ''}">`;
         columns.forEach(column => {
             const value = row[column] || '';
             let formattedValue = value;
@@ -2591,7 +2650,29 @@ function createMemorialTable(data, processingTime = 0, columnsFromBackend = null
                 formattedValue = parseFloat(value).toFixed(2) + '%';
             }
             
-            tableHTML += `<td class="align-middle">${formattedValue}</td>`;
+            // Formatação especial para coluna de descrição
+            if (column === 'Descrição' && value.length > 100) {
+                const shortText = value.substring(0, 100) + '...';
+                const fullText = value;
+                formattedValue = `
+                    <div class="description-cell">
+                        <div class="description-short" id="desc-short-${index}">
+                            ${shortText}
+                            <button class="btn btn-sm btn-link expand-btn" onclick="toggleDescription(${index})" style="padding: 0; margin-left: 5px; color: var(--accent-color);">
+                                <i class="fas fa-chevron-down"></i> Ver mais
+                            </button>
+                        </div>
+                        <div class="description-full" id="desc-full-${index}" style="display: none;">
+                            ${fullText}
+                            <button class="btn btn-sm btn-link collapse-btn" onclick="toggleDescription(${index})" style="padding: 0; margin-top: 5px; color: var(--accent-color);">
+                                <i class="fas fa-chevron-up"></i> Ver menos
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            tableHTML += `<td>${formattedValue}</td>`;
         });
         tableHTML += '</tr>';
     });
@@ -2600,12 +2681,83 @@ function createMemorialTable(data, processingTime = 0, columnsFromBackend = null
                         </tbody>
                     </table>
                 </div>
+                ${data.length > 10 ? `
+                    <div class="card-footer text-center" style="background: var(--bg-secondary); border-top: 1px solid var(--blue-gray-200);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Mostrando <span id="visible-count">10</span> de ${data.length} registros
+                            </small>
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleAllRows()" id="toggle-rows-btn">
+                                <i class="fas fa-eye me-1"></i>Mostrar tudo
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
     
     return tableHTML;
 }
+
+// Função para expandir/colapsar descrições
+window.toggleDescription = function(index) {
+    const shortElement = document.getElementById(`desc-short-${index}`);
+    const fullElement = document.getElementById(`desc-full-${index}`);
+    
+    if (shortElement && fullElement) {
+        if (shortElement.style.display !== 'none') {
+            // Expandir
+            shortElement.style.display = 'none';
+            fullElement.style.display = 'block';
+        } else {
+            // Colapsar
+            shortElement.style.display = 'block';
+            fullElement.style.display = 'none';
+        }
+    }
+};
+
+// Função para mostrar/ocultar todas as linhas da tabela
+window.toggleAllRows = function() {
+    const hiddenRows = document.querySelectorAll('.hidden-row');
+    const toggleBtn = document.getElementById('toggle-rows-btn');
+    const visibleCount = document.getElementById('visible-count');
+    const totalRows = document.querySelectorAll('tbody tr').length;
+    
+    if (hiddenRows.length > 0 && hiddenRows[0].style.display === 'none') {
+        // Mostrar todas as linhas
+        hiddenRows.forEach(row => {
+            row.style.display = '';
+        });
+        
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Ocultar extras';
+            toggleBtn.classList.remove('btn-outline-primary');
+            toggleBtn.classList.add('btn-outline-secondary');
+        }
+        
+        if (visibleCount) {
+            visibleCount.textContent = totalRows;
+        }
+    } else {
+        // Ocultar linhas extras (manter apenas as primeiras 10)
+        hiddenRows.forEach(row => {
+            row.style.display = 'none';
+        });
+        
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="fas fa-eye me-1"></i>Mostrar tudo';
+            toggleBtn.classList.remove('btn-outline-secondary');
+            toggleBtn.classList.add('btn-outline-primary');
+        }
+        
+        if (visibleCount) {
+            visibleCount.textContent = '10';
+        }
+    }
+};
 
 // Funções de download para memorial
 function downloadMemorialExcel() {

@@ -1,0 +1,19 @@
+# Configurações do NicSan
+# Copie este arquivo para .env e configure suas chaves
+
+# Chave da API OpenAI (obrigatória para funcionalidades de IA)
+OPENAI_API_KEY=sua_chave_openai_aqui
+
+# Configurações de segurança
+SECURE_PROCESSING=True
+ENCRYPT_TEMP_FILES=True
+SECRET_KEY=chave_secreta_aleatoria_aqui
+
+# Configurações do servidor
+HOST=0.0.0.0
+PORT=5000
+DEBUG=True
+
+# Configurações de logging
+LOG_LEVEL=INFO
+AUDIT_LOGGING=True 

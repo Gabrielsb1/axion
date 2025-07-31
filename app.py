@@ -1,5 +1,5 @@
 """
-AxionDocs - Sistema OCR integrado com API OpenAI
+NicSan - Sistema Inteligente de Documentos
 Desenvolvido por João Gabriel Santos Barros (2025)
 
 Licenciado sob MIT License - consulte LICENSE.txt
@@ -9,7 +9,7 @@ Este software é fornecido "no estado em que se encontra", sem garantias.
 O uso da API OpenAI requer chave configurada via variável de ambiente: OPENAI_API_KEY.
 Os custos gerados são responsabilidade do usuário da chave.
 
-Projeto iniciado como parte do TCC no Cartório de Registro de Imóveis de São Luís.
+Sistema de processamento inteligente de documentos com OCR e IA avançada.
 """
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -40,7 +40,7 @@ def static_files(filename):
     return send_from_directory(static_folder, filename)
 
 if __name__ == '__main__':
-    print("🚀 Iniciando servidor Flask Axion Modular...")
+    print("🚀 Iniciando servidor Flask NicSan...")
     
     # Verificar status do OCR
     try:

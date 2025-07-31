@@ -128,14 +128,23 @@ def download_ocr_result(file_id):
         # Caminho do arquivo - usar o diretório temporário correto
         file_path = os.path.join(Config.TEMP_DIRECTORY, f"ocr_{file_id}_{filename}")
         
+        print(f"🔍 Tentando download OCR - file_id: {file_id}, filename: {filename}")
+        print(f"📁 Caminho do arquivo: {file_path}")
+        
         # Verificar se o arquivo existe
         if not os.path.exists(file_path):
+            print(f"❌ Arquivo não encontrado em: {file_path}")
             # Tentar procurar no diretório de uploads como fallback
             fallback_path = os.path.join(Config.UPLOAD_FOLDER, f"ocr_{file_id}_{filename}")
+            print(f"🔍 Tentando fallback em: {fallback_path}")
             if os.path.exists(fallback_path):
                 file_path = fallback_path
+                print(f"✅ Arquivo encontrado no fallback: {file_path}")
             else:
+                print(f"❌ Arquivo não encontrado em nenhum local")
                 return jsonify({'error': f'Arquivo não encontrado: {file_path}'}), 404
+        else:
+            print(f"✅ Arquivo encontrado: {file_path}")
         
         return send_file(
             file_path,

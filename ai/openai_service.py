@@ -805,7 +805,7 @@ def analyze_document_with_checklist(text_content, document_type, filename="", mo
     """Função mantida para compatibilidade - agora usa a nova lógica"""
     return extract_document_specific_data(text_content, document_type, filename, model)
 
-def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-4o"):
+# def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-4o"):
     """Analisa múltiplos documentos para qualificação - cada documento individualmente"""
     try:
         print(f"🔍 Iniciando análise de qualificação com {model}")
@@ -858,34 +858,9 @@ def analyze_qualification_documents(documents_texts, filenames=None, model="gpt-
         print(f"❌ Erro na análise de qualificação: {str(e)}")
         return {"error": f"Erro na análise de qualificação: {str(e)}"}
 
-def clean_and_validate_fields(fields_dict, service_type='matricula'):
+def clean_and_validate_fields(fields_dict, service_type='certidao'):
     """Limpa e valida os campos extraídos pela OpenAI"""
-    if service_type == 'matricula':
-        expected_fields = [
-            # CADASTRO
-            'inscricao_imobiliaria', 'rip',
-            
-            # DADOS DO IMÓVEL
-            'tipo_imovel', 'tipo_logradouro', 'cep', 'nome_logradouro', 'numero_lote',
-            'bloco', 'pavimento', 'andar', 'loteamento', 'numero_loteamento', 'quadra',
-            'bairro', 'cidade', 'dominialidade', 'area_total', 'area_construida',
-            'area_privativa', 'area_uso_comum', 'area_correspondente', 'fracao_ideal',
-            
-            # DADOS PESSOAIS
-            'cpf_cnpj', 'nome_completo', 'sexo', 'nacionalidade', 'estado_civil',
-            'profissao', 'rg', 'cnh', 'endereco_completo', 'regime_casamento',
-            'data_casamento', 'matricula_casamento', 'natureza_juridica', 'representante_legal',
-            
-            # INFORMAÇÕES UTILIZADAS PARA OS ATOS
-            'valor_transacao', 'valor_avaliacao', 'data_alienacao', 'forma_alienacao',
-            'valor_divida', 'valor_alienacao_contrato', 'tipo_onus'
-        ]
-    elif service_type == 'minuta':
-        expected_fields = [
-            'descricao_imovel_completa', 'proprietario_atual', 'tipo_onus_ativo', 'descricao_onus_completa',
-            'numero_matricula', 'possiveis_erros'
-        ]
-    elif service_type == 'certidao':
+    if service_type == 'certidao':
         expected_fields = [
             'cnm',
             'descricao_imovel',
@@ -896,22 +871,6 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
             'onus_certidao_negativa',
             'nome_solicitante'
         ]
-    elif service_type == 'qualificacao':
-        expected_fields = [
-            # Documentos Obrigatórios
-            'contrato_presente', 'matricula_presente', 'certidao_itbi_presente', 
-            'procuracao_presente', 'cnd_presente',
-            # Documentos Complementares
-            'certidao_simplificada_presente', 'declaracao_primeira_aquisicao_presente',
-            'aforamento_cat_presente', 'boletim_cadastro_presente', 'outros_documentos_presente',
-            # Análise da IA
-            'analise_completa', 'observacoes_recomendacoes', 'status_qualificacao',
-            'pontuacao_qualificacao', 'documentos_faltantes', 'documentos_complementares_faltantes',
-            'problemas_identificados', 'recomendacoes_especificas'
-        ]
-    elif service_type == 'qualificacao_avancada':
-        # Para análise avançada, retornar o resultado diretamente sem validação específica
-        return fields_dict
     else:
         expected_fields = []
     
@@ -946,85 +905,14 @@ def clean_and_validate_fields(fields_dict, service_type='matricula'):
     
     return cleaned_fields
 
-def extract_fields_with_openai(text, model="gpt-4o", service_type="matricula"):
+def extract_fields_with_openai(text, model="gpt-4o", service_type="certidao"):
     """Envia o texto para a OpenAI API e retorna os campos extraídos em JSON"""
     try:
         print(f"🔍 Iniciando extração com OpenAI - Modelo: {model} - Serviço: {service_type}")
         print(f"📝 Tamanho do texto: {len(text)} caracteres")
         print(f"🎯 Modelo que será usado na API OpenAI: {model}")
         
-        if service_type == "matricula":
-            prompt = (
-                "Extraia os seguintes campos do texto da matrícula de imóvel abaixo. "
-                "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
-                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
-                "Campos a extrair:\n"
-                "CADASTRO:\n"
-                "- inscricao_imobiliaria: Inscrição imobiliária\n"
-                "- rip: RIP\n"
-                "DADOS DO IMÓVEL:\n"
-                "- tipo_imovel: Tipo de imóvel (terreno, unidade autônoma, lote etc.)\n"
-                "- tipo_logradouro: Tipo de logradouro (rua, avenida, estrada etc.)\n"
-                "- cep: CEP\n"
-                "- nome_logradouro: Nome do logradouro\n"
-                "- numero_lote: Número do lote/unidade autônoma\n"
-                "- bloco: Bloco (para unidades autônomas)\n"
-                "- pavimento: Pavimento (para unidades autônomas)\n"
-                "- andar: Andar (para unidades autônomas)\n"
-                "- loteamento: Loteamento\n"
-                "- numero_loteamento: Número do lote\n"
-                "- quadra: Quadra\n"
-                "- bairro: Bairro\n"
-                "- cidade: Cidade\n"
-                "- dominialidade: Dominialidade\n"
-                "- area_total: Área total\n"
-                "- area_construida: Área construída\n"
-                "- area_privativa: Área privativa (para unidades autônomas)\n"
-                "- area_uso_comum: Área de uso comum (para unidades autônomas)\n"
-                "- area_correspondente: Área correspondente (para unidades autônomas)\n"
-                "- fracao_ideal: Fração ideal (para unidades autônomas)\n"
-                "DADOS PESSOAIS:\n"
-                "- cpf_cnpj: CPF/CNPJ\n"
-                "- nome_completo: Nome completo\n"
-                "- sexo: Sexo\n"
-                "- nacionalidade: Nacionalidade\n"
-                "- estado_civil: Estado civil\n"
-                "- profissao: Profissão\n"
-                "- rg: RG\n"
-                "- cnh: CNH\n"
-                "- endereco_completo: Endereço completo (logradouro, número, complemento, bairro, cidade)\n"
-                "- regime_casamento: Regime de casamento\n"
-                "- data_casamento: Data do casamento\n"
-                "- matricula_casamento: Matrícula/termo da certidão de casamento\n"
-                "- natureza_juridica: Natureza jurídica da empresa (se pessoa jurídica)\n"
-                "- representante_legal: Nome completo do representante legal (se pessoa jurídica)\n"
-                "INFORMAÇÕES UTILIZADAS PARA OS ATOS:\n"
-                "- valor_transacao: Valor da transação\n"
-                "- valor_avaliacao: Valor de avaliação\n"
-                "- data_alienacao: Data da alienação\n"
-                "- forma_alienacao: Forma de alienação\n"
-                "- valor_divida: Valor da dívida\n"
-                "- valor_alienacao_contrato: Valor da alienação constante do contrato\n"
-                "- tipo_onus: Tipo de ônus\n"
-                "Exemplo de formato esperado: {\"inscricao_imobiliaria\": \"123\", \"tipo_imovel\": \"terreno\", ...}\n"
-                "Texto da matrícula:\n" + text
-            )
-        elif service_type == "minuta":
-            prompt = (
-                "Extraia os seguintes campos do texto da minuta abaixo. "
-                "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
-                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
-                "Campos a extrair:\n"
-                "- descricao_imovel_completa: Descrição completa do imóvel (endereço, área, confrontações, benfeitorias)\n"
-                "- proprietario_atual: Nome(s) completo(s) do(s) proprietário(s) atual(is), com todos os dados disponíveis: CPF, RG, nacionalidade, estado civil, regime de bens e endereço. **IMPORTANTE:** Se o proprietário for casado, INCLUA O CÔNJUGE com todos os dados (nome, CPF, RG, nacionalidade, estado civil, regime de bens, endereço). Analise toda a sequência da matrícula, considerando transmissões (compra e venda, doação, herança, etc.) para identificar corretamente quem é o PROPRIETÁRIO ATUAL do imóvel, mesmo que haja vários registros anteriores. Se houver mais de um proprietário (coproprietários), liste TODOS com seus respectivos dados. ex: Para casais, use formato: 'João da Silva, CPF: 123.456.789-00, casado, regime de comunhão parcial, residente em... E Maria da Silva, CPF: 987.654.321-00, casada, regime de comunhão parcial, residente em...\n"
-                "- tipo_onus_ativo:  Ônus reais, restrições judiciais e administrativas, ou certidão negativa (transcreva o texto completo referente a esses itens). Tipos de ÔNUS: Hipoteca, Alienação, Promessa de Compra e Venda, Penhora, Indisponibilidade, Usufruto, Clásula Restritiva, Averbação Premonitória, Bloqueio, Arresto, Execução, Cédula de Crédito Comercial, Cédula de Crédito Imobiliário E OUTROS. **IMPORTANTE:** NÃO inclua ônus, restrições ou gravames que já tenham sido cancelados, extintos ou baixados no documento. Considere apenas ônus ATIVOS. Se houver menção de cancelamento, desconsidere esse ônus.\n"
-                "- descricao_onus_completa: Descrição completa do ônus ativo (texto completo extraído referente ao ônus)\n"
-                "- numero_matricula: Número da matrícula\n"
-                "- possiveis_erros: Lista de possíveis erros ou inconsistências encontradas durante a extração (se houver)\n"
-                "Exemplo de formato esperado: {\"descricao_imovel_completa\": \"texto completo...\", \"proprietario_atual\": \"nome...\", ...}\n"
-                "Texto da minuta:\n" + text
-            )
-        elif service_type == "certidao":
+        if service_type == "certidao":
             prompt = (
                 "Extraia os seguintes campos do texto de uma matrícula imobiliária abaixo. "
                 "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
@@ -1048,70 +936,50 @@ def extract_fields_with_openai(text, model="gpt-4o", service_type="matricula"):
                 "... }\n\n"
                 "Texto da matrícula:\n" + text
             )
-        elif service_type == "qualificacao":
-            prompt = (
-                "Analise os documentos enviados para qualificação de registro de contrato. "
-                "Responda APENAS em JSON válido, sem explicações ou texto adicional. "
-                "Todos os valores devem ser strings. Se um campo não for encontrado, use string vazia (\"\").\n"
-                "Campos a extrair:\n"
-                "DOCUMENTOS OBRIGATÓRIOS:\n"
-                "- contrato_presente: Se o contrato principal está presente (Sim/Não)\n"
-                "- matricula_presente: Se a matrícula do imóvel está presente (Sim/Não)\n"
-                "- certidao_itbi_presente: Se a certidão de ITBI está presente (Sim/Não)\n"
-                "- procuracao_presente: Se a procuração está presente (Sim/Não)\n"
-                "- cnd_presente: Se a CND está presente (Sim/Não)\n"
-                "DOCUMENTOS COMPLEMENTARES:\n"
-                "- certidao_simplificada_presente: Se a certidão simplificada está presente (Sim/Não)\n"
-                "- declaracao_primeira_aquisicao_presente: Se a declaração de primeira aquisição está presente (Sim/Não)\n"
-                "- aforamento_cat_presente: Se o aforamento ou CAT está presente (Sim/Não)\n"
-                "- boletim_cadastro_presente: Se o boletim de cadastro está presente (Sim/Não)\n"
-                "- outros_documentos_presente: Se outros documentos relevantes estão presentes (Sim/Não)\n"
-                "ANÁLISE DA IA:\n"
-                "- analise_completa: Análise completa dos documentos enviados, identificando cada tipo de documento e sua relevância\n"
-                "- observacoes_recomendacoes: Observações sobre documentos faltantes, problemas identificados e recomendações\n"
-                "- status_qualificacao: Status da qualificação (aprovado/pendente/reprovado)\n"
-                "- pontuacao_qualificacao: Pontuação de 0 a 100 baseada na completude dos documentos\n"
-                "- documentos_faltantes: Lista de documentos obrigatórios que estão faltando\n"
-                "- documentos_complementares_faltantes: Lista de documentos complementares que poderiam melhorar a qualificação\n"
-                "- problemas_identificados: Problemas ou inconsistências identificadas nos documentos\n"
-                "- recomendacoes_especificas: Recomendações específicas para completar a qualificação\n"
-                "Exemplo de formato esperado: {\"contrato_presente\": \"Sim\", \"matricula_presente\": \"Sim\", \"analise_completa\": \"Análise completa...\", ...}\n"
-                "Documentos analisados:\n" + text
-            )
-        elif service_type == "qualificacao_avancada":
-            # Usar a nova lógica de análise avançada
-            try:
-                # Dividir o texto em documentos individuais (cada documento está separado por "=== DOCUMENTO:")
-                documents = text.split("=== DOCUMENTO:")
-                documents = [doc.strip() for doc in documents if doc.strip()]
-                
-                print(f"🔍 Documentos encontrados: {len(documents)}")
-                for i, doc in enumerate(documents):
-                    print(f"📄 Documento {i+1}: {doc[:100]}...")
-                
-                if not documents:
-                    return {"error": "Nenhum documento encontrado para análise"}
-                
-                # Extrair nomes dos arquivos do texto (se disponível)
-                filenames = []
-                for doc in documents:
-                    # Tentar extrair nome do arquivo da primeira linha
-                    lines = doc.split('\n')
-                    if lines and lines[0].strip():
-                        # O nome do arquivo está na primeira linha após "DOCUMENTO:"
-                        filename = lines[0].strip()
-                        filenames.append(filename)
-                    else:
-                        filenames.append(f"documento_{len(filenames)+1}.pdf")
-                
-                # Usar a nova função de análise avançada
-                result = analyze_qualification_documents(documents, filenames, model)
-                return result
-                
-            except Exception as e:
-                print(f"❌ Erro na análise avançada: {str(e)}")
-                return {"error": f"Erro na análise avançada: {str(e)}"}
+        else:
             return {"error": f"Tipo de serviço não suportado: {service_type}"}
+        
+        # Verificar se a chave da API está configurada
+        if not Config.OPENAI_API_KEY:
+            raise ValueError("A variável de ambiente OPENAI_API_KEY não está definida!")
+        
+        # Fazer a chamada para a API OpenAI
+        print("📡 Enviando requisição para OpenAI...")
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+            max_tokens=4000
+        )
+        
+        content = response.choices[0].message.content
+        print(f"✅ Resposta recebida da OpenAI - Tamanho: {len(content) if content else 0}")
+        
+        if content is None:
+            return {"error": "Resposta vazia da OpenAI"}
+        
+        # Processar resposta JSON
+        try:
+            # Limpar a resposta de possíveis blocos markdown
+            cleaned_content = re.sub(r'^```json\s*|```$', '', content.strip(), flags=re.MULTILINE)
+            cleaned_content = re.sub(r'^```\s*|```$', '', cleaned_content.strip(), flags=re.MULTILINE)
+            
+            # Tentar encontrar JSON válido na resposta
+            match = re.search(r'\{[\s\S]+\}', cleaned_content)
+            if match:
+                result = json.loads(match.group(0))
+            else:
+                result = json.loads(cleaned_content)
+            
+            print("✅ Campos extraídos com sucesso")
+            print(f"📊 Campos encontrados: {list(result.keys())}")
+            
+            return result
+            
+        except Exception as e:
+            print(f"❌ Erro ao processar JSON da resposta: {str(e)}")
+            return {"error": f"Erro ao interpretar resposta: {str(e)}", "raw": content}
             
     except Exception as e:
         print(f"❌ Erro geral na extração OpenAI: {str(e)}")
@@ -1161,7 +1029,7 @@ def extract_relevant_sections(document_text, doc_type):
     return document_text
 
 
-def analyze_qualification_documents(documents, filenames, model="gpt-4o"):
+# def analyze_qualification_documents(documents, filenames, model="gpt-4o"):
     """Análise avançada de qualificação usando OpenAI com verificação rigorosa de documentos"""
     try:
         print(f"🔍 Iniciando análise de qualificação avançada com {len(documents)} documentos")

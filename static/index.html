@@ -3,1049 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axion</title>
+    <title>NicSan - Sistema Inteligente de Documentos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/static/styles.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-building me-2"></i>
-                AxionDocs
+    <!-- Header Profissional -->
+         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+         <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                                 <div class="brand-icon me-3">
+                     <img src="/static/logo-light.png" alt="NicSan Logo" class="brand-logo" id="brandLogo">
+                 </div>
+                <div class="brand-text">
+                    <span class="brand-name">NicSan</span>
+                    <span class="brand-subtitle">Sistema Inteligente</span>
+                </div>
             </a>
+            
             <div class="navbar-nav ms-auto">
-                <div class="d-flex align-items-center">
-                    <span class="navbar-text me-3">
-                        <i class="fas fa-circle text-success me-1"></i>
-                        Online
-                    </span>
-                    <span class="navbar-text me-3">
-                        <i class="fas fa-robot me-1"></i>
-                        IA Ativa
-                    </span>
-                    <span class="navbar-text">
-                        <i class="fas fa-shield-alt me-1"></i>
-                        Seguro
-                    </span>
+                 <div class="status-indicators d-flex align-items-center">
+                     <div class="status-item">
+                         <i class="fas fa-circle text-success me-2"></i>
+                         <span class="status-text">Sistema Online</span>
+                     </div>
+                     <div class="status-item">
+                         <i class="fas fa-robot text-info me-2"></i>
+                         <span class="status-text">IA Ativa</span>
+                     </div>
+                     <div class="status-item">
+                         <i class="fas fa-lock text-warning me-2"></i>
+                         <span class="status-text">Seguro</span>
+                     </div>
+                     <div class="status-item">
+                         <button class="btn btn-link theme-toggle" id="themeToggle" title="Alternar Tema">
+                             <i class="fas fa-moon text-light"></i>
+                         </button>
+                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- Conteúdo Principal -->
+    <div class="main-container">
     <div class="container-fluid">
-        <div class="row justify-content-center mt-3">
-            <!-- [REMOVIDO] Coluna de configurações -->
-            <!-- Área Principal centralizada -->
-            <div class="col-md-10 col-lg-9 col-xl-8">
-                <!-- Aqui ficam as abas e o conteúdo principal do sistema -->
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10">
+                    
+
+
                 <!-- Abas de Serviços -->
-                <ul class="nav nav-tabs" id="servicesTabs" role="tablist">
+                    <div class="services-container">
+                        <ul class="nav nav-tabs modern-tabs" id="servicesTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="matricula-tab" data-bs-toggle="tab" data-bs-target="#matriculaTab" type="button" role="tab">
-                            <i class="fas fa-file-contract me-2"></i>Cadastro
+                                <button class="nav-link active" id="memorial-tab" data-bs-toggle="tab" data-bs-target="#memorial" type="button" role="tab">
+                                    <div class="tab-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="tab-content">
+                                        <span class="tab-title">Memorial</span>
+                                        <span class="tab-description">de Incorporação</span>
+                                    </div>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="certidao-tab" data-bs-toggle="tab" data-bs-target="#certidao" type="button" role="tab">
-                            <i class="fas fa-certificate me-2"></i>Certidão
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="minuta-tab" data-bs-toggle="tab" data-bs-target="#minuta" type="button" role="tab">
-                            <i class="fas fa-file-text me-2"></i>Minuta
-                        </button>
-                    </li>
-                    
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="qualificacao-tab" data-bs-toggle="tab" data-bs-target="#qualificacao" type="button" role="tab">
-                            <i class="fas fa-user-check me-2"></i>Qualificação
-                        </button>
-                    </li>
-
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="memorial-tab" data-bs-toggle="tab" data-bs-target="#memorial" type="button" role="tab">
-                            <i class="fas fa-file-alt me-2"></i>Memorial
+                                    <div class="tab-icon">
+                                        <i class="fas fa-certificate"></i>
+                                    </div>
+                                    <div class="tab-content">
+                                        <span class="tab-title">Certidão</span>
+                                        <span class="tab-description">Situação Jurídica</span>
+                                    </div>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="ocr-tab" data-bs-toggle="tab" data-bs-target="#ocr" type="button" role="tab">
-                            <i class="fas fa-eye me-2"></i>OCR
+                                    <div class="tab-icon">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="tab-content">
+                                        <span class="tab-title">OCR</span>
+                                        <span class="tab-description">Reconhecimento</span>
+                                    </div>
                         </button>
                     </li>
                 </ul>
 
                 <!-- Conteúdo das Abas -->
-                <div class="tab-content" id="servicesTabsContent">
-                    <!-- Aba Matrícula 3º RI -->
-                    <div class="tab-pane fade show active" id="matriculaTab" role="tabpanel">
-                        <!-- Cabeçalho da Área Principal -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-file-contract me-2"></i>Matrícula</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMatricula" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileMatricula">
-                                            <i class="fas fa-play me-1"></i>Processar
-                                        </button>
+                        <div class="tab-content modern-tab-content" id="servicesTabsContent">
+                            
+                            <!-- Aba Memorial -->
+                            <div class="tab-pane fade show active" id="memorial" role="tabpanel">
+                                <div class="service-card">
+                                    <div class="card-header-modern">
+                                        <div class="header-content">
+                                            <div class="service-info">
+                                                <h3 class="service-title">
+                                                    <i class="fas fa-file-alt me-3"></i>
+                                                    Memorial de Incorporação
+                                                </h3>
+                                                <p class="service-description">
+                                                    Analise documentos e gere memoriais de incorporação estruturados
+                                                </p>
+                                            </div>
+                                            <div class="service-actions">
+                                                <div class="file-upload-area">
+                                                    <input type="file" class="form-control modern-file-input" id="fileInputMemorial" accept=".docx,.pdf">
+                                                    <label for="fileInputMemorial" class="file-input-label">
+                                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                                        Selecionar Arquivo
+                                                    </label>
+                                                </div>
+                                                <button class="btn btn-success btn-process" id="processFileMemorial">
+                                                    <i class="fas fa-play me-2"></i>
+                                                    Processar
+                                                </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWord" title="Baixar dados como documento Word">
-                                        <i class="fas fa-file-word"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDF" title="Baixar dados como documento PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info" id="downloadJSON" title="Baixar dados como arquivo JSON">
-                                        <i class="fas fa-file-code"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="matriculaStatus"></div>
-                                
 
-
-                                <!-- Campos da Matrícula -->
-                                <div class="row">
-                                    <!-- CADASTRO -->
-                                    <div class="col-md-12 mb-3">
-                                        <div class="card border-primary">
-                                            <div class="card-header bg-primary text-white">
-                                                <h6 class="mb-0"><i class="fas fa-database me-2"></i>CADASTRO</h6>
+                                    </div>
+                                                                                                                                                   <div class="card-body-modern">
+                                          <div id="memorialStatus" class="status-area"></div>
+                                          <div id="memorialResults" class="preview-area"></div>
+                                                                                    <div id="memorialColumnConfig" class="mt-4" style="display: none;">
+                                              <div class="card border-0 shadow-sm">
+                                                  <div class="card-header bg-light">
+                                                      <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Configuração de Colunas do Excel</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="inscricaoImobiliaria" class="form-label fw-bold">Inscrição Imobiliária</label>
-                                                            <input type="text" class="form-control" id="inscricaoImobiliaria" readonly>
-                                                        </div>
+                                                          <div class="col-md-8">
+                                                              <p class="text-muted mb-2"><small>Arraste para reordenar as colunas:</small></p>
+                                                              <div id="columnsList" class="mb-3"></div>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="rip" class="form-label fw-bold">RIP</label>
-                                                            <input type="text" class="form-control" id="rip" readonly>
+                                                    <div class="col-md-4">
+                                                              <p class="text-muted mb-2"><small>Preview da Estrutura:</small></p>
+                                                              <div id="columnPreview" class="mb-3 p-2 border rounded bg-light">
+                                                                  <small class="text-muted">Nenhuma coluna selecionada</small>
+                                                        </div>
+                                                              <div class="d-grid gap-2">
+                                                                  <button class="btn btn-outline-primary btn-sm" id="addCustomColumn">
+                                                                      <i class="fas fa-plus me-1"></i>+ Adicionar Coluna
+                                                                  </button>
+                                                                  <button class="btn btn-outline-secondary btn-sm" id="resetColumns">
+                                                                      <i class="fas fa-undo me-1"></i>Restaurar Padrão
+                                                                  </button>
+                                                                  <button class="btn btn-success btn-sm" id="downloadExcelCustom">
+                                                                      <i class="fas fa-file-excel me-1"></i>Baixar Excel Personalizado
+                                                                  </button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- DADOS DO IMÓVEL -->
-                                    <div class="col-md-12 mb-3">
-                                        <div class="card border-success">
-                                            <div class="card-header bg-success text-white">
-                                                <h6 class="mb-0"><i class="fas fa-building me-2"></i>DADOS DO IMÓVEL</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="tipoImovel" class="form-label fw-bold">Tipo de Imóvel</label>
-                                                            <input type="text" class="form-control" id="tipoImovel" readonly placeholder="terreno, unidade autônoma, lote etc.">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="tipoLogradouro" class="form-label fw-bold">Tipo de Logradouro</label>
-                                                            <input type="text" class="form-control" id="tipoLogradouro" readonly placeholder="rua, avenida, estrada etc.">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="cep" class="form-label fw-bold">CEP</label>
-                                                            <input type="text" class="form-control" id="cep" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="nomeLogradouro" class="form-label fw-bold">Nome do Logradouro</label>
-                                                            <input type="text" class="form-control" id="nomeLogradouro" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="numeroLote" class="form-label fw-bold">Número do Lote/Unidade Autônoma</label>
-                                                            <input type="text" class="form-control" id="numeroLote" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="bloco" class="form-label fw-bold">Bloco</label>
-                                                            <input type="text" class="form-control" id="bloco" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="pavimento" class="form-label fw-bold">Pavimento</label>
-                                                            <input type="text" class="form-control" id="pavimento" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="andar" class="form-label fw-bold">Andar</label>
-                                                            <input type="text" class="form-control" id="andar" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="loteamento" class="form-label fw-bold">Loteamento</label>
-                                                            <input type="text" class="form-control" id="loteamento" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="numeroLoteamento" class="form-label fw-bold">Número do Lote</label>
-                                                            <input type="text" class="form-control" id="numeroLoteamento" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="quadra" class="form-label fw-bold">Quadra</label>
-                                                            <input type="text" class="form-control" id="quadra" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="bairro" class="form-label fw-bold">Bairro</label>
-                                                            <input type="text" class="form-control" id="bairro" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="cidade" class="form-label fw-bold">Cidade</label>
-                                                            <input type="text" class="form-control" id="cidade" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="dominialidade" class="form-label fw-bold">Dominialidade</label>
-                                                            <input type="text" class="form-control" id="dominialidade" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="areaTotal" class="form-label fw-bold">Área Total</label>
-                                                            <input type="text" class="form-control" id="areaTotal" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="areaConstruida" class="form-label fw-bold">Área Construída</label>
-                                                            <input type="text" class="form-control" id="areaConstruida" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="areaPrivativa" class="form-label fw-bold">Área Privativa</label>
-                                                            <input type="text" class="form-control" id="areaPrivativa" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="areaUsoComum" class="form-label fw-bold">Área de Uso Comum</label>
-                                                            <input type="text" class="form-control" id="areaUsoComum" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="areaCorrespondente" class="form-label fw-bold">Área Correspondente</label>
-                                                            <input type="text" class="form-control" id="areaCorrespondente" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="fracaoIdeal" class="form-label fw-bold">Fração Ideal</label>
-                                                            <input type="text" class="form-control" id="fracaoIdeal" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- DADOS PESSOAIS -->
-                                    <div class="col-md-12 mb-3">
-                                        <div class="card border-warning">
-                                            <div class="card-header bg-warning text-dark">
-                                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>DADOS PESSOAIS</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="cpfCnpj" class="form-label fw-bold">CPF/CNPJ</label>
-                                                            <input type="text" class="form-control" id="cpfCnpj" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="nomeCompleto" class="form-label fw-bold">Nome Completo</label>
-                                                            <input type="text" class="form-control" id="nomeCompleto" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="sexo" class="form-label fw-bold">Sexo</label>
-                                                            <input type="text" class="form-control" id="sexo" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="nacionalidade" class="form-label fw-bold">Nacionalidade</label>
-                                                            <input type="text" class="form-control" id="nacionalidade" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="estadoCivil" class="form-label fw-bold">Estado Civil</label>
-                                                            <input type="text" class="form-control" id="estadoCivil" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="profissao" class="form-label fw-bold">Profissão</label>
-                                                            <input type="text" class="form-control" id="profissao" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="rg" class="form-label fw-bold">RG</label>
-                                                            <input type="text" class="form-control" id="rg" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="cnh" class="form-label fw-bold">CNH</label>
-                                                            <input type="text" class="form-control" id="cnh" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="mb-3">
-                                                            <label for="enderecoCompleto" class="form-label fw-bold">Endereço Completo</label>
-                                                            <textarea class="form-control" id="enderecoCompleto" rows="2" readonly placeholder="logradouro, número, complemento, bairro, cidade"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="regimeCasamento" class="form-label fw-bold">Regime de Casamento</label>
-                                                            <input type="text" class="form-control" id="regimeCasamento" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="dataCasamento" class="form-label fw-bold">Data do Casamento</label>
-                                                            <input type="text" class="form-control" id="dataCasamento" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="matriculaCasamento" class="form-label fw-bold">Matrícula/Termo da Certidão de Casamento</label>
-                                                            <input type="text" class="form-control" id="matriculaCasamento" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- Dados da Pessoa Jurídica -->
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="naturezaJuridica" class="form-label fw-bold">Natureza Jurídica da Empresa</label>
-                                                            <input type="text" class="form-control" id="naturezaJuridica" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="representanteLegal" class="form-label fw-bold">Nome Completo do Representante Legal</label>
-                                                            <input type="text" class="form-control" id="representanteLegal" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- INFORMAÇÕES UTILIZADAS PARA OS ATOS -->
-                                    <div class="col-md-12 mb-3">
-                                        <div class="card border-info">
-                                            <div class="card-header bg-info text-white">
-                                                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>INFORMAÇÕES UTILIZADAS PARA OS ATOS</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="valorTransacao" class="form-label fw-bold">Valor da Transação</label>
-                                                            <input type="text" class="form-control" id="valorTransacao" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="valorAvaliacao" class="form-label fw-bold">Valor de Avaliação</label>
-                                                            <input type="text" class="form-control" id="valorAvaliacao" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="dataAlienacao" class="form-label fw-bold">Data da Alienação</label>
-                                                            <input type="text" class="form-control" id="dataAlienacao" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="formaAlienacao" class="form-label fw-bold">Forma de Alienação</label>
-                                                            <input type="text" class="form-control" id="formaAlienacao" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="valorDivida" class="form-label fw-bold">Valor da Dívida</label>
-                                                            <input type="text" class="form-control" id="valorDivida" readonly>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="mb-3">
-                                                            <label for="valorAlienacaoContrato" class="form-label fw-bold">Valor da Alienação Constante do Contrato</label>
-                                                            <input type="text" class="form-control" id="valorAlienacaoContrato" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="mb-3">
-                                                            <label for="tipoOnus" class="form-label fw-bold">Tipo de Ônus</label>
-                                                            <input type="text" class="form-control" id="tipoOnus" readonly>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                          <div id="memorialTable" class="mt-4"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Aba Minuta -->
-                    <div class="tab-pane fade" id="minuta" role="tabpanel">
-                        <!-- Cabeçalho da Área Principal -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-file-text me-2"></i>Dados da Minuta</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMinuta" accept=".pdf,.jpg,.jpeg,.png" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileMinuta">
-                                            <i class="fas fa-play me-1"></i>Processar
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordMinuta" title="Baixar dados como documento Word">
-                                        <i class="fas fa-file-word"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFMinuta" title="Baixar dados como documento PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONMinuta" title="Baixar dados como arquivo JSON">
-                                        <i class="fas fa-file-code"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="minutaStatus"></div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="card border-primary">
-                                            <div class="card-header bg-primary text-white">
-                                                <h6 class="mb-0"><i class="fas fa-building me-2"></i>Descrição do Imóvel</h6>
+                            <!-- Aba Certidão -->
+                            <div class="tab-pane fade" id="certidao" role="tabpanel">
+                                <div class="service-card">
+                                    <div class="card-header-modern">
+                                        <div class="header-content">
+                                            <div class="service-info">
+                                                <h3 class="service-title">
+                                                    <i class="fas fa-certificate me-3"></i>
+                                                    Certidão de Situação Jurídica
+                                                </h3>
+                                                <p class="service-description">
+                                                    Processe documentos de matrícula e extraia informações para gerar certidões
+                                                </p>
                                             </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <label for="descricaoImovelCompleta" class="form-label fw-bold">Descrição Completa do Imóvel</label>
-                                                    <textarea class="form-control" id="descricaoImovelCompleta" rows="6" readonly placeholder="Texto completo extraído referente à descrição do imóvel..."></textarea>
+                                            <div class="service-actions">
+                                                <div class="file-upload-area">
+                                                    <input type="file" class="form-control modern-file-input" id="fileInputCertidao" accept=".pdf">
+                                                    <label for="fileInputCertidao" class="file-input-label">
+                                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                                        Selecionar Arquivo
+                                                    </label>
+                                                </div>
+                                                <button class="btn btn-primary btn-process" id="processFileCertidao" type="button" disabled>
+                                                    <i class="fas fa-play me-2"></i>
+                                                    Processar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="download-actions">
+                                            <button class="btn btn-outline-primary btn-sm" id="downloadCertidaoWord" title="Baixar em Word">
+                                                <i class="fas fa-file-word me-1"></i>
+                                                Word
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body-modern">
+                                        <div id="certidaoStatus" class="status-area"></div>
+                                        <div id="certidaoDocumentPreview" class="document-preview-area" style="display: none;">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-file-alt me-2"></i>
+                                                        Preview do Documento
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="certidaoDocumentContent" class="document-content">
+                                                        <!-- Conteúdo do documento será inserido aqui -->
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="card border-success">
-                                            <div class="card-header bg-success text-white">
-                                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Proprietário Atual</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <label for="proprietarioAtual" class="form-label fw-bold">Proprietário Atual do Imóvel</label>
-                                                    <textarea class="form-control" id="proprietarioAtual" rows="4" readonly placeholder="Nome completo do proprietário atual..."></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <div class="card border-warning">
-                                            <div class="card-header bg-warning text-dark">
-                                                <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>Ônus Ativo</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <label for="tipoOnusAtivo" class="form-label fw-bold">Tipo de Ônus Ativo</label>
-                                                    <input type="text" class="form-control" id="tipoOnusAtivo" readonly placeholder="Ex: Hipoteca, Penhora, Usufruto...">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="descricaoOnusCompleta" class="form-label fw-bold">Descrição Completa do Ônus</label>
-                                                    <textarea class="form-control" id="descricaoOnusCompleta" rows="6" readonly placeholder="Texto completo extraído referente ao ônus ativo..."></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="card border-info">
-                                            <div class="card-header bg-info text-white">
-                                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Adicionais</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <label for="numeroMatricula" class="form-label fw-bold">Número da Matrícula</label>
-                                                    <input type="text" class="form-control" id="numeroMatricula" readonly>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="possiveisErros" class="form-label fw-bold">Possíveis Erros</label>
-                                                    <textarea class="form-control" id="possiveisErros" rows="4" readonly placeholder="Erros encontrados durante a extração..."></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Aba Qualificação -->
-                    <div class="tab-pane fade" id="qualificacao" role="tabpanel">
-                        <!-- Cabeçalho da Área Principal -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-user-check me-2"></i>Análise de Qualificação</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputQualificacao" accept=".pdf" style="width: 400px;" multiple>
-                                        <button class="btn btn-success btn-sm" id="processFileQualificacao" disabled>
-                                            <i class="fas fa-play me-1"></i>Analisar Kit Completo
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Status e Progresso -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6><i class="fas fa-info-circle me-2"></i>Status da Análise</h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="qualificacaoStatus"></div>
-                                <div id="qualificacaoProgress" class="mt-3" style="display: none;">
-                                    <div class="progress">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
-                                    </div>
-                                    <small class="text-muted mt-2 d-block">Analisando documentos...</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Lista de Documentos Enviados -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6><i class="fas fa-folder-open me-2"></i>Documentos Enviados</h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="documentosEnviados" class="row">
-                                    <!-- Documentos serão listados aqui -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Checklist de Qualificação -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>CHECKLIST – QUALIFICAÇÃO SIMPLIFICADA</h5>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-warning me-2" id="editChecklist" title="Editar respostas do checklist" style="display: none;">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordQualificacao" title="Baixar checklist como documento Word">
-                                        <i class="fas fa-file-word"></i> Word
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Checklist Essencial:</strong> Os itens serão preenchidos automaticamente pela IA após a análise. Use o botão "Editar" para fazer correções manuais.
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover checklist-table">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th style="width: 60%">Pergunta</th>
-                                                <th style="width: 8%">SIM</th>
-                                                <th style="width: 8%">NÃO</th>
-                                                <th style="width: 8%">N/A</th>
-                                                <th style="width: 16%">Justificativa</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr class="table-secondary">
-                                                <td colspan="5" class="fw-bold">Matrícula</td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">1)</div> O título foi apresentado juntamente com as certidões de inteiro teor e de situação jurídica ou de ônus reais e de ações reipersecutórias (dentro do prazo de validade de 30 dias), comprobatórias do registro anterior?</td>
-                                                <td class="text-center"><input type="radio" name="item1" id="item1_sim" value="sim" class="form-check-input" disabled></td>
-                                                <td class="text-center"><input type="radio" name="item1" id="item1_nao" value="nao" class="form-check-input" disabled></td>
-                                                <td class="text-center"><input type="radio" name="item1" id="item1_na" value="na" class="form-check-input" disabled></td>
-                                                <td><div id="justificativa_item1" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">2)</div> A nova matrícula preenche os requisitos do Art. 176, § 1º, inciso II, da Lei n.º 6.015/1973 – Lei de Registros Públicos? (REQUISITOS ESSENCIAIS PARA ABERTURA)</td>
-                                                <td class="text-center"><input type="radio" name="item2" id="item2_sim" value="sim" class="form-check-input" disabled></td>
-                                                <td class="text-center"><input type="radio" name="item2" id="item2_nao" value="nao" class="form-check-input" disabled></td>
-                                                <td class="text-center"><input type="radio" name="item2" id="item2_na" value="na" class="form-check-input" disabled></td>
-                                                <td><div id="justificativa_item2" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">3)</div> Verificar dominialidade do imóvel. (terrenos foreiros à União ou ao Município, bem como terrenos de Marinha)?</td>
-                                                <td class="text-center"><input type="radio" name="item3" id="item3_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item3" id="item3_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item3" id="item3_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item3" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">4)</div> Em caso de abertura de matrícula, o imóvel for foreiro à União, tem RIP?</td>
-                                                <td class="text-center"><input type="radio" name="item4" id="item4_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item4" id="item4_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item4" id="item4_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item4" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">5)</div> Incide sobre o imóvel algum ônus?</td>
-                                                <td class="text-center"><input type="radio" name="item5" id="item5_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item5" id="item5_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item5" id="item5_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item5" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">6)</div> Para o caso de existir ônus, foi apresentado termo de autorização para o cancelamento de ônus ou constou no contrato cláusula que autorize esse cancelamento?</td>
-                                                <td class="text-center"><input type="radio" name="item6" id="item6_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item6" id="item6_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item6" id="item6_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item6" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">7)</div> Constou a qualificação completa dos proprietários?</td>
-                                                <td class="text-center"><input type="radio" name="item7" id="item7_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item7" id="item7_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item7" id="item7_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item7" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">8)</div> Em matrícula pertencente a esta Serventia, consta a inscrição imobiliária do imóvel/número de RIP?</td>
-                                                <td class="text-center"><input type="radio" name="item8" id="item8_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item8" id="item8_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item8" id="item8_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item8" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">9)</div> A inscrição imobiliária que consta na matrícula do imóvel é a mesma da certidão de ITBI apresentada?</td>
-                                                <td class="text-center"><input type="radio" name="item9" id="item9_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item9" id="item9_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="item9" id="item9_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_item9" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="table-secondary">
-                                                <td colspan="5" class="fw-bold">Título</td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">1)</div> Todas as vias estão iguais?</td>
-                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT1" id="itemT1_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT1" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">2)</div> Todas as vias estão assinadas/possuem data e local de emissão do contrato?</td>
-                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT2" id="itemT2_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT2" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">3)</div> O contrato contém a descrição completa do imóvel e o número da matrícula?</td>
-                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT3" id="itemT3_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT3" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">4)</div> A certidão de ITBI contém a mesma descrição do imóvel conforme o contrato e matrícula do imóvel?
-                                                    - Verificar se a descrição da matrícula é a mesma no contrato, ITBI e matrícula (apartamento, bloco, número, quadra, empreendimento);
-                                                    - Sempre consultar a validade da certidão.
-                                                    - Verificar se a inscrição imobiliária constante na matrícula é o mesmo constante no contrato (em casos de atualização de inscrição imobiliária).</td>
-                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT4" id="itemT4_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT4" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">5)</div> O valor base para ITBI é igual ou maior que o valor da transação do imóvel?</td>
-                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT5" id="itemT5_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT5" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">6)</div> As partes indicadas no ITBI são as mesmas do contrato? OBS: Observar os nomes e CPF.</td>
-                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT6" id="itemT6_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT6" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">7)</div> O termo de quitação ou contrato foram devidamente assinados pelo(a) representante legal do(a) credor fiduciário(a)/interveniente quitante?
-                                                    - Para o caso de termo de quitação, foi devidamente assinado e com firma reconhecida</td>
-                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT7" id="itemT7_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT7" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">8)</div> Os transmitentes estão qualificados no título conforme art. 648, V, do CNCGJ/MA? (Em caso de pessoa física: nome completo, RG, CPF, profissão, estado civil e endereço; em caso de pessoa jurídica: consta o número do CNPJ, representação e a sede?)
-                                                    OBS: Há alguma divergência quanto aos dados constantes da matrícula e do título? (Se for o caso, fazer averbação retificando);</td>
-                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT8" id="itemT8_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT8" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">9)</div> Em caso de apresentação de declaração de 1ª aquisição, foi assinada pelo(s) comprador(es) com firma devidamente reconhecida?
-                                                    - SEMPRE consultar no site da SEMFAZ e no sistema o CPF do(s) comprador(es), nos campos de adquirente, bem como no campo de proprietário.</td>
-                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT9" id="itemT9_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT9" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">10)</div> Os transmitentes ou adquirentes são casados sob regime diverso do legal?
-
-                                                    OBS: se positivo, sempre deverá ser averbado o pacto antenupcial no Livro 2 e se for o caso registrado no Livro 3.</td>
-                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT10" id="itemT10_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT10" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">11)</div> Se o(s) adquirente (s) e/ou transmitente(s) estiver(em) representado(s) por procurador, constar os dados da representação no texto do registro.
-                                                    OBS: se não houver os dados da representação, solicitar por meio de Nota Devolutiva.</td>
-                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT11" id="itemT11_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT11" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">12)</div> Nos casos em que a Pessoa Jurídica for representada por sócio/gerente/administrador ou outro representante legal, deve constar no título os Atos Constitutivos da empresa que justifiquem a representação.
-                                                    OBS: caso não conste, solicitar em nota devolutiva a documentação que justifique.</td>
-                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT12" id="itemT12_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT12" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">13)</div> Sempre que o transmitente for Pessoa Jurídica verificar se consta CND (Certidão Negativa de Débitos), ou há menção sobre a dispensa da referida certidão.
-                                                    (Fazer a conferência da CND por meio da internet e imprimir).
-                                                    OBS: se não for possível consultar, solicitar a certidão. (tratar com Oficial Substituto)</td>
-                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT13" id="itemT13_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT13" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">14)</div> ) Foi apresentada a CND do(a) devedor(a) em caso de contrato de mútuo ou CCB?</td>
-                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT14" id="itemT14_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT14" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">15)</div> Se tratando de Pessoa Jurídica, imprimir Certidão Simplificada ou consulta da empresa na respectiva Junta Comercial. 
-                                                    OBS: sempre deve constar no texto do registro o NIRE e a data do ato constitutivo.</td>
-                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT15" id="itemT15_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT15" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">16)</div> Quando tratar-se de firma individual exigir os documentos de pessoa física. (pois não poderá ser registrado em nome da firma individual, por não possuir personalidade jurídica).</td>
-                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT16" id="itemT16_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT16" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">17)</div> Em caso de terreno foreiro à União, foi apresentada a CAT onerosa com a descrição correta do imóvel e nome e CPF ou CNPJ do outorgante vendedor.</td>
-                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT17" id="itemT17_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT17" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">18)</div> Em caso de terreno foreiro ao município, foi apresentado o Termo de Transferência de Aforamento ou Escritura Pública de Resgate de Aforamento?</td>
-                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT18" id="itemT18_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT18" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">19)</div> O contrato indica a matrícula, descrição e inscrição imobiliária do imóvel (verificar se houve atualização de inscrição imobiliária)? 
-                                                    - Em caso de negativa, observar se a descrição está completa para individualizar o objeto.
-                                                    OBS: Fazer a comparação com o boletim de cadastro imobiliário também</td>
-                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT19" id="itemT19_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT19" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">20)</div> Existe procuração para o(a) representante legal do(a) credor(a) fiduciário(a)?
-                                                    - A procuração deve estar válida e indicar os poderes específicos. Observar se existe distinção de "grupo" para determinados poderes e se é necessário a assinatura de mais um(a) representante.</td>
-                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT20" id="itemT20_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT20" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">21)</div> Consta no título requerimento genérico em que as partes autorizem a proceder todos os atos que se fizerem necessários?</td>
-                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT21" id="itemT21_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT21" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">22)</div> Deve ser efetuada alguma averbação precedente ou subsequente ao registro referente à qualificação dos proprietários (Exemplo: casamento, pacto antenupcial, retificação de dados)?</td>
-                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT22" id="itemT22_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT22" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                            <tr class="align-middle">
-                                                <td><div class="fw-bold checklist-item-number">23)</div> Em caso de consolidação de propriedade de credor fiduciário, foram averbados os leilões negativos e a quitação da dívida?</td>
-                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_sim" value="sim" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_nao" value="nao" class="form-check-input"></td>
-                                                <td class="text-center"><input type="radio" name="itemT23" id="itemT23_na" value="na" class="form-check-input"></td>
-                                                <td><div id="justificativa_itemT23" class="text-danger small justificativa-text"></div></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Aba OCR -->
                     <div class="tab-pane fade" id="ocr" role="tabpanel">
-                        <!-- Cabeçalho da Área Principal -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-eye me-2"></i>OCR - PDFs Escaneados</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputOCR" accept=".pdf" style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileOCR" disabled>
-                                            <i class="fas fa-play me-1"></i>Processar OCR
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2" id="downloadOCRPDF" title="Baixar PDF pesquisável">
-                                        <i class="fas fa-file-pdf"></i> PDF Pesquisável
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info me-2" id="downloadOCRText" title="Baixar texto extraído">
-                                        <i class="fas fa-file-text"></i> Texto
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="ocrStatus"></div>
-                                
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Importante:</strong> PDFs com assinaturas digitais terão a assinatura removida automaticamente. O PDF resultante será apenas para consulta de dados.
-                                </div>
-
-                                <!-- Configurações OCR -->
-                                <div class="row mt-3">
-                                    <div class="col-12">
-                                        <div class="card border-warning">
-                                            <div class="card-header bg-warning text-dark">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Configurações OCR</h6>
+                                <div class="service-card">
+                                    <div class="card-header-modern">
+                                        <div class="header-content">
+                                            <div class="service-info">
+                                                <h3 class="service-title">
+                                                    <i class="fas fa-eye me-3"></i>
+                                                    OCR - Reconhecimento de Texto
+                                                </h3>
+                                                <p class="service-description">
+                                                    Extraia texto de imagens e documentos digitalizados
+                                                </p>
                                             </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="mb-3">
-                                                            <label for="ocrQuality" class="form-label fw-bold">Qualidade</label>
-                                                            <select class="form-select" id="ocrQuality">
-                                                                <option value="ultra_fast">Ultra Rápida</option>
-                                                                <option value="fast">Rápida</option>
-                                                                <option value="standard">Padrão</option>
-                                                                <option value="high" selected>Alta Qualidade</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
+                                            <div class="service-actions">
+                                                <div class="file-upload-area">
+                                                    <input type="file" class="form-control modern-file-input" id="fileInputOCR" accept=".pdf,.jpg,.jpeg,.png">
+                                                    <label for="fileInputOCR" class="file-input-label">
+                                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                                        Selecionar Arquivo
+                                                    </label>
                                                 </div>
-                                                <div class="alert alert-info">
-                                                    <i class="fas fa-info-circle me-2"></i>
-                                                    <strong>Dica:</strong> Use "Alta Qualidade" para documentos com certificados digitais ou baixa resolução.
-                                                </div>
+                                                <button class="btn btn-info btn-process" id="processFileOCR">
+                                                    <i class="fas fa-play me-2"></i>
+                                                    Processar
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Aba Memorial -->
-                    <div class="tab-pane fade" id="memorial" role="tabpanel">
-                        <!-- Cabeçalho da Área Principal -->
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-book me-2"></i>Dados do Memorial</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputMemorial" accept=".docx" multiple style="width: 400px;">
-                                        <button class="btn btn-success btn-sm" id="processFileMemorial">
-                                            <i class="fas fa-play me-1"></i>Processar Memorial
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-success me-2" id="downloadWordMemorial" title="Baixar dados como documento Word">
-                                        <i class="fas fa-file-word"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadPDFMemorial" title="Baixar dados como documento PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info" id="downloadJSONMemorial" title="Baixar dados como arquivo JSON">
-                                        <i class="fas fa-file-code"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Configuração de Colunas do Excel -->
-                        <div class="card mt-3" id="memorialColumnConfig" style="display: none;">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-columns me-2"></i>Configuração de Colunas do Excel</h5>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2" id="addCustomColumn">
-                                        <i class="fas fa-plus me-1"></i>Adicionar Coluna
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-success" id="resetColumns">
-                                        <i class="fas fa-undo me-1"></i>Restaurar Padrão
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <h6><i class="fas fa-grip-vertical me-2"></i>Arraste para reordenar as colunas:</h6>
-                                        <div id="columnsList" class="list-group">
-                                            <!-- Colunas serão inseridas dinamicamente aqui -->
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6><i class="fas fa-eye me-2"></i>Preview da Estrutura:</h6>
-                                        <div id="columnPreview" class="border rounded p-3 bg-light">
-                                            <small class="text-muted">Configure as colunas para ver o preview</small>
-                                        </div>
-                                        <div class="mt-3">
-                                            <button class="btn btn-success btn-sm w-100" id="downloadExcelCustom">
-                                                <i class="fas fa-file-excel me-1"></i>Baixar Excel Personalizado
+                                        <div class="download-actions">
+                                            <button class="btn btn-outline-danger btn-sm" id="downloadOCRPDF" title="Baixar em PDF" disabled>
+                                                <i class="fas fa-file-pdf me-1"></i>
+                                                PDF
                                             </button>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card mt-3">
-                            <div class="card-header">
-                                <h5><i class="fas fa-file-alt me-2"></i>Resultados do Memorial</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="memorialStatus"></div>
-                                <div id="memorialResults" class="mt-3"></div>
-                                <div id="memorialTable" class="mt-3"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Aba Certidão -->
-                    <div class="tab-pane fade" id="certidao" role="tabpanel">
-                        <div class="card mt-3">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <h5 class="mb-0 me-3"><i class="fas fa-certificate me-2"></i>Certidão de Situação Jurídica</h5>
-                                    <div class="d-flex align-items-center">
-                                        <input type="file" class="form-control form-control-sm me-2" id="fileInputCertidao" accept=".pdf" style="width: 400px;">
-                                        <button class="btn btn-primary btn-sm" id="processFileCertidao" type="button" disabled>
-                                            <i class="fas fa-play me-1"></i>Processar Certidão
-                                        </button>
+                                    <div class="card-body-modern">
+                                        <div id="ocrStatus" class="status-area"></div>
+                                        <div id="ocrResults" class="preview-area"></div>
                                     </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2" id="downloadCertidaoWord" title="Baixar certidão em Word" type="button">
-                                        <i class="fas fa-file-word"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="downloadCertidaoPDF" title="Baixar certidão gerada" type="button">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="certidaoStatus"></div>
-                                <div id="certidaoPreview" class="mt-3"></div>
                             </div>
                         </div>
                     </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
                 </div>
             </div>
         </div>
@@ -1056,188 +283,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="/static/app-simple.js"></script>
     <script type="module" src="/static/js/main.js"></script>
-    <script type="module" src="/static/js/qualificacao.js"></script>
     <script src="/static/test_checklist_simple.js"></script>
-    
-    <!-- Estilos personalizados para Memorial -->
-    <style>
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .bg-gradient-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-        .table-hover tbody tr:hover {
-            background-color: rgba(0,123,255,0.1) !important;
-        }
-        .display-6 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            line-height: 1.2;
-        }
-        .alert {
-            border-radius: 15px;
-        }
-        
-        /* Estilos para gerenciamento dinâmico de colunas */
-        .column-item {
-            cursor: move;
-            transition: all 0.3s ease;
-            border: 1px solid #dee2e6;
-            margin-bottom: 5px;
-        }
-        
-        .column-item:hover {
-            background-color: #f8f9fa;
-            border-color: #007bff;
-        }
-        
-        .column-item.dragging {
-            opacity: 0.5;
-            transform: rotate(5deg);
-        }
-        
-        .column-item .drag-handle {
-            color: #6c757d;
-            cursor: grab;
-        }
-        
-        .column-item .drag-handle:active {
-            cursor: grabbing;
-        }
-        
-        .custom-column {
-            border-left: 4px solid #28a745;
-        }
-        
-        .default-column {
-            border-left: 4px solid #007bff;
-        }
-        
-        .column-preview-item {
-            padding: 5px 10px;
-            margin: 2px 0;
-            background: #e9ecef;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-        
-        .sortable-ghost {
-            opacity: 0.4;
-        }
-        
-        .sortable-chosen {
-            background-color: #e3f2fd;
-        }
-        .btn {
-            border-radius: 8px;
-        }
-        .table th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Estilos para modo de edição do checklist */
-        .checklist-table.editing-mode {
-            border: 2px solid #ffc107;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
-        }
-        
-        .checklist-table.editing-mode thead {
-            background-color: #fff3cd !important;
-        }
-        
-        .checklist-table.editing-mode input[type="radio"]:not(:disabled) {
-            cursor: pointer;
-            transform: scale(1.1);
-            transition: all 0.2s ease;
-        }
-        
-        .checklist-table.editing-mode input[type="radio"]:not(:disabled):hover {
-            transform: scale(1.2);
-        }
-        
-        .checklist-table.editing-mode tbody tr:hover {
-            background-color: rgba(255, 193, 7, 0.1) !important;
-        }
-        
-        /* Indicador visual de modo de edição */
-        .editing-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #ffc107;
-            color: #000;
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Estilos para badges de documentos */
-        .badge {
-            font-size: 0.75em;
-            padding: 0.25em 0.5em;
-        }
-        
-        .justificativa-text {
-            font-size: 0.85em;
-            line-height: 1.3;
-        }
-        
-        /* Estilos para radio buttons desabilitados */
-        .checklist-table input[type="radio"]:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .checklist-table input[type="radio"]:disabled + label {
-            color: #6c757d;
-            cursor: not-allowed;
-        }
-        
-        /* Estilos para radio buttons habilitados */
-        .checklist-table input[type="radio"]:not(:disabled) {
-            cursor: pointer;
-        }
-        
-        .checklist-table input[type="radio"]:not(:disabled):hover {
-            transform: scale(1.1);
-            transition: transform 0.2s ease;
-        }
-    </style>
-
-    <!-- Scripts JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app-simple.js"></script>
-    <script src="/static/js/qualificacao.js"></script>
-    <script src="/static/js/qualificacao-toggle.js"></script>
-    
-    <script>
-        // Inicializar event listeners quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Inicializando aplicação...');
-            
-            // Configurar event listeners da qualificação
-            if (typeof setupQualificacaoEventListeners === 'function') {
-                setupQualificacaoEventListeners();
-                console.log('✅ Event listeners da qualificação configurados');
-            }
-            
-            console.log('✅ Aplicação inicializada com sucesso');
-        });
-    </script>
-
 </body>
 </html> 

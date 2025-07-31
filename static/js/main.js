@@ -1,242 +1,499 @@
-// main.js - Configuração específica para matrícula
+// main.js - Configuração principal do sistema NicSan
 import { processFile } from './process.js';
 
-// Configuração da UI
+// Configuração da UI moderna
 const ui = {
     showAlert: function(message, type = 'info') {
-        // Implementação simples de alerta
         console.log(`[${type.toUpperCase()}] ${message}`);
-        // Aqui você pode implementar um sistema de alertas mais sofisticado
+        // Implementação de alertas mais sofisticados pode ser adicionada aqui
     },
-    updateStatus: function(message, type = 'info') {
-        const statusElement = document.getElementById('matriculaStatus');
+    
+    updateStatus: function(message, type = 'info', statusId = 'status') {
+        const statusElement = document.getElementById(statusId);
         if (statusElement) {
-            statusElement.innerHTML = `<div class="alert alert-${type}"><i class="fas fa-spinner fa-spin me-2"></i>${message}</div>`;
+            const iconClass = this.getStatusIcon(type);
+            statusElement.innerHTML = `
+                <div class="alert alert-${type} fade-in">
+                    <i class="${iconClass} me-2"></i>
+                    ${message}
+                </div>
+            `;
         }
     },
-    showProgress: function(show) {
-        // Implementação de progresso se necessário
+    
+    getStatusIcon: function(type) {
+        const icons = {
+            'info': 'fas fa-info-circle',
+            'success': 'fas fa-check-circle',
+            'warning': 'fas fa-exclamation-triangle',
+            'danger': 'fas fa-times-circle',
+            'loading': 'fas fa-spinner fa-spin'
+        };
+        return icons[type] || icons.info;
+    },
+    
+    showProgress: function(show, elementId = 'status') {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (show) {
+                element.innerHTML = `
+                    <div class="alert alert-info fade-in">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        Processando documento...
+                    </div>
+                `;
+            }
+        }
         console.log(`Progress: ${show}`);
+    },
+    
+    updateFileInput: function(inputId, fileName) {
+        const input = document.getElementById(inputId);
+        const label = input.nextElementSibling;
+        if (label && fileName) {
+            label.innerHTML = `
+                <i class="fas fa-file me-2"></i>
+                ${fileName}
+            `;
+            label.style.borderColor = 'var(--success-color)';
+            label.style.color = 'var(--success-color)';
+        }
+    },
+    
+    resetFileInput: function(inputId) {
+        const input = document.getElementById(inputId);
+        const label = input.nextElementSibling;
+        if (label) {
+            label.innerHTML = `
+                <i class="fas fa-cloud-upload-alt me-2"></i>
+                Selecionar Arquivo
+            `;
+            label.style.borderColor = '';
+            label.style.color = '';
+        }
     }
 };
 
-// Função para configurar event listeners específicos da matrícula
-function setupMatriculaEventListeners() {
-    console.log('🚀 Configurando event listeners da matrícula...');
+// Sistema de Tema
+const themeManager = {
+    currentTheme: localStorage.getItem('theme') || 'light',
     
-    // File input para matrícula
-    const fileInputMatricula = document.getElementById('fileInputMatricula');
-    if (fileInputMatricula) {
-        // Remover listeners existentes se houver
-        const newFileInput = fileInputMatricula.cloneNode(true);
-        fileInputMatricula.parentNode.replaceChild(newFileInput, fileInputMatricula);
+    init: function() {
+        this.setTheme(this.currentTheme);
+        this.setupThemeToggle();
+    },
+    
+    setTheme: function(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        this.currentTheme = theme;
+        localStorage.setItem('theme', theme);
         
-        newFileInput.addEventListener('change', (event) => {
+        // Atualizar ícone do botão
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            const icon = themeToggle.querySelector('i');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun text-light' : 'fas fa-moon text-light';
+            }
+        }
+        
+        // Atualizar logo baseado no tema
+        const brandLogo = document.getElementById('brandLogo');
+        if (brandLogo) {
+            brandLogo.src = theme === 'dark' ? '/static/logo-dark.png' : '/static/logo-light.png';
+        }
+    },
+    
+    toggleTheme: function() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    },
+    
+    setupThemeToggle: function() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+        }
+    }
+};
+
+// Inicialização quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 NicSan - Sistema inicializado...');
+    
+    // Verificar se as funções do app-simple.js estão disponíveis
+    console.log('🔍 Verificando funções disponíveis:');
+    console.log('processMemorialFiles:', typeof window.processMemorialFiles);
+    console.log('processFile:', typeof processFile);
+    console.log('updateMemorialInterface:', typeof window.updateMemorialInterface);
+    
+    // Inicializar sistema de tema
+    themeManager.init();
+    
+    // Configurar event listeners para Certidão
+    setupCertidaoEventListeners();
+    
+    // Configurar event listeners para Memorial
+    setupMemorialEventListeners();
+    
+    // Configurar event listeners para OCR
+    setupOCREventListeners();
+    
+    // Adicionar animações de entrada
+    addEntranceAnimations();
+});
+
+// Função para configurar event listeners da Certidão
+function setupCertidaoEventListeners() {
+    console.log('🚀 Configurando event listeners da Certidão...');
+    
+    const fileInput = document.getElementById('fileInputCertidao');
+    const processButton = document.getElementById('processFileCertidao');
+    
+    if (fileInput && processButton) {
+        fileInput.addEventListener('change', (event) => {
             const files = event.target.files;
-            const processButton = document.getElementById('processFileMatricula');
-            
             if (files && files.length > 0) {
                 processButton.disabled = false;
-                console.log(`${files.length} arquivo(s) selecionado(s) para matrícula`);
+                processButton.classList.add('btn-pulse');
+                ui.updateFileInput('fileInputCertidao', files[0].name);
+                console.log(`${files.length} arquivo(s) selecionado(s) para certidão`);
             } else {
                 processButton.disabled = true;
+                processButton.classList.remove('btn-pulse');
+                ui.resetFileInput('fileInputCertidao');
             }
         });
-        console.log('✅ File input matrícula configurado');
-    }
-    
-    // Process button para matrícula
-    const processButtonMatricula = document.getElementById('processFileMatricula');
-    if (processButtonMatricula) {
-        // Remover listeners existentes se houver
-        const newProcessButton = processButtonMatricula.cloneNode(true);
-        processButtonMatricula.parentNode.replaceChild(newProcessButton, processButtonMatricula);
         
-        newProcessButton.addEventListener('click', async () => {
-            const fileInput = document.getElementById('fileInputMatricula');
+        processButton.addEventListener('click', async () => {
             const files = fileInput.files;
-            
             if (!files || files.length === 0) {
                 ui.showAlert('Nenhum arquivo selecionado!', 'warning');
                 return;
             }
             
-            // Converter FileList para Array
-            const filesArray = Array.from(files);
+            // Adicionar estado de loading
+            processButton.disabled = true;
+            processButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
             
-            // Processar arquivos
-            await processFile(filesArray, ui, (data) => {
-                // Callback para definir dados atuais
-                window.currentData = data;
-            });
+            try {
+                const file = files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Obter modelo das configurações globais
+                const modelElement = document.querySelector('input[name="chatgptModel"]:checked');
+                const selectedModel = modelElement ? modelElement.value : 'gpt-4o';
+                formData.append('model', selectedModel);
+                
+                // Mostrar status de processamento
+                const statusArea = document.getElementById('certidaoStatus');
+                const documentPreviewArea = document.getElementById('certidaoDocumentPreview');
+                
+                console.log('🔍 Elementos encontrados:', {
+                    statusArea: !!statusArea,
+                    documentPreviewArea: !!documentPreviewArea
+                });
+                
+                if (statusArea) statusArea.innerHTML = '<div class="alert alert-info">Executando OCR e processando certidão, aguarde...</div>';
+                if (documentPreviewArea) documentPreviewArea.style.display = 'none';
+                
+                // Fazer chamada para extrair dados
+                const response = await fetch('/api/certidao/data', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    window.currentCertidaoData = result.data;
+                    
+                    // Mostrar dados extraídos
+                    if (result.data) {
+                        let info = '';
+                        if (result.tipo && result.motivo) {
+                            let tipoLabel = '';
+                            if (result.tipo === 'STForeiro') tipoLabel = 'Foreira';
+                            else if (result.tipo === 'STPositiva') tipoLabel = 'Positiva';
+                            else if (result.tipo === 'STNegativa') tipoLabel = 'Negativa';
+                            else tipoLabel = result.tipo;
+                            info = `<div class='alert alert-secondary mb-2'><b>Tipo de Certidão:</b> ${tipoLabel}<br/><b>Motivo:</b> ${result.motivo}</div>`;
+                        }
+                        
+                        statusArea.innerHTML = info + '<div class="alert alert-success">OCR executado e certidão processada com sucesso! Clique para baixar em Word.</div>';
+                        
+                        // Mostrar preview do documento formatado
+                        if (result.formatted_html) {
+                            console.log('📄 HTML formatado recebido:', result.formatted_html.substring(0, 200) + '...');
+                            
+                            if (documentPreviewArea) {
+                                documentPreviewArea.style.display = 'block';
+                                const documentContent = document.getElementById('certidaoDocumentContent');
+                                console.log('🔍 Elemento documentContent encontrado:', !!documentContent);
+                                
+                                if (documentContent) {
+                                    documentContent.innerHTML = result.formatted_html;
+                                    console.log('✅ Preview formatado inserido com sucesso');
+                                } else {
+                                    console.error('❌ Elemento certidaoDocumentContent não encontrado');
+                                }
+                            } else {
+                                console.error('❌ Elemento certidaoDocumentPreview não encontrado');
+                            }
+                        } else {
+                            console.log('⚠️ Nenhum HTML formatado recebido');
+                        }
+                        
+                        // Habilitar botão de download Word
+                        const downloadWordBtn = document.getElementById('downloadCertidaoWord');
+                        if (downloadWordBtn) {
+                            downloadWordBtn.disabled = false;
+                        }
+                    } else {
+                        statusArea.innerHTML = '<div class="alert alert-warning">Processamento concluído, mas nenhum dado foi extraído.</div>';
+                    }
+                } else {
+                    let errorMsg = 'Erro ao processar certidão.';
+                    try {
+                        const err = await response.json();
+                        errorMsg = err.error || errorMsg;
+                    } catch (jsonError) {
+                        console.error('Erro ao fazer parse do JSON de erro:', jsonError);
+                    }
+                    statusArea.innerHTML = `<div class="alert alert-danger">${errorMsg}</div>`;
+                }
+            } catch (error) {
+                console.error('Erro no processamento:', error);
+                const statusArea = document.getElementById('certidaoStatus');
+                statusArea.innerHTML = `<div class="alert alert-danger">Erro inesperado: ${error.message}</div>`;
+            }
+            
+            // Restaurar botão
+            processButton.disabled = false;
+            processButton.innerHTML = '<i class="fas fa-play me-2"></i>Processar';
         });
-        console.log('✅ Process button matrícula configurado');
+        
+        console.log('✅ Event listeners da Certidão configurados');
     }
     
-    // Download buttons para matrícula
-    const downloadButtons = [
-        { id: 'downloadWord', func: downloadWordFile },
-        { id: 'downloadPDF', func: downloadPDFFile },
-        { id: 'downloadJSON', func: downloadJSONFile }
-    ];
-    
-    downloadButtons.forEach(button => {
-        const element = document.getElementById(button.id);
-        if (element) {
-            // Remover listeners existentes se houver
-            const newElement = element.cloneNode(true);
-            element.parentNode.replaceChild(newElement, element);
+    // Configurar event listener para download Word da certidão
+    const downloadWordBtn = document.getElementById('downloadCertidaoWord');
+    if (downloadWordBtn) {
+        downloadWordBtn.addEventListener('click', async () => {
+            if (!window.currentCertidaoData) {
+                ui.showAlert('Nenhum dado da certidão disponível para download Word', 'warning');
+                return;
+            }
             
-            newElement.addEventListener('click', () => button.func());
-            console.log(`✅ Download button ${button.id} configurado para matrícula`);
-        }
+            try {
+                downloadWordBtn.disabled = true;
+                downloadWordBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando...';
+                
+                // Chamar API para gerar arquivo Word
+                const response = await fetch('/api/certidao/word', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: window.currentCertidaoData
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const fileName = `certidao_${new Date().toISOString().slice(0, 10)}.docx`;
+                    
+                    // Download do arquivo
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    ui.showAlert('Arquivo Word da certidão baixado com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    ui.showAlert(`Erro ao gerar arquivo Word: ${error.error}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar Word:', error);
+                ui.showAlert('Erro ao gerar arquivo Word', 'danger');
+            } finally {
+                downloadWordBtn.disabled = false;
+                downloadWordBtn.innerHTML = '<i class="fas fa-file-word me-1"></i>Word';
+            }
+        });
+        
+        console.log('✅ Event listener para download Word da certidão configurado');
+    }
+}
+
+// Função para configurar event listeners do Memorial
+function setupMemorialEventListeners() {
+    console.log('🚀 Configurando event listeners do Memorial...');
+    
+    const fileInput = document.getElementById('fileInputMemorial');
+    const processButton = document.getElementById('processFileMemorial');
+    
+    if (fileInput && processButton) {
+        fileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                processButton.disabled = false;
+                processButton.classList.add('btn-pulse');
+                ui.updateFileInput('fileInputMemorial', files[0].name);
+                console.log(`Arquivo selecionado para memorial: ${files[0].name}`);
+            } else {
+                processButton.disabled = true;
+                processButton.classList.remove('btn-pulse');
+                ui.resetFileInput('fileInputMemorial');
+            }
+        });
+        
+        processButton.addEventListener('click', async () => {
+            const files = fileInput.files;
+            if (!files || files.length === 0) {
+                ui.showAlert('Nenhum arquivo selecionado!', 'warning');
+        return;
+    }
+    
+            // Adicionar estado de loading
+            processButton.disabled = true;
+            processButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+            
+            // Usar a função específica do memorial do app-simple.js
+            try {
+                // Definir currentFiles globalmente para o app-simple.js (apenas 1 arquivo)
+                window.currentFiles = [files[0]];
+                console.log('📁 currentFiles definido:', window.currentFiles);
+                console.log('📁 Arquivo selecionado:', window.currentFiles[0]?.name);
+                
+                // Verificar se a função existe
+                if (typeof window.processMemorialFiles === 'function') {
+                    console.log('✅ Usando window.processMemorialFiles');
+                    await window.processMemorialFiles();
+                } else if (typeof processFile === 'function') {
+                    console.log('✅ Usando processFile("memorial")');
+                    await processFile('memorial');
+                } else {
+                    console.error('Função de processamento não encontrada');
+                    ui.showAlert('Erro: Função de processamento não encontrada', 'danger');
+                }
+            } catch (error) {
+                console.error('Erro no processamento:', error);
+                ui.showAlert('Erro no processamento: ' + error.message, 'danger');
+            }
+            
+            // Restaurar botão
+            processButton.disabled = false;
+            processButton.innerHTML = '<i class="fas fa-play me-2"></i>Processar';
+        });
+        
+        console.log('✅ Event listeners do Memorial configurados');
+    }
+}
+
+// Função para configurar event listeners do OCR
+function setupOCREventListeners() {
+    console.log('🚀 Configurando event listeners do OCR...');
+    
+    const fileInput = document.getElementById('fileInputOCR');
+    const processButton = document.getElementById('processFileOCR');
+    
+    if (fileInput && processButton) {
+        fileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                processButton.disabled = false;
+                processButton.classList.add('btn-pulse');
+                ui.updateFileInput('fileInputOCR', files[0].name);
+                console.log(`${files.length} arquivo(s) selecionado(s) para OCR`);
+            } else {
+                processButton.disabled = true;
+                processButton.classList.remove('btn-pulse');
+                ui.resetFileInput('fileInputOCR');
+            }
+        });
+        
+        processButton.addEventListener('click', async () => {
+            const files = fileInput.files;
+            if (!files || files.length === 0) {
+                ui.showAlert('Nenhum arquivo selecionado!', 'warning');
+                return;
+            }
+            
+            // Adicionar estado de loading
+            processButton.disabled = true;
+            processButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+            
+            const filesArray = Array.from(files);
+            await processFile(filesArray, ui, (data) => {
+                window.currentOCRData = data;
+            }, 'ocr');
+            
+            // Restaurar botão
+            processButton.disabled = false;
+            processButton.innerHTML = '<i class="fas fa-play me-2"></i>Processar';
+        });
+        
+        console.log('✅ Event listeners do OCR configurados');
+    }
+}
+
+// Função para adicionar animações de entrada
+function addEntranceAnimations() {
+    // Animar elementos na entrada
+            const elements = document.querySelectorAll('.service-card');
+    elements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 100);
     });
 }
 
-
-
-// Funções de download específicas para matrícula
-function downloadWordFile() {
-    if (!window.currentData) {
-        ui.showAlert('Nenhum dado disponível para download', 'warning');
-        return;
+// Adicionar estilos CSS dinâmicos para animações
+const style = document.createElement('style');
+style.textContent = `
+    .btn-pulse {
+        animation: pulse 2s infinite;
     }
     
-    const content = formatDataForDownload(window.currentData);
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dados_matricula_${new Date().toISOString().slice(0, 10)}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    ui.showAlert('Arquivo Word baixado com sucesso!', 'success');
-}
-
-function downloadPDFFile() {
-    if (!window.currentData) {
-        ui.showAlert('Nenhum dado disponível para download', 'warning');
-        return;
-    }
-
-    try {
-        const doc = new window.jspdf.jsPDF();
-        const content = formatDataForDownload(window.currentData);
-        const lines = doc.splitTextToSize(content, 180);
-        doc.text(lines, 10, 10);
-        doc.save(`dados_matricula_${new Date().toISOString().slice(0, 10)}.pdf`);
-        ui.showAlert('PDF baixado com sucesso!', 'success');
-    } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        ui.showAlert('Erro ao gerar PDF. Verifique se a biblioteca jsPDF está carregada.', 'error');
-    }
-}
-
-function downloadJSONFile() {
-    if (!window.currentData) {
-        ui.showAlert('Nenhum dado disponível para download', 'warning');
-        return;
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(73, 80, 87, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(73, 80, 87, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(73, 80, 87, 0);
+        }
     }
     
-    const jsonData = {
-        metadata: {
-            extractedAt: new Date().toISOString(),
-            service: 'matricula'
-        },
-        data: window.currentData
-    };
-    
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dados_matricula_${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    ui.showAlert('JSON baixado com sucesso!', 'success');
-}
-
-// Função para formatar dados para download
-function formatDataForDownload(data) {
-    let content = 'DADOS DA MATRÍCULA\n';
-    content += '='.repeat(50) + '\n\n';
-    
-    if (data.campos) {
-        // CADASTRO
-        content += '=== CADASTRO ===\n';
-        content += `Inscrição Imobiliária: ${data.campos.inscricao_imobiliaria || 'Não informado'}\n`;
-        content += `RIP: ${data.campos.rip || 'Não informado'}\n\n`;
-        
-        // DADOS DO IMÓVEL
-        content += '=== DADOS DO IMÓVEL ===\n';
-        content += `Tipo de Imóvel: ${data.campos.tipo_imovel || 'Não informado'}\n`;
-        content += `Tipo de Logradouro: ${data.campos.tipo_logradouro || 'Não informado'}\n`;
-        content += `CEP: ${data.campos.cep || 'Não informado'}\n`;
-        content += `Nome do Logradouro: ${data.campos.nome_logradouro || 'Não informado'}\n`;
-        content += `Número do Lote: ${data.campos.numero_lote || 'Não informado'}\n`;
-        content += `Bloco: ${data.campos.bloco || 'Não informado'}\n`;
-        content += `Pavimento: ${data.campos.pavimento || 'Não informado'}\n`;
-        content += `Andar: ${data.campos.andar || 'Não informado'}\n`;
-        content += `Loteamento: ${data.campos.loteamento || 'Não informado'}\n`;
-        content += `Número do Loteamento: ${data.campos.numero_loteamento || 'Não informado'}\n`;
-        content += `Quadra: ${data.campos.quadra || 'Não informado'}\n`;
-        content += `Bairro: ${data.campos.bairro || 'Não informado'}\n`;
-        content += `Cidade: ${data.campos.cidade || 'Não informado'}\n`;
-        content += `Dominialidade: ${data.campos.dominialidade || 'Não informado'}\n`;
-        content += `Área Total: ${data.campos.area_total || 'Não informado'}\n`;
-        content += `Área Construída: ${data.campos.area_construida || 'Não informado'}\n`;
-        content += `Área Privativa: ${data.campos.area_privativa || 'Não informado'}\n`;
-        content += `Área de Uso Comum: ${data.campos.area_uso_comum || 'Não informado'}\n`;
-        content += `Área Correspondente: ${data.campos.area_correspondente || 'Não informado'}\n`;
-        content += `Fração Ideal: ${data.campos.fracao_ideal || 'Não informado'}\n\n`;
-        
-        // DADOS PESSOAIS
-        content += '=== DADOS PESSOAIS ===\n';
-        content += `CPF/CNPJ: ${data.campos.cpf_cnpj || 'Não informado'}\n`;
-        content += `Nome Completo: ${data.campos.nome_completo || 'Não informado'}\n`;
-        content += `Sexo: ${data.campos.sexo || 'Não informado'}\n`;
-        content += `Nacionalidade: ${data.campos.nacionalidade || 'Não informado'}\n`;
-        content += `Estado Civil: ${data.campos.estado_civil || 'Não informado'}\n`;
-        content += `Profissão: ${data.campos.profissao || 'Não informado'}\n`;
-        content += `RG: ${data.campos.rg || 'Não informado'}\n`;
-        content += `CNH: ${data.campos.cnh || 'Não informado'}\n`;
-        content += `Endereço Completo: ${data.campos.endereco_completo || 'Não informado'}\n`;
-        content += `Regime de Casamento: ${data.campos.regime_casamento || 'Não informado'}\n`;
-        content += `Data do Casamento: ${data.campos.data_casamento || 'Não informado'}\n`;
-        content += `Matrícula do Casamento: ${data.campos.matricula_casamento || 'Não informado'}\n`;
-        content += `Natureza Jurídica: ${data.campos.natureza_juridica || 'Não informado'}\n`;
-        content += `Representante Legal: ${data.campos.representante_legal || 'Não informado'}\n\n`;
-        
-        // INFORMAÇÕES PARA ATOS
-        content += '=== INFORMAÇÕES PARA ATOS ===\n';
-        content += `Valor da Transação: ${data.campos.valor_transacao || 'Não informado'}\n`;
-        content += `Valor de Avaliação: ${data.campos.valor_avaliacao || 'Não informado'}\n`;
-        content += `Data da Alienação: ${data.campos.data_alienacao || 'Não informado'}\n`;
-        content += `Forma de Alienação: ${data.campos.forma_alienacao || 'Não informado'}\n`;
-        content += `Valor da Dívida: ${data.campos.valor_divida || 'Não informado'}\n`;
-        content += `Valor da Alienação do Contrato: ${data.campos.valor_alienacao_contrato || 'Não informado'}\n`;
-        content += `Tipo de Ônus: ${data.campos.tipo_onus || 'Não informado'}\n`;
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
     }
     
-    return content;
-}
-
-// Inicialização quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Axion - Configurando matrícula...');
-    // Aguardar um pouco para o app-simple.js carregar primeiro
-    setTimeout(() => {
-        setupMatriculaEventListeners();
-        
-        // QUALIFICAÇÃO REMOVIDA - Event listeners configurados apenas em index.html
-        // setupQualificacaoEventListeners() já é chamada em index.html
-        // Remover daqui para evitar event listeners duplicados
-        console.log('🚀 Axion - Qualificação gerenciada por index.html (evitando duplicação)');
-    }, 100);
-}); 
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style); 

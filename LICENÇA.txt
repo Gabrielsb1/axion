@@ -1,6 +1,0 @@
-Projeto desenvolvido por: João Gabriel Santos Barros
-Durante estágio no Cartório de Registro de Imóveis de São Luís
-
-Cedido gratuitamente para uso interno da empresa, com permissão de modificação e melhoria, enquanto em uso na organização.
-
-Todos os direitos de autoria permanecem com o desenvolvedor. 
